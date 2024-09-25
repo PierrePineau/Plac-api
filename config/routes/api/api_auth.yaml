@@ -1,0 +1,60 @@
+nelmio_api_doc:
+  documentation:
+    paths:
+      /api/app/login_check:
+        post:
+            security:
+                - APICode: []
+            summary: Connexion à l'espace gestion d'une application
+            tags:
+                - Auth
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth'
+            responses:
+                '200':
+                    description: ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/tokenJWT'
+      /api/admin/login_check:
+        post:
+            summary: Connexion l'admin de Plac (SuperAdmin)
+            tags:
+                - Auth
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth'
+            responses:
+                '200':
+                    description: ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/tokenJWT'
+      /api/user/login_check:
+        post:
+            security: 
+                - APIKey: []
+                - APICode: []
+            summary: Connexion à l'espace client
+            tags:
+                - Auth
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth'
+            responses:
+                '200':
+                    description: ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/tokenJWT'
+

@@ -1,0 +1,21 @@
+{% extends '@!NelmioApiDoc/SwaggerUi/index.html.twig' %}
+
+{% block stylesheets %}
+{{ parent() }}
+{# Favicon #}
+<link rel="icon" type="image/svg+xml" href="{{asset('./favicon.svg')}}">
+<link rel="icon" type="image/png" href="{{asset('./favicon.png')}}">
+{% endblock stylesheets %}
+
+
+{% block swagger_initialization %}
+    <script type="text/javascript">
+        window.onload = loadSwaggerUI({
+            defaultModelsExpandDepth: 1,
+            docExpansion: 'none',
+            displayRequestDuration: true,
+            filter: true,
+            deepLinking: true,
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "mail/base.html.twig" %}
+
+{% block content %}
+    {# <!-- START CENTERED WHITE CONTAINER --> #}
+    {# <span class="preheader">Bienvenue sur {{site.name}}</span> #}
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main">
+        {# <!-- START MAIN CONTENT AREA --> #}
+        <tr>
+            <td class="wrapper">
+                <h1>Bienvenue sur {{site.name}}</h1>
+                <p>Bonjour {{user.firstname}},</p>
+                <p>lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien.</p>
+                <div class="btn_container">
+                    <a href="{{site.url}}" rel="nofollow" target="_blank" class="btn btn-primary">Boutique</a>
+                </div>
+                <div class="divider"></div>
+                <p>L'équipe {{site.name}}</p>
+            </td>
+        </tr>
+        {# <!-- END MAIN CONTENT AREA --> #}
+    </table>
+{% endblock %}

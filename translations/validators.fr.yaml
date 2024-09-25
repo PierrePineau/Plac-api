@@ -1,0 +1,9 @@
+# ADMIN #
+admin.email.invalid: "L'email n'est pas valide."
+admin.password.not_blank: "Le mot de passe ne peut être vide."
+admin.email.not_blank: "L'email ne peut pas être vide."
+
+admin.name.not_blank: "Le nom ne peut pas être vide."
+admin.name.invalid: "Le nom n'est pas valide."
+admin.name.min_length: "Le nom doit contenir au moins {{ limit }} caractères."
+admin.name.max_length: "Le nom doit contenir au maximum {{ limit }} caractères."
