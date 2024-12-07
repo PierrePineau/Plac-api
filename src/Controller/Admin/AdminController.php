@@ -12,6 +12,7 @@ use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Validator\Constraints\Json;
 
 #[Route('/api/admin')]
 #[OA\Tag(name: 'Admin')]
@@ -75,7 +76,8 @@ class AdminController extends AbstractCoreController
     #[Route('', methods: ['GET', 'POST'])] 
     public function index(Request $request): JsonResponse
     {
-        return parent::index($request);
+        return $this->json([], JsonResponse::HTTP_UNAUTHORIZED);
+        // return parent::index($request);
     }
 
     #[OA\Get(
@@ -135,6 +137,7 @@ class AdminController extends AbstractCoreController
     #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '\d+'])]
     public function get($id, Request $request): JsonResponse
     {
-        parent::get($id, $request);
+        // parent::get($id, $request);
+        return $this->json([], JsonResponse::HTTP_UNAUTHORIZED);
     }
 }
