@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use GuzzleHttp\Psr7\Response;
+use App\Core\Utils\Messenger;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,6 +12,7 @@ use Nelmio\ApiDocBundle\Annotation\Security;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 #[Route('/api/oauth', name: 'api_oauth_')]
 #[OA\Tag(name: 'OAuth')]
@@ -31,17 +32,26 @@ class OAuthController extends AbstractController
     }
 
     #[OA\Post(
-        summary: 'Login with for oauth',
+        summary: 'Connect with one oauth service',
     )]
     #[Route('/connect/{service}',name:"connect", methods: ['GET'])]
-    public function oauthConnect(string $service, ClientRegistry $clientRegistry): JsonResponse
+    public function oauthConnect(string $service, ClientRegistry $clientRegistry, Messenger $messenger): JsonResponse
     {
         if (!array_key_exists($service, self::SCOPES)) {
-            throw $this->createNotFoundException();
+            // throw $this->createNotFoundException();
+            return $this->json(
+                $messenger->newResponse(false, 'oauth.error', ['service' => $service]),
+                Response::HTTP_NOT_FOUND
+            );
         }
-        $urlRedirect = $clientRegistry->getClient($service)->redirect(self::SCOPES[$service]);
+        $content = $clientRegistry->getClient($service)->redirect(self::SCOPES[$service]);
+        if (!is_array($content)) {
+            $content = [$content];
+        }
+        $resp = $messenger->newResponse(true, 'oauth.redirect', $content);
         return $this->json(
-            ['redirectUrl' => $urlRedirect]
+            $resp,
+            Response::HTTP_OK
         );
     }
 
@@ -52,7 +62,11 @@ class OAuthController extends AbstractController
     public function oauthCheck(string $service, ClientRegistry $clientRegistry): JsonResponse
     {
         if (!array_key_exists($service, self::SCOPES)) {
-            throw $this->createNotFoundException();
+            // throw $this->createNotFoundException();
+            return $this->json(
+                $messenger->newResponse(false, 'oauth.error', ['service' => $service]),
+                Response::HTTP_NOT_FOUND
+            );
         }
 
         // L'autentification est géré par le firewall avec un JWT

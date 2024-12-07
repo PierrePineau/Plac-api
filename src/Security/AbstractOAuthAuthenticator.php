@@ -36,6 +36,6 @@ abstract class AbstractOAuthAuthenticator extends JWTAuthenticator implements Au
      */
     public function supports(Request $request): ?bool
     {
-        return $request->attributes->get('_route') === 'api_oauth_check' && $request->get('service') === $this->serviceName;
+        return $request->attributes->get('_route') === 'api_oauth_login_check' && $request->get('service') === $this->serviceName;
     }
 }
