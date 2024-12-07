@@ -67,18 +67,17 @@ services:
     #         $adminProvider : '@security.user.provider.concrete.admin_user_provider'
 
 # AUTHENTICATORS
-    # app.custom_authenticator:
-    #     class: App\Security\App\AppAuthenticator
-    #     public: true
-    #     arguments:
-    #         $translator: '@translator'
-    #         $doctrine: '@doctrine'
-    #         $container: '@service_container'
-    #         $adminProvider : '@security.user.provider.concrete.admin_user_provider'
-    #         $requestStack: '@request_stack'
-    #         $passwordHash: '@security.user_password_hasher'
-    #         $logger: '@logger'
-    #     parent: lexik_jwt_authentication.security.jwt_authenticator
+    app.user_authenticator:
+        class: App\Security\UserAuthenticator
+        public: true
+        arguments:
+            $translator: '@translator'
+            $doctrine: '@doctrine'
+            $container: '@service_container'
+            $requestStack: '@request_stack'
+            $passwordHash: '@security.user_password_hasher'
+            $logger: '@logger'
+        parent: lexik_jwt_authentication.security.jwt_authenticator
 
     # customer.custom_authenticator:
     #     class: App\Security\Customer\CustomerAuthenticator

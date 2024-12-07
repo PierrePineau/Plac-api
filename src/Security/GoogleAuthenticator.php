@@ -13,64 +13,67 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
-/**
- * @see https://symfony.com/doc/current/security/custom_authenticator.html
- */
-class GoogleAuthenticator extends AbstractAuthenticator
+class GoogleAuthenticator extends AbstractOAuthAuthenticator
 {
-    /**
-     * Called on every request to decide if this authenticator should be
-     * used for the request. Returning `false` will cause this authenticator
-     * to be skipped.
-     */
-    public function supports(Request $request): ?bool
-    {
-        // return $request->headers->has('X-AUTH-TOKEN');
-    }
+    protected string $serviceName = 'google';
+    protected const FIREWALL_NAME = 'app';
 
     public function authenticate(Request $request): Passport
     {
-        // $apiToken = $request->headers->get('X-AUTH-TOKEN');
-        // if (null === $apiToken) {
-        // The token header was empty, authentication fails with HTTP Status
-        // Code 401 "Unauthorized"
-        // throw new CustomUserMessageAuthenticationException('No API token provided');
-        // }
+        $googleToken = $request->get('token');
+        if (!$googleToken) {
+            throw new AuthenticationException('No Google token provided');
+        }
 
-        // implement your own logic to get the user identifier from `$apiToken`
-        // e.g. by looking up a user in the database using its API key
-        // $userIdentifier = /** ... */;
+        // Vérifiez le token auprès des serveurs de Google
+        $response = $this->httpClient->request('GET', 'https://www.googleapis.com/oauth2/v3/tokeninfo', [
+            'query' => ['id_token' => $googleToken],
+        ]);
 
-        // return new SelfValidatingPassport(new UserBadge($userIdentifier));
+        if ($response->getStatusCode() !== 200) {
+            throw new AuthenticationException('Invalid Google token');
+        }
+
+        $googleUser = $response->toArray();
+        $email = $googleUser['email'] ?? null;
+
+        if (!$email) {
+            throw new AuthenticationException('Google token does not contain an email');
+        }
+
+        // Charge ou créer l'utilisateur 
+        $passport = new SelfValidatingPassport(
+            new UserBadge(
+                (string) $payload[$idClaim],
+                fn ($userIdentifier) => $this->loadUser($payload, $userIdentifier)
+            )
+        );
+
+        $token = $this->createToken($passport, self::FIREWALL_NAME);
+
+        // $passport->setAttribute('payload', $payload);
+        // $passport->setAttribute('token', $token);
+
+        return $passport;
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
+    public function start(Request $request, AuthenticationException $authException = null): Response
     {
-        // on success, let the request continue
-        return null;
+        if ($authException instanceof CustomUserMessageAuthenticationException) {
+            $data = [
+                // you may want to customize or obfuscate the message first
+                'code' => $authException->getCode(),
+                'error' => $authException->getMessage(),
+                'message' => $this->translator->trans($authException->getMessage())
+                // or to translate this message
+                // $this->translator->trans($exception->getMessageKey(), $exception->getMessageData())
+            ];
+            return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        }else{
+            $exception = new MissingTokenException($authException->getMessage() ?? 'JWT Token not found', 0, $authException);
+            $event = new JWTNotFoundEvent($exception, new JWTAuthenticationFailureResponse($exception->getMessageKey()), $request);
+            $this->eventDispatcher->dispatch($event, $authException->getMessage());
+            return $event->getResponse();
+        }
     }
-
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
-    {
-        $data = [
-            // you may want to customize or obfuscate the message first
-            'message' => strtr($exception->getMessageKey(), $exception->getMessageData()),
-
-            // or to translate this message
-            // $this->translator->trans($exception->getMessageKey(), $exception->getMessageData())
-        ];
-
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
-    }
-
-    // public function start(Request $request, AuthenticationException $authException = null): Response
-    // {
-    //     /*
-    //      * If you would like this class to control what happens when an anonymous user accesses a
-    //      * protected page (e.g. redirect to /login), uncomment this method and make this class
-    //      * implement Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface.
-    //      *
-    //      * For more details, see https://symfony.com/doc/current/security/experimental_authenticators.html#configuring-the-authentication-entry-point
-    //      */
-    // }
 }

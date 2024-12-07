@@ -13,7 +13,7 @@ use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
-#[Route('/api', name: 'api_auth_')]
+#[Route('/api', name: 'api_')]
 #[OA\Tag(name: 'Auth')]
 class AuthController extends AbstractController
 {

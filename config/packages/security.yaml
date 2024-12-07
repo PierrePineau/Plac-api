@@ -1,5 +1,4 @@
 security:
-    enable_authenticator_manager: true
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: "auto"
@@ -27,6 +26,9 @@ security:
             jwt: ~
             provider: admin_user_provider
             context: core
+            # logout:
+            #     path: api_logout
+            #     target: api_admin_login
             json_login:
                 check_path: /api/admin/login_check
                 success_handler: lexik_jwt_authentication.handler.authentication_success
@@ -34,14 +36,16 @@ security:
             login_throttling:
                 max_attempts: 5
         app:
-            # enable_authenticator_manager: true
             pattern: ^/api/app
             stateless: true
             jwt:
-                # authenticator: user.custom_authenticator
+                authenticator: app.user_authenticator
             switch_user: true
             provider: app_user_provider
             context: core
+            # logout:
+            #     path: api_logout
+            #     target: api_login
             json_login:
                 check_path: /api/app/login_check
                 success_handler: lexik_jwt_authentication.handler.authentication_success
@@ -54,8 +58,9 @@ security:
         main:
             lazy: true
             provider: app_user_provider
-            # custom_authenticators:
-            #     - App\Security\GoogleAuthenticator
+            custom_authenticators:
+              - App\Security\UserAuthenticator
+              # - App\Security\GoogleAuthenticator
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
