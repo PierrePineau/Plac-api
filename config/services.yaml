@@ -111,36 +111,13 @@ services:
         arguments:
             $container: "@service_container"
         tags: ["kernel.event_subscriber"]
-
-# # ODRAZIA
-#     App\Odrazia\:
-#         resource: '../src/Odrazia/'
-#         autowire: false
-#         # autoconfigure: false
-#         public: true
+        
 # FIXTURES
-    # App\DataFixtures\Odrazia\:
-    #     resource: '../src/DataFixtures/Odrazia/'
-    #     public: true
-    #     arguments:
-    #         $container: '@service_container'
-    #         $doctrine: '@doctrine'
-    
-    App\DataFixtures\Demo\:
-        resource: '../src/DataFixtures/Demo/'
+    App\DataFixtures\:
+        resource: '../src/DataFixtures/'
         public: true
         arguments:
             $container: '@service_container'
-            $doctrine: '@doctrine'
-
-    App\DataFixtures\Test\:
-        resource: '../src/DataFixtures/Test/'
-        public: true
-        arguments:
-            $container: '@service_container'
-            $doctrine: '@doctrine'
-            # $logger: '@logger'
-            $requestStack: '@request_stack'
 
 
     # add more service definitions when explicit configuration is needed
