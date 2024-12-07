@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Admin;
+use App\Core\Repository\AbstractCoreRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -12,7 +13,7 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 /**
  * @extends ServiceEntityRepository<Admin>
  */
-class AdminRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
+class AdminRepository extends AbstractCoreRepository implements PasswordUpgraderInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

@@ -20,7 +20,7 @@ class UserManager extends AbstractCoreService
 
     public function findOneByIdentifier(string $identifier): ?User
     {
-        return $this->findOneBy(['email' => $identifier]);
+        return $this->em->getRepository(User::class)->loadUserByIdentifier($identifier);
     }
     // public function _create(array $data): Admin
     // {

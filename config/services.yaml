@@ -67,16 +67,21 @@ services:
     #         $adminProvider : '@security.user.provider.concrete.admin_user_provider'
 
 # AUTHENTICATORS
+    App\Security\Provider\UserProvider:
+        public: true
+        arguments:
+            # $entityManager: '@doctrine.orm.default_entity_manager'
+    
     app.user_authenticator:
         class: App\Security\UserAuthenticator
         public: true
         arguments:
-            $translator: '@translator'
-            $doctrine: '@doctrine'
             $container: '@service_container'
-            $requestStack: '@request_stack'
+            $translator: '@translator'
             $passwordHash: '@security.user_password_hasher'
             $logger: '@logger'
+            $userProvider: '@App\Security\Provider\UserProvider'
+            $adminProvider: '@security.user.provider.concrete.admin_user_provider'
         parent: lexik_jwt_authentication.security.jwt_authenticator
 
     # customer.custom_authenticator:
@@ -92,13 +97,13 @@ services:
     #     parent: lexik_jwt_authentication.security.jwt_authenticator
 
 # EVENTS
-    # App\EventListener\JWTCreatedListener:
-    #     public: true
-    #     arguments:
-    #         $requestStack: '@request_stack'
-    #         $entityManager: '@doctrine.orm.admin_entity_manager'
-    #     tags:
-    #         - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
+    App\EventListener\JWTCreatedListener:
+        public: true
+        arguments:
+            $requestStack: '@request_stack'
+            $entityManager: '@doctrine.orm.default_entity_manager'
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
 
 # SUBSCRIBERS
     App\EventSubscriber\:

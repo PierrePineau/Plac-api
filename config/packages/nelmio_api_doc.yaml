@@ -7,29 +7,19 @@ nelmio_api_doc:
             version: '%env(APP_VERSION)%'
         components:
             securitySchemes:
-                Admin:
-                    description: Authentification en tant qu'administrateur
+                JWT:
+                    description: Authentification via JWT Token
                     type: http
                     scheme: bearer
                     bearerFormat: JW
-                App:
-                    description: Authentification en tant qu'utilisateur
-                    type: http
-                    scheme: bearer
-                    bearerFormat: JW
-                Customer:
-                    description: Authentification en tant que client (Customer)
-                    type: http
-                    scheme: bearer
-                    bearerFormat: JW
-                APIKey:
-                    type: apiKey
-                    in: header
-                    name: X-API-KEY
-                APICode:
-                    type: apiKey
-                    in: header
-                    name: X-API-SITE-CODE
+                # APIKey:
+                #     type: apiKey
+                #     in: header
+                #     name: X-API-KEY
+                # APICode:
+                #     type: apiKey
+                #     in: header
+                #     name: X-API-SITE-CODE
             schemas:
                 auth:
                     title: Authentification
@@ -37,7 +27,7 @@ nelmio_api_doc:
                     properties:
                         username:
                             type: string
-                            example: loremipsum@gmail.com
+                            example: exemple@gmail.com
                         password:
                             type: string
                     required:
@@ -92,12 +82,19 @@ nelmio_api_doc:
                                 limit:
                                     type: integer
                                     example: 10
-            
-            # model:
-            #     product:
-            #         type: Product
-            #         groups: [create]
-
+                response:
+                    title: get
+                    type: object
+                    properties:
+                        success:
+                            type: boolean
+                            example: true
+                        code:
+                            type: string
+                            example: success.message
+                        message:
+                            type: string
+                            example: Success Message
             parameters:
                 page:
                     name: page
@@ -149,17 +146,6 @@ nelmio_api_doc:
                             - DESC
                             - ASC
                         default: DESC
-                orderASC:
-                    name: order
-                    description: Order
-                    in: query
-                    required: false
-                    schema:
-                        type: string
-                        enum:
-                            - DESC
-                            - ASC
-                        default: ASC
                 id:
                     name: id
                     description: 
@@ -174,12 +160,6 @@ nelmio_api_doc:
                     required: true
                     schema:
                         type: string
-                weight:
-                    name: weight
-                    in: query
-                    required: true
-                    schema:
-                        type: float
                 code:
                     name: code
                     description: 
