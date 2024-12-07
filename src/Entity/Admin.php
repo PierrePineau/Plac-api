@@ -105,4 +105,10 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
+
+    // CANNOT LISTING ADMIN USERS -> RETURN EMPTY ARRAY
+    public function toArray(): array
+    {
+        return [];
+    }
 }

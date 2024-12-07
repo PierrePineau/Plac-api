@@ -4,6 +4,7 @@ namespace App\Core\Service;
 
 use App\Core\Utils\Messenger;
 use App\Core\Utils\Tools;
+use App\Core\Utils\Pagination;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -199,11 +200,11 @@ abstract class AbstractCoreService
 
     public function _search(array $filters = []): array
     {
-        $count = $this->em->getRepository($this->entityClass)->search( $filters, true);
+        $count = $this->em->getRepository($this->entityClass)->search($filters, true);
         $results = [];
         $resultsArray = [];
         if ($count) {
-            $results = $this->em->getRepository($this->entityClass)->search( $filters);
+            $results = $this->em->getRepository($this->entityClass)->search($filters);
             foreach ($results as $element) {
                 // On véririe si $product est un objet ou array
                 if (is_object($element)) {

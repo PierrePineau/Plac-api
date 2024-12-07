@@ -12,7 +12,7 @@ class JWTCreatedListener
 	 */
 	private $requestStack;
 
-    private $repoSite;
+    // private $repoSite;
 
 	/**
 	 * @param RequestStack $requestStack
@@ -20,7 +20,7 @@ class JWTCreatedListener
 	public function __construct(RequestStack $requestStack, $entityManager)
 	{
 		$this->requestStack = $requestStack;
-        $this->repoSite = $entityManager->getRepository(Site::class);
+        // $this->repoSite = $entityManager->getRepository(Site::class);
 	}
 
 	/**
@@ -72,7 +72,6 @@ class JWTCreatedListener
 		// }elseif ($user instanceof Admin) {
         //     $payload['id'] = $user->getId();
         // }
-
 		$event->setData($payload);
 	}
 }

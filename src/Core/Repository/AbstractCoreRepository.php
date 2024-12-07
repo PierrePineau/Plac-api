@@ -22,7 +22,7 @@ abstract class AbstractCoreRepository extends ServiceEntityRepository
     /**
      * @param class-string $entityClass
      */
-    public function __construct(ManagerRegistry $registry, $entityClass, string $alias)
+    public function __construct(ManagerRegistry $registry, $entityClass, string $alias = 'e')
     {
         parent::__construct($registry, $entityClass);
         $this->entityClass = parent::getEntityName();

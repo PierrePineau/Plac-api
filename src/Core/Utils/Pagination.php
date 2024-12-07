@@ -1,5 +1,5 @@
 <?php
-namespace App\Plugin;
+namespace App\Core\Utils;
 
 class Pagination{
 
