@@ -9,12 +9,14 @@ use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Bundle\SecurityBundle\Security;
 
 abstract class AbstractCoreService
 {
     public $container;
     public $em;
     public $entityClass;
+    public $identifier;
 
     public $tools;
     public $messenger;
@@ -48,11 +50,17 @@ abstract class AbstractCoreService
         $this->container = $container;
         $this->em = $entityManager;
         $this->entityClass = $data['entity'];
-        $this->ELEMENT = $data['code'];
+        $this->ELEMENT = strtolower($data['code']);
+        $this->identifier = $data['identifier'] ?? 'id';
 
         // UTILS
         $this->tools = $this->container->get(Tools::class);
         $this->messenger = $this->container->get(Messenger::class);
+
+        // Services
+        if (isset($data['security']) && $data['security'] instanceof Security) {
+            $this->security = $data['security'];
+        }
 
         // Code Messages
         $this->ELEMENT_NOT_FOUND = $this->ELEMENT.'.'. $this::NOT_FOUND;
@@ -70,6 +78,19 @@ abstract class AbstractCoreService
     /**
      * UTILS - METHODS
      */
+    public function getUser()
+    {
+        return $this->security->getUser();
+    }
+
+    public function generateDefault()
+    {
+        // Add here code for default generation
+    }
+    public function generateUuid(): string
+    {
+        return $this->tools->generateUuid();
+    }
 
     public function generateCode($name)
     {
@@ -92,7 +113,7 @@ abstract class AbstractCoreService
     // Cette fonction permet de valider les données d'un élément avant de le créer ou de le modifier
     public function isValid($element): ?bool
     {
-        $errors = $this->validator->validate($element);
+        $errors = $this->tools->validate($element);
         if (count($errors) > 0) {
             $errorsString = '';
             foreach ($errors as $error) {
@@ -176,12 +197,20 @@ abstract class AbstractCoreService
      */
     public function find($id)
     {
-        return $this->em->getRepository($this->entityClass)->find($id);
+        if ($this->identifier == 'id') {
+            return $this->em->getRepository($this->entityClass)->find($id);
+        }else{
+            return $this->em->getRepository($this->entityClass)->findOneBy([$this->identifier => $id]);
+        }
     }
 
     public function findByIds(array $ids)
     {
-        return $this->em->getRepository($this->entityClass)->findBy(['id' => $ids]);
+        if ($this->identifier == 'id') {
+            return $this->em->getRepository($this->entityClass)->findBy(['id' => $ids]);
+        }else {
+            return $this->em->getRepository($this->entityClass)->findBy([$this->identifier => $ids]);
+        }
     }
 
     public function findOneBy(array $filters = [])

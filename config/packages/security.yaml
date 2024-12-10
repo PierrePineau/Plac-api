@@ -14,7 +14,10 @@ security:
                 property: email
 
         app_user_provider:
-            id : App\Security\Provider\UserProvider
+            entity:
+                class: App\Entity\Employe
+                property: uuid
+        # used to reload user from session & other features (e.g. switch_user)
             # entity:
             #     class: App\Entity\User
             #     property: uuid

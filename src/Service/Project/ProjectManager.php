@@ -4,14 +4,14 @@ namespace App\Service\Project;
 
 use App\Core\Service\AbstractCoreService;
 use App\Entity\Project;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class ProjectManager extends AbstractCoreService
 {
-    private $passwordHash;
-    public function __construct($container, $entityManager)
+    public function __construct($container, $entityManager, Security $security)
     {
-        $this->passwordHash = $passwordHash;
         parent::__construct($container, $entityManager, [
+            'identifier' => 'uuid',
             'code' => 'Project',
             'entity' => Project::class,
         ]);

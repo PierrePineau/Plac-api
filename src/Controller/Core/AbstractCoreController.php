@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Core\Controller;
+namespace App\Controller\Core;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,6 +13,9 @@ abstract class AbstractCoreController extends AbstractController
 {
     public $manager;
     public $entity;
+    public const ROLE_ADMIN = 'ROLE_ADMIN';
+    public const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
+    public const ROLE_USER = 'ROLE_USER';
     /**
      * @param class-string $entity
      */
@@ -26,8 +29,7 @@ abstract class AbstractCoreController extends AbstractController
     {
         switch ($request->getMethod()) {
             case 'GET':
-                $filters = $request->query->all();
-                $response = $this->manager->list($filters);
+                $response = $this->manager->search($request->query->all());
                 break;
             case 'POST':
                 $response = $this->manager->create($request->request->all());

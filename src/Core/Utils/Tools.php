@@ -2,10 +2,22 @@
 
 namespace App\Core\Utils;
 
+use Symfony\Component\Uid\Factory\UuidFactory;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+
 class Tools
 {
-    public function __construct()
+    public function __construct(
+        public ValidatorInterface $validator,
+        private UuidFactory $uuidFactory,
+    )
     {
+    }
+    
+    public function validate($entity): mixed
+    {
+        $errors = $this->validator->validate($entity);
+        return $errors;
     }
 
     public function generateCode(string $name, array $data = []): string
@@ -65,5 +77,15 @@ class Tools
     public function generateKey(int $length = 20): string
     {
         return $this->genererChaineAleatoire($length, 'withSpecial');
+    }
+    
+    public function generateUuid(): string
+    {
+        $timestampBased = $this->uuidFactory->timeBased();
+        return $timestampBased->toRfc4122();
+        // $b = random_bytes(16);
+        // $b[6] = chr(ord($b[6]) & 0x0f | 0x40);
+        // $b[8] = chr(ord($b[8]) & 0x3f | 0x80);
+        // return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($b), 4));
     }
 }

@@ -3,6 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -41,6 +44,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     #[Groups(["create"])]
     private ?string $password = null;
+
+    #[ORM\Column]
+    private ?bool $deleted = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $updatedAt = null;
+
+    /**
+     * @var Collection<int, UserOrganisation>
+     */
+    #[ORM\OneToMany(targetEntity: UserOrganisation::class, mappedBy: 'user')]
+    private Collection $userOrganisations;
+
+    #[ORM\Column]
+    private ?bool $enable = null;
+
+    public function __construct()
+    {
+        $this->userOrganisations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -127,6 +156,96 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    public function isDeleted(): ?bool
+    {
+        return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): static
+    {
+        $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserOrganisation>
+     */
+    public function getUserOrganisations(): Collection
+    {
+        return $this->userOrganisations;
+    }
+
+    public function addUserOrganisation(UserOrganisation $userOrganisation): static
+    {
+        if (!$this->userOrganisations->contains($userOrganisation)) {
+            $this->userOrganisations->add($userOrganisation);
+            $userOrganisation->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserOrganisation(UserOrganisation $userOrganisation): static
+    {
+        if ($this->userOrganisations->removeElement($userOrganisation)) {
+            // set the owning side to null (unless already changed)
+            if ($userOrganisation->getUser() === $this) {
+                $userOrganisation->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function isEnable(): ?bool
+    {
+        return $this->enable;
+    }
+
+    public function setEnable(bool $enable): static
+    {
+        $this->enable = $enable;
+
+        return $this;
     }
 
     public function toArray(): array

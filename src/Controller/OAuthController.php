@@ -59,7 +59,7 @@ class OAuthController extends AbstractController
         summary: 'Login check for oauth',
     )]
     #[Route('/check/{service}', name:"login_check", methods: ['POST'])]
-    public function oauthCheck(string $service, ClientRegistry $clientRegistry): JsonResponse
+    public function oauthCheck(string $service, ClientRegistry $clientRegistry, Messenger $messenger): JsonResponse
     {
         if (!array_key_exists($service, self::SCOPES)) {
             // throw $this->createNotFoundException();

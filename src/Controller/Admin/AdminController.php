@@ -2,7 +2,7 @@
 
 namespace App\Controller\Admin;
 
-use App\Core\Core\Controller\AbstractCoreController;
+use App\Controller\Core\AbstractCoreController;
 use App\Service\Admin\AdminManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Constraints\Json;
 
 #[Route('/api/admin')]
 #[OA\Tag(name: 'Admin')]
+#[Security(name: 'JWT')]
 class AdminController extends AbstractCoreController
 {
     public function __construct(AdminManager $manager)
@@ -49,11 +50,6 @@ class AdminController extends AbstractCoreController
                 ) 
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[OA\Post(
         summary: 'Create new',
@@ -67,11 +63,6 @@ class AdminController extends AbstractCoreController
                 ) 
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[Route('', methods: ['GET', 'POST'])] 
     public function index(Request $request): JsonResponse
@@ -92,11 +83,6 @@ class AdminController extends AbstractCoreController
                 )
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[OA\Post(
         summary: 'Update one',
@@ -110,11 +96,6 @@ class AdminController extends AbstractCoreController
                 )
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[OA\Delete(
         summary: 'Delete',
@@ -128,11 +109,6 @@ class AdminController extends AbstractCoreController
                 )
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '\d+'])]
     public function get($id, Request $request): JsonResponse

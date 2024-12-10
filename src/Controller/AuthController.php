@@ -2,8 +2,6 @@
 
 namespace App\Controller;
 
-use GuzzleHttp\Psr7\Response;
-use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;

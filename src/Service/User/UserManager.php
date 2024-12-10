@@ -4,17 +4,20 @@ namespace App\Service\User;
 
 use App\Core\Service\AbstractCoreService;
 use App\Entity\User;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserManager extends AbstractCoreService
 {
     private $passwordHash;
-    public function __construct($container, $entityManager, UserPasswordHasherInterface $passwordHash)
+    public function __construct($container, $entityManager, Security $security, UserPasswordHasherInterface $passwordHash)
     {
         $this->passwordHash = $passwordHash;
         parent::__construct($container, $entityManager, [
+            'identifier' => 'uuid',
             'code' => 'user',
             'entity' => User::class,
+            'security' => $security,
         ]);
     }
 
@@ -22,35 +25,37 @@ class UserManager extends AbstractCoreService
     {
         return $this->em->getRepository(User::class)->loadUserByIdentifier($identifier);
     }
-    // public function _create(array $data): Admin
-    // {
-    //     if (!isset($data['email'])) {
-    //         throw new \Exception('Email is required');
-    //     }
+    
+    public function _create(array $data)
+    {
+        if (!isset($data['email'])) {
+            throw new \Exception($this->ELEMENT.'.email.required');
+        }
 
-    //     if (!isset($data['password'])) {
-    //         throw new \Exception('Password is required');
-    //     }
+        if (!isset($data['password'])) {
+            throw new \Exception($this->ELEMENT.'.password.required');
+        }
 
-    //     $email = $data['email'];
-    //     $password = $data['password'];
+        $email = $data['email'];
+        $password = $data['password'];
 
-    //     if ($this->findOneBy(['email' => $email])) {
-    //         throw new \Exception($this->ELEMENT_ALREADY_EXISTS);
-    //     }
+        if ($this->findOneBy(['email' => $email])) {
+            throw new \Exception($this->ELEMENT_ALREADY_EXISTS);
+        }
         
-    //     $admin = new Admin();
-    //     $admin->setEmail($email);
-    //     $hashedPassword = $this->passwordHash->hashPassword(
-    //         $admin,
-    //         $password
-    //     );
-    //     $admin->setPassword($hashedPassword);
-    //     $admin->setRoles(['ROLE_SUPER_ADMIN', 'ROLE_ADMIN']);
+        $user = new User();
+        $user->setEmail($email);
+        $user->setUuid($this->generateUuid());
+        $hashedPassword = $this->passwordHash->hashPassword(
+            $user,
+            $password
+        );
+        $user->setPassword($hashedPassword);
 
-    //     $this->em->persist($admin);
-    //     // $this->em->flush(); // Le flush est fait dans le AbstractCoreService
-
-    //     return $admin;
-    // }
+        $this->em->persist($user);
+        // $this->em->flush(); // Le flush est fait dans le AbstractCoreService
+        // Vérifie si l'entité est valide
+        $this->isValid($user);
+        return $user;
+    }
 }

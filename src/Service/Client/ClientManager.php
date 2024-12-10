@@ -4,16 +4,16 @@ namespace App\Service\Client;
 
 use App\Core\Service\AbstractCoreService;
 use App\Entity\Client;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class ClientManager extends AbstractCoreService
 {
-    private $passwordHash;
-    public function __construct($container, $entityManager)
+    public function __construct($container, $entityManager, Security $security)
     {
-        $this->passwordHash = $passwordHash;
         parent::__construct($container, $entityManager, [
             'code' => 'Client',
             'entity' => Client::class,
+            'security' => $security,
         ]);
     }
 }

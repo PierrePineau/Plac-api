@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Controller\Organisation;
+namespace App\Controller\Admin\Module;
 
-use App\Entity\Organisation;
-use App\Service\Organisation\OrganisationManager;
-use App\Core\Core\Controller\AbstractCoreController;
+use App\Controller\Core\AbstractCoreController;
+use App\Entity\Module;
+use App\Service\Module\ModuleManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -14,13 +14,14 @@ use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-#[Route('/api/organisations')]
-#[OA\Tag(name: 'Organisation')]
-class OrganisationController extends AbstractCoreController
+#[Route('/api/admin/modules')]
+#[OA\Tag(name: 'Admin.Module')]
+#[Security(name: 'JWT')]
+class ModuleController extends AbstractCoreController
 {
-    public function __construct(OrganisationManager $manager)
+    public function __construct(ModuleManager $manager)
     {
-        parent::__construct($manager, Organisation::class);
+        parent::__construct($manager, Module::class);
     }
 
     #[OA\Get(
@@ -49,11 +50,6 @@ class OrganisationController extends AbstractCoreController
                 ) 
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[OA\Post(
         summary: 'Create new',
@@ -67,11 +63,6 @@ class OrganisationController extends AbstractCoreController
                 ) 
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[Route('', methods: ['GET', 'POST'])] 
     public function index(Request $request): JsonResponse
@@ -91,11 +82,6 @@ class OrganisationController extends AbstractCoreController
                 )
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[OA\Post(
         summary: 'Update one',
@@ -109,11 +95,6 @@ class OrganisationController extends AbstractCoreController
                 )
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[OA\Delete(
         summary: 'Delete',
@@ -127,15 +108,10 @@ class OrganisationController extends AbstractCoreController
                 )
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '\d+'])]
     public function get($id, Request $request): JsonResponse
     {
-        parent::get($id, $request);
+        return parent::get($id, $request);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Controller\User;
 
 use App\Entity\User;
 use App\Service\User\UserManager;
-use App\Core\Core\Controller\AbstractCoreController;
+use App\Controller\Core\AbstractCoreController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -14,8 +14,9 @@ use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-#[Route('/api/users')]
-#[OA\Tag(name: 'User')]
+#[Route('/api/admin/users')]
+#[OA\Tag(name: 'Admin.User')]
+#[Security(name: 'JWT')]
 class UserController extends AbstractCoreController
 {
     public function __construct(UserManager $manager)
@@ -48,11 +49,6 @@ class UserController extends AbstractCoreController
                     ref: '#/components/schemas/list'
                 ) 
             )
-        ],
-        security: [
-            [
-                'JWT' => [],
-            ]
         ]
     )]
     #[OA\Post(
@@ -66,11 +62,6 @@ class UserController extends AbstractCoreController
                     ref: '#/components/schemas/response'
                 ) 
             )
-        ],
-        security: [
-            [
-                'JWT' => [],
-            ]
         ]
     )]
     #[Route('', methods: ['GET', 'POST'])] 
@@ -90,11 +81,6 @@ class UserController extends AbstractCoreController
                     ref: '#/components/schemas/response'
                 )
             )
-        ],
-        security: [
-            [
-                'JWT' => [],
-            ]
         ]
     )]
     #[OA\Post(
@@ -108,11 +94,6 @@ class UserController extends AbstractCoreController
                     ref: '#/components/schemas/response'
                 )
             )
-        ],
-        security: [
-            [
-                'JWT' => [],
-            ]
         ]
     )]
     #[OA\Delete(
@@ -126,16 +107,11 @@ class UserController extends AbstractCoreController
                     ref: '#/components/schemas/response'
                 )
             )
-        ],
-        security: [
-            [
-                'JWT' => [],
-            ]
         ]
     )]
-    #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '\d+'])]
+    #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['uuid' => '[a-z0-9-]+'])]
     public function get($id, Request $request): JsonResponse
     {
-        parent::get($id, $request);
+        return parent::get($id, $request);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Controller\Project;
 
 use App\Entity\Project;
 use App\Service\Project\ProjectManager;
-use App\Core\Core\Controller\AbstractCoreController;
+use App\Controller\Core\AbstractCoreController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 #[Route('/api/projects')]
 #[OA\Tag(name: 'Project')]
+#[Security(name: 'JWT')]
 class ProjectController extends AbstractCoreController
 {
     public function __construct(ProjectManager $manager)
@@ -49,11 +50,6 @@ class ProjectController extends AbstractCoreController
                 ) 
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[OA\Post(
         summary: 'Create new',
@@ -67,11 +63,6 @@ class ProjectController extends AbstractCoreController
                 ) 
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[Route('', methods: ['GET', 'POST'])] 
     public function index(Request $request): JsonResponse
@@ -91,11 +82,6 @@ class ProjectController extends AbstractCoreController
                 )
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[OA\Post(
         summary: 'Update one',
@@ -109,11 +95,6 @@ class ProjectController extends AbstractCoreController
                 )
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
     #[OA\Delete(
         summary: 'Delete',
@@ -127,15 +108,10 @@ class ProjectController extends AbstractCoreController
                 )
             )
         ],
-        security: [
-            [
-                'JWT' => [],
-            ]
-        ]
     )]
-    #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '\d+'])]
+    #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['uuid' => '[a-z0-9-]+'])]
     public function get($id, Request $request): JsonResponse
     {
-        parent::get($id, $request);
+        return parent::get($id, $request);
     }
 }

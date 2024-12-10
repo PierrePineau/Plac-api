@@ -4,17 +4,19 @@ namespace App\Service\Admin;
 
 use App\Core\Service\AbstractCoreService;
 use App\Entity\Admin;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AdminManager extends AbstractCoreService
 {
     private $passwordHash;
-    public function __construct($container, $entityManager, UserPasswordHasherInterface $passwordHash)
+    public function __construct($container, $entityManager, Security $security, UserPasswordHasherInterface $passwordHash)
     {
         $this->passwordHash = $passwordHash;
         parent::__construct($container, $entityManager, [
             'code' => 'admin',
             'entity' => Admin::class,
+            'security' => $security,
         ]);
     }
 

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ProjectRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -22,6 +24,17 @@ class Project
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
+
+    /**
+     * @var Collection<int, ProjectNote>
+     */
+    #[ORM\OneToMany(targetEntity: ProjectNote::class, mappedBy: 'project')]
+    private Collection $projectNotes;
+
+    public function __construct()
+    {
+        $this->projectNotes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -71,5 +84,35 @@ class Project
             'uuid' => $this->getUuid(),
             'name' => $this->getName(),
         ];
+    }
+
+    /**
+     * @return Collection<int, ProjectNote>
+     */
+    public function getProjectNotes(): Collection
+    {
+        return $this->projectNotes;
+    }
+
+    public function addProjectNote(ProjectNote $projectNote): static
+    {
+        if (!$this->projectNotes->contains($projectNote)) {
+            $this->projectNotes->add($projectNote);
+            $projectNote->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProjectNote(ProjectNote $projectNote): static
+    {
+        if ($this->projectNotes->removeElement($projectNote)) {
+            // set the owning side to null (unless already changed)
+            if ($projectNote->getProject() === $this) {
+                $projectNote->setProject(null);
+            }
+        }
+
+        return $this;
     }
 }
