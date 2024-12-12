@@ -43,11 +43,18 @@ class Organisation
     #[ORM\ManyToMany(targetEntity: Employe::class, mappedBy: 'organisations')]
     private Collection $employes;
 
+    /**
+     * @var Collection<int, OrganisationFile>
+     */
+    #[ORM\OneToMany(targetEntity: OrganisationFile::class, mappedBy: 'organisation')]
+    private Collection $organisationFiles;
+
     public function __construct()
     {
         $this->userOrganisations = new ArrayCollection();
         $this->organisationModules = new ArrayCollection();
         $this->employes = new ArrayCollection();
+        $this->organisationFiles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -187,6 +194,36 @@ class Organisation
     {
         if ($this->employes->removeElement($employe)) {
             $employe->removeOrganisation($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrganisationFile>
+     */
+    public function getOrganisationFiles(): Collection
+    {
+        return $this->organisationFiles;
+    }
+
+    public function addOrganisationFile(OrganisationFile $organisationFile): static
+    {
+        if (!$this->organisationFiles->contains($organisationFile)) {
+            $this->organisationFiles->add($organisationFile);
+            $organisationFile->setOrganisation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrganisationFile(OrganisationFile $organisationFile): static
+    {
+        if ($this->organisationFiles->removeElement($organisationFile)) {
+            // set the owning side to null (unless already changed)
+            if ($organisationFile->getOrganisation() === $this) {
+                $organisationFile->setOrganisation(null);
+            }
         }
 
         return $this;

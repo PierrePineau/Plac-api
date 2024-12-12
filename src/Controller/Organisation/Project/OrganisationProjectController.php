@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Controller\Project;
+namespace App\Controller\Organisation\Project;
 
+use App\Controller\Core\AbstractCoreController;
 use App\Entity\Project;
 use App\Service\Project\ProjectManager;
-use App\Controller\Core\AbstractCoreController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -14,10 +14,10 @@ use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-#[Route('/api/projects')]
-#[OA\Tag(name: 'Project')]
+#[Route('/api/app/organisations/{idOrganisation}/projects', requirements: ['idOrganisation' => '[a-z0-9-]+'])]
+#[OA\Tag(name: 'Organisation.Project')]
 #[Security(name: 'JWT')]
-class ProjectController extends AbstractCoreController
+class OrganisationProjectController extends AbstractCoreController
 {
     public function __construct(ProjectManager $manager)
     {
@@ -65,9 +65,9 @@ class ProjectController extends AbstractCoreController
         ],
     )]
     #[Route('', methods: ['GET', 'POST'])] 
-    public function index(Request $request): JsonResponse
+    public function index($idOrganisation, Request $request): JsonResponse
     {
-        return parent::index($request);
+        return parent::_index($request);
     }
 
     #[OA\Get(
@@ -110,8 +110,8 @@ class ProjectController extends AbstractCoreController
         ],
     )]
     #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['uuid' => '[a-z0-9-]+'])]
-    public function get($id, Request $request): JsonResponse
+    public function get($idOrganisation, $id, Request $request): JsonResponse
     {
-        return parent::get($id, $request);
+        return parent::_get($id, $request);
     }
 }

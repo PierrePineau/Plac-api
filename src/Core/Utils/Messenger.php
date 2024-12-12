@@ -6,10 +6,11 @@ use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
-// #[WithMonologChannel('odrazia')]
+#[WithMonologChannel('plac')]
 class Messenger
 {
     private $container;
@@ -74,12 +75,22 @@ class Messenger
     // Get message from code with translation
     public function errorResponse(Throwable $th): array
     {
-        return $this->newResponse(false, $th->getMessage(), [], $th);
+        return $this->newResponse([
+            'success' => false,
+            'message' => $th->getMessage(),
+            'code' => $th->getCode(),
+            'th' => $th,
+        ]);
     }
 
     // Get message from code with translation
-    public function newResponse(bool $success = true, $message = '', $data = null, ?Throwable $th = null): array
+    public function newResponse(array $params = []): array
     {
+        $success = isset($params['success']) && $params['success'] === true ? true : false;
+        $message = $params['message'] ?? '';
+        $data = $params['data'] ?? null;
+        $th = isset($params['th']) && $params['th'] instanceof Throwable ? $params['th'] : null;
+        $code = isset($params['code']) ? $params['code'] : 200;
         // On recherche si la string contient "||"
         if (strpos($message, '||')) {
             // On sépare la string en tableau
@@ -93,9 +104,16 @@ class Messenger
             }
             $message = $stringMessage;
         }
+
+        if ($code == 0) {
+            // On considère que c'est une erreur interne
+            $code = 500;
+            $message = 'error.internal';
+        }
         $response = [
             'success' => $success,
-            'code' => $message,
+            'code' => $code,
+            'codeMessage' => $message,
             'message' => $this->getMessage($message),
         ];
         if (isset($data)) {
@@ -122,7 +140,6 @@ class Messenger
 
     public function dispatchEvent(Event $event, ?string $eventName = null): ?Event
     {
-        $this->eventDispatcher->dispatch($event, $eventName);
-        return $event;
+        return $this->eventDispatcher->dispatch($event, $eventName);
     }
 }

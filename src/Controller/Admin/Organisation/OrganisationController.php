@@ -67,7 +67,7 @@ class OrganisationController extends AbstractCoreController
     #[Route('', methods: ['GET', 'POST'])] 
     public function index(Request $request): JsonResponse
     {
-        return parent::index($request);
+        return parent::_index($request);
     }
 
     #[OA\Get(
@@ -109,9 +109,9 @@ class OrganisationController extends AbstractCoreController
             )
         ],
     )]
-    #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['uuid' => '[a-z0-9-]+'])]
+    #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '[a-z0-9-]+'])]
     public function get($id, Request $request): JsonResponse
     {
-        return parent::get($id, $request);
+        return parent::_get($id, $request);
     }
 }

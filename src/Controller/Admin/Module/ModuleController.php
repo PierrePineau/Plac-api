@@ -67,7 +67,7 @@ class ModuleController extends AbstractCoreController
     #[Route('', methods: ['GET', 'POST'])] 
     public function index(Request $request): JsonResponse
     {
-        return parent::index($request);
+        return parent::_index($request);
     }
 
     #[OA\Get(
@@ -112,6 +112,6 @@ class ModuleController extends AbstractCoreController
     #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '\d+'])]
     public function get($id, Request $request): JsonResponse
     {
-        return parent::get($id, $request);
+        return parent::_get($id, $request);
     }
 }

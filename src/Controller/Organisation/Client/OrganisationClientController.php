@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Controller\Admin;
+namespace App\Controller\Organisation\Client;
 
 use App\Controller\Core\AbstractCoreController;
-use App\Service\Admin\AdminManager;
+use App\Entity\Client;
+use App\Service\Client\ClientManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -12,16 +13,15 @@ use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Validator\Constraints\Json;
 
-#[Route('/api/admin')]
-#[OA\Tag(name: 'Admin')]
+#[Route('/api/app/organisations/{idOrganisation}/clients', requirements: ['idOrganisation' => '[a-z0-9-]+'])]
+#[OA\Tag(name: 'Organisation.Client')]
 #[Security(name: 'JWT')]
-class AdminController extends AbstractCoreController
+class OrganisationClientController extends AbstractCoreController
 {
-    public function __construct(AdminManager $manager)
+    public function __construct(ClientManager $manager)
     {
-        parent::__construct($manager, Admin::class);
+        parent::__construct($manager, Client::class);
     }
 
     #[OA\Get(
@@ -65,10 +65,9 @@ class AdminController extends AbstractCoreController
         ],
     )]
     #[Route('', methods: ['GET', 'POST'])] 
-    public function index(Request $request): JsonResponse
+    public function index($idOrganisation, Request $request): JsonResponse
     {
-        return $this->json([], JsonResponse::HTTP_UNAUTHORIZED);
-        // return parent::index($request);
+        return parent::_index($request);
     }
 
     #[OA\Get(
@@ -110,10 +109,9 @@ class AdminController extends AbstractCoreController
             )
         ],
     )]
-    #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '\d+'])]
-    public function get($id, Request $request): JsonResponse
+    #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['uuid' => '[a-z0-9-]+'])]
+    public function get($idOrganisation, $id, Request $request): JsonResponse
     {
-        // parent::get($id, $request);
-        return $this->json([], JsonResponse::HTTP_UNAUTHORIZED);
+        return parent::_get($id, $request);
     }
 }

@@ -40,7 +40,12 @@ class OAuthController extends AbstractController
         if (!array_key_exists($service, self::SCOPES)) {
             // throw $this->createNotFoundException();
             return $this->json(
-                $messenger->newResponse(false, 'oauth.error', ['service' => $service]),
+                $messenger->newResponse([
+                    'success' => false,
+                    'message' => 'oauth.error',
+                    'code' => Response::HTTP_NOT_FOUND,
+                    'data' => ['service' => $service]
+                ]),
                 Response::HTTP_NOT_FOUND
             );
         }
@@ -48,7 +53,12 @@ class OAuthController extends AbstractController
         if (!is_array($content)) {
             $content = [$content];
         }
-        $resp = $messenger->newResponse(true, 'oauth.redirect', $content);
+        $resp = $messenger->newResponse([
+            'success' => true,
+            'message' => 'oauth.redirect',
+            'code' => Response::HTTP_OK,
+            'data' => $content
+        ]);
         return $this->json(
             $resp,
             Response::HTTP_OK
@@ -64,7 +74,12 @@ class OAuthController extends AbstractController
         if (!array_key_exists($service, self::SCOPES)) {
             // throw $this->createNotFoundException();
             return $this->json(
-                $messenger->newResponse(false, 'oauth.error', ['service' => $service]),
+                $messenger->newResponse([
+                    'success' => false,
+                    'message' => 'oauth.error',
+                    'code' => Response::HTTP_NOT_FOUND,
+                    'data' => ['service' => $service]
+                ]),
                 Response::HTTP_NOT_FOUND
             );
         }

@@ -44,7 +44,7 @@ class AdminManager extends AbstractCoreService
             $password
         );
         $admin->setPassword($hashedPassword);
-        $admin->setRoles(['ROLE_SUPER_ADMIN', 'ROLE_ADMIN']);
+        $admin->setRoles(['ROLE_ADMIN']);
 
         $this->em->persist($admin);
         // $this->em->flush(); // Le flush est fait dans le AbstractCoreService

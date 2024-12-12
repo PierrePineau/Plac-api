@@ -3,43 +3,44 @@
 namespace App\Service\Organisation;
 
 use App\Core\Service\AbstractCoreService;
-use App\Entity\Organisation;
+use App\Core\Traits\OrganisationTrait;
 use App\Entity\OrganisationModule;
 use App\Service\Module\ModuleManager;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class OrganisationModuleManager extends AbstractCoreService
 {
+    use OrganisationTrait;
+
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
             'code' => 'Organisation.Module',
-            'entity' => Organisation::class,
+            'entity' => OrganisationModule::class,
             'security' => $security,
         ]);
     }
 
+    // Pour gérer un project il faut que soit défini une organisation
+    // Le middleware permet de vérifier si l'organisation est bien défini et si l'utilisateur a les droits
+    public function guardMiddleware(array $data): array
+    {
+        $organisation = $this->getOrganisation($data);
+
+        $data['organisation'] = $organisation;
+
+        return $data;
+    }
+
     public function _search(array $filters = []): array
     {
-        if (!isset($filters['idOrganisation'])) {
-            throw new \Exception($this->ELEMENT.'.organisation.required');
-        }
-
         return parent::_search($filters);
     }
 
     public function _add(array $data)
     {
-        if (!isset($filters['idOrganisation'])) {
-            throw new \Exception($this->ELEMENT.'.organisation.required');
-        }
-
-        $organisationManager = $this->container->get(OrganisationManager::class);
         $moduleManager = $this->container->get(ModuleManager::class);
-        $organisation = $organisationManager->find($filters['idOrganisation']);
-        if (!$organisation) {
-            throw new \Exception($organisationManager->ELEMENT_NOT_FOUND);
-        }
+        $organisation = $data['organisation'];
 
         $organisationModules = $this->findBy([
             'organisation' => $organisation->getId(),
@@ -61,13 +62,6 @@ class OrganisationModuleManager extends AbstractCoreService
             $newOrganisationModule->setEnable(true);
             $this->em->persist($newOrganisationModule);
         }
-    }
-
-    public function _delete($id, array $data = [])
-    {
-        $this->_remove([
-            'ids' => [$id],
-        ]);
     }
 
     public function _remove(array $data)

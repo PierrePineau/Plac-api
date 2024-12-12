@@ -24,15 +24,21 @@ abstract class AbstractCoreController extends AbstractController
         $this->manager = $manager;
     }
 
-    #[Route('', methods: ['GET', 'POST'])] 
-    public function index(Request $request): JsonResponse
+    public function _index(Request $request): JsonResponse
     {
+        $data = $request->attributes->all();
         switch ($request->getMethod()) {
             case 'GET':
-                $response = $this->manager->search($request->query->all());
+                $data = array_merge($data, $request->query->all());
+                $response = $this->manager->search($data);
                 break;
             case 'POST':
-                $response = $this->manager->create($request->request->all());
+                $data = array_merge($data, $request->request->all());
+                $response = $this->manager->create($data);
+                break;
+            case 'DELETE':
+                $data = array_merge($data, $request->request->all());
+                $response = $this->manager->remove($data);
                 break;
             default:
                 return $this->json([], JsonResponse::HTTP_BAD_REQUEST);
@@ -41,18 +47,21 @@ abstract class AbstractCoreController extends AbstractController
         return $this->json($response, $response['success'] ? JsonResponse::HTTP_OK : JsonResponse::HTTP_BAD_REQUEST);
     }
 
-    #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '\d+'])]
-    public function get($id, Request $request): JsonResponse
+    public function _get($id, Request $request): JsonResponse
     {
+        $data = $request->attributes->all();
         switch ($request->getMethod()) {
             case 'GET':
-                $response = $this->manager->get($id, $request->query->all());
+                $data = array_merge($data, $request->query->all());
+                $response = $this->manager->get($id, $data);
                 break;
             case 'POST':
-                $response = $this->manager->update($id, $request->request->all());
+                $data = array_merge($data, $request->request->all());
+                $response = $this->manager->update($id, $data);
                 break;
             case 'DELETE':
-                $response = $this->manager->delete($id);
+                $data = array_merge($data, $request->request->all());
+                $response = $this->manager->delete($id, $data);
                 break;
             default:
                 return $this->json([], JsonResponse::HTTP_BAD_REQUEST);

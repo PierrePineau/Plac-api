@@ -15,8 +15,8 @@ security:
 
         app_user_provider:
             entity:
-                class: App\Entity\Employe
-                property: uuid
+                class: App\Entity\User
+                property: email
         # used to reload user from session & other features (e.g. switch_user)
             # entity:
             #     class: App\Entity\User
@@ -77,6 +77,7 @@ security:
     access_control:
         - {path: "^/*", ips: "%env(TRUSTED_IPS)%"}
         - {path: ^/api/admin/login_check, roles: IS_AUTHENTICATED_ANONYMOUSLY}
+        - {path: ^/api/app/users, methods: POST, roles: PUBLIC_ACCESS}
         - {path: ^/api/app/login_check, roles: IS_AUTHENTICATED_ANONYMOUSLY}
         - {path: "^/api/admin", roles: ROLE_ADMIN}
 

@@ -72,9 +72,6 @@ class ModuleManager extends AbstractCoreService
     public function _update($id, array $data)
     {
         $module = $this->find($id);
-        if (!$module) {
-            throw new \Exception($this->ELEMENT_NOT_FOUND);
-        }
 
         $this->setData(
             $newModule,

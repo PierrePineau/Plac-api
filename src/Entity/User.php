@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -23,7 +24,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["default"])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(unique: true)]
     private ?string $uuid = null;
 
     #[Assert\NotBlank(message: 'user.email.not_blank')]
@@ -46,7 +47,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column]
-    private ?bool $deleted = null;
+    private ?bool $deleted = false;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
@@ -69,6 +70,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->userOrganisations = new ArrayCollection();
+        $this->uuid = Uuid::v7()->toRfc4122();
+        $this->deleted = false;
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+        $this->roles = ['ROLE_USER'];
+        $this->enable = true;
     }
 
     public function getId(): ?int

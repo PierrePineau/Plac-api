@@ -145,4 +145,18 @@ class Plan
 
         return $this;
     }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'price' => $this->getPrice(),
+            'description' => $this->getDescription(),
+            'renewalFrequency' => $this->getRenewalFrequency(),
+            // 'modules' => $this->getModules()->map(fn (Module $module) => $module->toArray())->toArray(),
+            'reference' => $this->getReference(),
+            'enable' => $this->isEnable(),
+        ];
+    }
 }

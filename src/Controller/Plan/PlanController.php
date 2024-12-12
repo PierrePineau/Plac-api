@@ -69,9 +69,9 @@ class PlanController extends AbstractCoreController
     public function index(Request $request): JsonResponse
     {
         if ($request->isMethod('POST')) {
-            $this->denyAccessUnlessGranted(self::ROLE_SUPER_ADMIN);
+            $this->denyAccessUnlessGranted(self::ROLE_ADMIN);
         }
-        return parent::index($request);
+        return parent::_index($request);
     }
 
     #[OA\Get(
@@ -113,10 +113,10 @@ class PlanController extends AbstractCoreController
             )
         ],
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN', statusCode: 423)]
+    #[IsGranted('ROLE_ADMIN', statusCode: 423)]
     #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '\d+'])]
     public function get($id, Request $request): JsonResponse
     {
-        return parent::get($id, $request);
+        return parent::_get($id, $request);
     }
 }

@@ -57,6 +57,9 @@ nelmio_api_doc:
                             type: boolean
                             example: true
                         code:
+                            type: integer
+                            example: 200
+                        codeMessage:
                             type: string
                             example: success.message
                         message:

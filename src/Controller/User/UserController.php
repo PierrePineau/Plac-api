@@ -13,9 +13,10 @@ use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/api/admin/users')]
-#[OA\Tag(name: 'Admin.User')]
+#[Route('/api/app/users')]
+#[OA\Tag(name: 'User')]
 #[Security(name: 'JWT')]
 class UserController extends AbstractCoreController
 {
@@ -67,7 +68,10 @@ class UserController extends AbstractCoreController
     #[Route('', methods: ['GET', 'POST'])] 
     public function index(Request $request): JsonResponse
     {
-        return parent::index($request);
+        if ($request->isMethod('GET')) {
+            $this->deniedUnlessGranted(self::ROLE_ADMIN, 423);
+        }
+        return parent::_index($request);
     }
 
     #[OA\Get(
@@ -109,9 +113,10 @@ class UserController extends AbstractCoreController
             )
         ]
     )]
-    #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['uuid' => '[a-z0-9-]+'])]
+    #[IsGranted('ROLE_USER', statusCode: 423)]
+    #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '[a-z0-9-]+'])]
     public function get($id, Request $request): JsonResponse
     {
-        return parent::get($id, $request);
+        return parent::_get($id, $request);
     }
 }

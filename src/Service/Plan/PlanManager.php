@@ -41,15 +41,6 @@ class PlanManager extends AbstractCoreService
         $this->em->flush();
     }
 
-    public function _search(array $filters = []): array
-    {
-        $this->getUser();
-        var_dump($this->getUser());
-        die;
-
-        return parent::_search($filters);
-    }
-
     public function _create(array $data)
     {
         $plan = new Plan();

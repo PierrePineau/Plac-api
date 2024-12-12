@@ -41,6 +41,7 @@ class Note
     public function __construct()
     {
         $this->projectNotes = new ArrayCollection();
+        $this->uuid = Uuid::v7()->toRfc4122();
     }
 
     public function getId(): ?int

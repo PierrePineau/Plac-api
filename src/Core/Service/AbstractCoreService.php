@@ -5,11 +5,13 @@ namespace App\Core\Service;
 use App\Core\Utils\Messenger;
 use App\Core\Utils\Tools;
 use App\Core\Utils\Pagination;
+use App\Model\User;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Contracts\EventDispatcher\Event;
 
 abstract class AbstractCoreService
 {
@@ -17,6 +19,8 @@ abstract class AbstractCoreService
     public $em;
     public $entityClass;
     public $identifier;
+    public $security;
+    public $user;
 
     public $tools;
     public $messenger;
@@ -80,7 +84,10 @@ abstract class AbstractCoreService
      */
     public function getUser()
     {
-        return $this->security->getUser();
+        if (!$this->user || $this->user instanceof User) {
+            $this->user = $this->security->getUser();
+        }
+        return $this->user;        
     }
 
     public function generateDefault()
@@ -192,18 +199,38 @@ abstract class AbstractCoreService
         return $this->messenger->dispatchEvent($event, $eventName);
     }
 
+    // Cette fonction permet de vérifier avant de faire une action
+    public function guardMiddleware(array $data): array
+    {
+        // Add here code for default check
+        return $data;
+    }
+
+    // Cette fonction permet de vérifier les authentifications et autorisations
+    public function middleware(array $data): mixed
+    {
+        // Add here code for default check
+        return $data;
+    }
+
     /**
      * REPOSITORY - METHODS
      */
-    public function find($id)
+    public function find($id, bool $throwException = true)
     {
-        if ($this->identifier == 'id') {
-            return $this->em->getRepository($this->entityClass)->find($id);
+        if ($this->identifier == 'id' && is_numeric($id)) {
+            $element = $this->em->getRepository($this->entityClass)->find($id);
         }else{
-            return $this->em->getRepository($this->entityClass)->findOneBy([$this->identifier => $id]);
+            $element = $this->em->getRepository($this->entityClass)->findOneBy([$this->identifier => $id]);
         }
-    }
 
+        if (!$element && $throwException) {
+            throw new \Exception($this->ELEMENT_NOT_FOUND, 404);
+        }
+
+        return $element;
+    }
+    
     public function findByIds(array $ids)
     {
         if ($this->identifier == 'id') {
@@ -251,12 +278,16 @@ abstract class AbstractCoreService
     public function search(array $filters = []): ?array
     {
         try {
+            $filters = $this->guardMiddleware($filters);
             $search = $this->_search($filters);
 
             return $this->messenger->newResponse(
-                true,
-                $search['total'] > 0 ? $this->ELEMENT_FOUND : $this->ELEMENT_NOT_FOUND,
-                $search
+                [
+                    'success' => true,
+                    'message' => $search['total'] > 0 ? $this->ELEMENT_FOUND : $this->ELEMENT_NOT_FOUND,
+                    'code' => 200,
+                    'data' => $search
+                ]
             );
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
@@ -266,12 +297,16 @@ abstract class AbstractCoreService
     public function get($id, array $filters = []): ?array
     {
         try {
+            $filters = $this->guardMiddleware($filters);
             $element = $this->_get($id, $filters);
             
             return $this->messenger->newResponse(
-                true,
-                $this->ELEMENT_FOUND,
-                $element
+                [
+                    'success' => true,
+                    'message' => $this->ELEMENT_FOUND,
+                    'code' => 200,
+                    'data' => $element
+                ]
             );
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
@@ -281,9 +316,9 @@ abstract class AbstractCoreService
     public function _get($id, array $filters = []): mixed
     {
         $element = $this->find($id);
-        if (!$element) {
-            throw new \Exception($this->ELEMENT_NOT_FOUND);
-        }
+        $this->middleware([
+            $this->ELEMENT => $element,
+        ]);
         $element = $element->toArray(false);
 
         return $element;
@@ -292,11 +327,17 @@ abstract class AbstractCoreService
     public function update($id, array $data): ?array
     {
         try {
+            $data = $this->guardMiddleware($data);
             $element = $this->_update($id, $data);
 
             $this->em->flush();
 
-            return $this->messenger->newResponse(true, $this->ELEMENT_UPDATED);
+            return $this->messenger->newResponse([
+                'success' => true,
+                'message' => $this->ELEMENT_UPDATED,
+                'code' => 200,
+                'data' => $element
+            ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
         }
@@ -305,11 +346,17 @@ abstract class AbstractCoreService
     public function create(array $data): ?array
     {
         try {
+            $data = $this->guardMiddleware($data);
             $element = $this->_create($data);
 
             $this->em->flush();
 
-            return $this->messenger->newResponse(true, $this->ELEMENT_CREATED);
+            return $this->messenger->newResponse([
+                'success' => true,
+                'message' => $this->ELEMENT_CREATED,
+                'code' => 201,
+                'data' => $element
+            ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
         }
@@ -318,11 +365,17 @@ abstract class AbstractCoreService
     public function add(array $data): ?array
     {
         try {
+            $data = $this->guardMiddleware($data);
             $element = $this->_add($data);
 
             $this->em->flush();
 
-            return $this->messenger->newResponse(true, $this->ELEMENT_ADDED);
+            return $this->messenger->newResponse([
+                'success' => true,
+                'message' => $this->ELEMENT_ADDED,
+                'code' => 201,
+                'data' => $element
+            ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
         }
@@ -331,11 +384,17 @@ abstract class AbstractCoreService
     public function remove(array $data): ?array
     {
         try {
+            $data = $this->guardMiddleware($data);
             $element = $this->_remove($data);
 
             $this->em->flush();
 
-            return $this->messenger->newResponse(true, $this->ELEMENT_REMOVED);
+            return $this->messenger->newResponse([
+                'success' => true,
+                'message' => $this->ELEMENT_REMOVED,
+                'code' => 200,
+                'data' => $element
+            ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
         }
@@ -344,11 +403,17 @@ abstract class AbstractCoreService
     public function delete($id, array $data = []): ?array
     {
         try {
+            $data = $this->guardMiddleware($data);
             $element = $this->_delete($id, $data);
 
             $this->em->flush();
 
-            return $this->messenger->newResponse(true, $this->ELEMENT_DELETED);
+            return $this->messenger->newResponse([
+                'success' => true,
+                'message' => $this->ELEMENT_DELETED,
+                'code' => 200,
+                'data' => $element
+            ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
         }
@@ -370,12 +435,12 @@ abstract class AbstractCoreService
 
     public function _add(array $data)
     {
-        throw new \Exception($this->ELEMENT.'.create.not_allowed');
+        throw new \Exception($this->ELEMENT.'.add.not_allowed');
     }
 
     public function _remove(array $data)
     {
-        throw new \Exception($this->ELEMENT.'.create.not_allowed');
+        throw new \Exception($this->ELEMENT.'.remove.not_allowed');
     }
 
     public function _delete($id, array $data = [])

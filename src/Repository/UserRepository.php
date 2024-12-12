@@ -16,12 +16,18 @@ class UserRepository extends AbstractCoreRepository implements PasswordUpgraderI
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, User::class);
+        parent::__construct($registry, User::class, [
+            'alias' => 'u',
+        ]);
     }
 
     public function loadUserByIdentifier(string $identifier): ?User
     {
-        return $this->findOneBy(['email' => $identifier]);
+        return $this->createNewQueryBuilder()
+            ->andWhere('u.email = :identifier OR u.uuid = :identifier')
+            ->setParameter('identifier', $identifier)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     /**
