@@ -3,13 +3,14 @@
 namespace App\DataFixtures\Test\User;
 
 use App\Core\Utils\Messenger;
+use App\DataFixtures\Test\TestUserAuthTrait;
 use App\Service\ApiManager;
 use App\Service\User\UserManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class TestUserFixtures extends Fixture implements FixtureGroupInterface
+class TestUserOrganisationFixtures extends Fixture implements FixtureGroupInterface
 {
     private $container;
     private $apiManager;
@@ -18,6 +19,8 @@ class TestUserFixtures extends Fixture implements FixtureGroupInterface
     private $headers;
     private $data;
     private $actions;
+
+    use TestUserAuthTrait;
 
     public function __construct($container)
     {
@@ -30,14 +33,15 @@ class TestUserFixtures extends Fixture implements FixtureGroupInterface
             // 'Content-Type' => 'application/json',
         ];
         $this->data = [
-            'testUser' => [
+            'auth' => [
                 'username' => 'test@gmail.com',
                 'password' => 'test123A',
             ],
+            'idUser' => "0193bb21-45bd-7047-a092-5d55be3f648a",
         ];
         $this->actions = [
-            'Create new user' => 'createUser',
             'Authenticate' => 'authenticate',
+            'Create new organisation' => 'createUserOrganisation',
             // 'Update info user' => 'updateInfoUser',
             // 'Delete user' => 'deleteUser',
         ];
@@ -45,7 +49,7 @@ class TestUserFixtures extends Fixture implements FixtureGroupInterface
 
     public static function getGroups(): array
     {
-        return ['test.generate', 'test.user'];
+        return ['test.generate', 'test.user.organisation'];
     }
 
     public function load(ObjectManager $em): void
@@ -55,7 +59,8 @@ class TestUserFixtures extends Fixture implements FixtureGroupInterface
                 try {
                     $resp = $this->$function();
 
-                    if ($resp['success'] != true) {
+                    if (isset($resp['success']) && $resp['success'] != true) {
+                        $this->messenger->debug($resp);
                         throw new \Exception($resp['message']);
                     }
 
@@ -65,9 +70,8 @@ class TestUserFixtures extends Fixture implements FixtureGroupInterface
                 } catch (\Throwable $th) {
                     //throw $th;
                     $this->messenger->log("RUN TEST : {$name} : K.O ({$th->getMessage()})");
-                    // dump($th->getLine());
-                    // dump($th->getFile());
-                    // $messenger->log($th->getMessage());
+                    dump($th->getLine());
+                    dump($th->getFile());
                     break;
                 }
             }
@@ -78,49 +82,20 @@ class TestUserFixtures extends Fixture implements FixtureGroupInterface
         }
     }
 
-    private function createUser():array
+    private function createUserOrganisation():array
     {
         $resp = $this->apiManager->api([
             'apiUrl' => $this->apiUrl,
-            'path' => 'app/users',
+            'path' => 'app/users/' . $this->data['idUser'] . '/organisations',
             'headers' => $this->headers,
             'method' => 'POST',
             'params' => [
-                'email' => $this->data['testUser']['email'],
-                'password' => $this->data['testUser']['password'],
+                'name' => 'Test Organisation',
             ]
         ]);
         
         $this->messenger->debug($resp);
 
         return $resp;
-    }
-
-    private function authenticate():array
-    {
-        // $resp = $this->apiManager->post(
-        //     $this->apiUrl,
-        //     'app/login_check',
-        //     $this->headers,
-        //     'POST',
-        //     [
-        //         'email' => $this->data['testUser']['email'],
-        //         'password' => $this->data['testUser']['password'],
-        //     ]
-        // );
-        $this->messenger->debug($this->apiUrl. 'app/users');
-        $headers = $this->headers;
-        $headers['Content-Type'] = 'application/json';
-        $resp = $this->apiManager->api([
-            'apiUrl' => $this->apiUrl,
-            'path' => 'app/login_check',
-            'headers' => $headers,
-            'method' => 'JSON',
-            'params' => [
-                'username' => $this->data['testUser']['email'],
-                'password' => $this->data['testUser']['password'],
-            ]
-        ]);
-        $this->headers['Authorization'] = 'Bearer '.$resp['token'];
     }
 }

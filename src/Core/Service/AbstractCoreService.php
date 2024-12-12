@@ -82,6 +82,16 @@ abstract class AbstractCoreService
     /**
      * UTILS - METHODS
      */
+    public function errorException(string $message, int $code = 400)
+    {
+        throw new \Exception($message, $code);
+    }
+
+    public function notFoundException(string $message, int $code = 404)
+    {
+        throw new \Exception($message, $code);
+    }
+    
     public function getUser()
     {
         if (!$this->user || $this->user instanceof User) {
@@ -305,7 +315,7 @@ abstract class AbstractCoreService
                     'success' => true,
                     'message' => $this->ELEMENT_FOUND,
                     'code' => 200,
-                    'data' => $element
+                    'data' => $element->toArray()
                 ]
             );
         } catch (\Throwable $th) {
@@ -319,8 +329,6 @@ abstract class AbstractCoreService
         $this->middleware([
             $this->ELEMENT => $element,
         ]);
-        $element = $element->toArray(false);
-
         return $element;
     }
 
@@ -336,7 +344,7 @@ abstract class AbstractCoreService
                 'success' => true,
                 'message' => $this->ELEMENT_UPDATED,
                 'code' => 200,
-                'data' => $element
+                'data' => $element->toArray()
             ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
@@ -355,7 +363,7 @@ abstract class AbstractCoreService
                 'success' => true,
                 'message' => $this->ELEMENT_CREATED,
                 'code' => 201,
-                'data' => $element
+                'data' => $element->toArray()
             ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
@@ -374,7 +382,7 @@ abstract class AbstractCoreService
                 'success' => true,
                 'message' => $this->ELEMENT_ADDED,
                 'code' => 201,
-                'data' => $element
+                'data' => $element->toArray()
             ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
@@ -393,7 +401,7 @@ abstract class AbstractCoreService
                 'success' => true,
                 'message' => $this->ELEMENT_REMOVED,
                 'code' => 200,
-                'data' => $element
+                'data' => $element->toArray()
             ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
@@ -412,7 +420,6 @@ abstract class AbstractCoreService
                 'success' => true,
                 'message' => $this->ELEMENT_DELETED,
                 'code' => 200,
-                'data' => $element
             ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);

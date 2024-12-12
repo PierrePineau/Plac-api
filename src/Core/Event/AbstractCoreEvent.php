@@ -33,8 +33,11 @@ abstract class AbstractCoreEvent extends Event
         $this->isOk = $isOk;
     }
 
-    public function getErrors(): array
+    public function getErrors(bool $implode = true): mixed
     {
+        if ($implode) {
+            return implode('||', $this->errors);
+        }
         return $this->errors;
     }
 

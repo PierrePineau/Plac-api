@@ -105,7 +105,7 @@ class Messenger
             $message = $stringMessage;
         }
 
-        if ($code == 0) {
+        if ($code == 0 && $_ENV['APP_ENV'] != 'dev') {
             // On considère que c'est une erreur interne
             $code = 500;
             $message = 'error.internal';

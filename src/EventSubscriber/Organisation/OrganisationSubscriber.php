@@ -17,7 +17,10 @@ class OrganisationSubscriber implements EventSubscriberInterface
     {
         // return the subscribed events, their methods and priorities
         return [
-            OrganisationGetEvent::class => ['onOrganisationGetEvent', 10],
+            OrganisationGetEvent::class => [
+                ['onOrganisationGetEvent', 10],
+                ['middleware', 9]
+            ],
         ];
     }
 
@@ -47,6 +50,16 @@ class OrganisationSubscriber implements EventSubscriberInterface
             return $event;
         }
         
+        return $event;
+    }
+
+    public function middleware(OrganisationGetEvent $event): OrganisationGetEvent
+    {
+        // On vérifie si l'utilisateur connecté à accès à l'organisation
+        $organisationManager = $this->container->get(OrganisationManager::class);
+        $organisationManager->middleware([
+            'organisation' => $event->getOrganisation()
+        ]);
         return $event;
     }
 }

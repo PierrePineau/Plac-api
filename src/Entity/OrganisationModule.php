@@ -19,7 +19,7 @@ class OrganisationModule
 
     #[ORM\ManyToOne(inversedBy: 'organisationModules')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?module $module = null;
+    private ?Module $module = null;
 
     #[ORM\Column]
     private ?bool $enable = null;

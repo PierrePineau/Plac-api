@@ -1,6 +1,8 @@
 <?php
 namespace App\Service;
 
+use App\Core\Utils\Messenger;
+
 class ApiManager
 {
     private $container;
@@ -9,8 +11,15 @@ class ApiManager
         $this->container = $container;
     }
 
-    public function api($apiUrl, $path, $headers, $method = 'GET', $params = [])
+    public function api(array $data = [])
     {
+        // $apiUrl, $path, $headers, $method = 'GET', $params = []
+        $apiUrl = $data['apiUrl'];
+        $path = $data['path'];
+        $headers = isset($data['headers']) ? $data['headers'] : [];
+        $method = isset($data['method']) ? $data['method'] : 'GET';
+        $params = isset($data['params']) ? $data['params'] : [];
+        
         // $toolsManager = $this->container->get(ToolsManager::class);
         $allowedMethods = ['GET', 'POST', 'DELETE', 'FILE', 'JSON'];
         if(!in_array($method, $allowedMethods)){
@@ -45,20 +54,12 @@ class ApiManager
                     ]);
                     break;
                 case 'JSON':
-                    // var_dump($url);
-                    // var_dump($params);
-                    // var_dump($headers);
-                    // die();
                     $request = $client->post($url, [
                         'headers' => $headers,
                         'body' => json_encode($params)
                     ]);
                     break;
                 case 'POST':
-                    // var_dump($url);
-                    // var_dump($params);
-                    // var_dump($headers);
-                    // die();
                     $request = $client->post($url, [
                         'headers' => $headers,
                         'form_params' => $params
@@ -82,9 +83,9 @@ class ApiManager
             // throw $th;
             $statusCode = $e->getResponse()->getStatusCode();
             $data = json_decode((string) $e->getResponse()->getBody(), true);
-            if ($_ENV['APP_ENV'] === 'dev' && $_ENV['APP_DEBUG'] === true) {
-                var_dump($data);
-                die();
+            if ($_ENV['APP_ENV'] === 'dev') {
+                $messenger = $this->container->get(Messenger::class);
+                $messenger->debug($data);
             }
             $message = '';
             switch ($statusCode) {
@@ -118,28 +119,28 @@ class ApiManager
         
     }
 
-    public function get($apiUrl, $path, $headers, $params = [])
-    {
-        return $this->api($apiUrl, $path, $headers, 'GET', $params);
-    }
+    // public function get($apiUrl, $path, $headers, $params = [])
+    // {
+    //     return $this->api($apiUrl, $path, $headers, 'GET', $params);
+    // }
 
-    public function post($apiUrl, $path, $headers, $params = [])
-    {
-        return $this->api($apiUrl, $path, $headers, 'POST', $params);
-    }
+    // public function post($apiUrl, $path, $headers, $params = [])
+    // {
+    //     return $this->api($apiUrl, $path, $headers, 'POST', $params);
+    // }
 
-    public function json($apiUrl, $path, $headers, $params = [])
-    {
-        return $this->api($apiUrl, $path, $headers, 'JSON', $params);
-    }
+    // public function json($apiUrl, $path, $headers, $params = [])
+    // {
+    //     return $this->api($apiUrl, $path, $headers, 'JSON', $params);
+    // }
 
-    public function delete($apiUrl, $path, $headers, $params = [])
-    {
-        return $this->api($apiUrl, $path, $headers, 'DELETE', $params);
-    }
+    // public function delete($apiUrl, $path, $headers, $params = [])
+    // {
+    //     return $this->api($apiUrl, $path, $headers, 'DELETE', $params);
+    // }
 
-    public function file($apiUrl, $path, $headers, $params = [])
-    {
-        return $this->api($apiUrl, $path, $headers, 'FILE', $params);
-    }
+    // public function file($apiUrl, $path, $headers, $params = [])
+    // {
+    //     return $this->api($apiUrl, $path, $headers, 'FILE', $params);
+    // }
 }

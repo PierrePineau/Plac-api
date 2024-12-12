@@ -54,18 +54,18 @@ class UserManager extends AbstractCoreService
     public function _create(array $data)
     {
         if (!isset($data['email'])) {
-            throw new \Exception($this->ELEMENT.'.email.required');
+            $this->errorException($this->ELEMENT.'.email.required');
         }
 
         if (!isset($data['password'])) {
-            throw new \Exception($this->ELEMENT.'.password.required');
+            $this->errorException($this->ELEMENT.'.password.required');
         }
 
         $email = $data['email'];
         $password = $data['password'];
 
         if ($this->findOneBy(['email' => $email])) {
-            throw new \Exception($this->ELEMENT_ALREADY_EXISTS);
+            $this->errorException($this->ELEMENT_ALREADY_EXISTS);
         }
         
         $user = new User();

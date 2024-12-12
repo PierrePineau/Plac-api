@@ -537,3 +537,5 @@ TeamPerson.found: Membre de l'équipe trouvé
 TeamPerson.created: Membre de l'équipe créé
 TeamPerson.updated: Membre de l'équipe mis à jour
 TeamPerson.deleted: Membre de l'équipe supprimé
+
+organisation.not_allowed: "Vous ne pouvez pas supprimer ou modifier cette organisation"

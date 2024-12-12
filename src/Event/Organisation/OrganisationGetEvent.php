@@ -7,7 +7,7 @@ use App\Entity\Organisation;
 
 final class OrganisationGetEvent extends AbstractCoreEvent
 {
-    private ?Organisation $organisation;
+    private ?Organisation $organisation = null;
     
     public function __construct(array $data = [])
     {   

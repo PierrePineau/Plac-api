@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: OrganisationRepository::class)]
 class Organisation
@@ -16,7 +17,7 @@ class Organisation
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::GUID)]
+    #[ORM\Column(unique: true)]
     private ?string $uuid = null;
 
     #[ORM\Column(length: 255)]
@@ -49,8 +50,20 @@ class Organisation
     #[ORM\OneToMany(targetEntity: OrganisationFile::class, mappedBy: 'organisation')]
     private Collection $organisationFiles;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $updatedAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
+
     public function __construct()
     {
+        $this->uuid = Uuid::v7()->toRfc4122();
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
         $this->userOrganisations = new ArrayCollection();
         $this->organisationModules = new ArrayCollection();
         $this->employes = new ArrayCollection();
@@ -131,15 +144,6 @@ class Organisation
         $this->organisationSubscription = $organisationSubscription;
 
         return $this;
-    }
-
-    public function toArray(): array
-    {
-        return [
-            // 'id' => $this->getId(),
-            'id' => $this->getUuid(),
-            'name' => $this->getName(),
-        ];
     }
 
     /**
@@ -227,5 +231,50 @@ class Organisation
         }
 
         return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'id' => $this->getUuid(),
+            'name' => $this->getName(),
+        ];
     }
 }

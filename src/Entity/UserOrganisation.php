@@ -49,4 +49,13 @@ class UserOrganisation
 
         return $this;
     }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'user' => $this->getUser()->toArray(),
+            'organisation' => $this->getOrganisation()->toArray(),
+        ];
+    }
 }

@@ -35,5 +35,8 @@ class DemoUserFixtures extends Fixture implements FixtureGroupInterface
         ]);
 
         $this->messenger->debug($resp);
+
+        // On créer une organisation à l'utilisateur
+        $userOrganisationManager = $this->container->get(UserOrganisationManager::class);
     }
 }
