@@ -59,6 +59,12 @@ class Organisation
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
+    /**
+     * @var Collection<int, OrganisationClient>
+     */
+    #[ORM\OneToMany(targetEntity: OrganisationClient::class, mappedBy: 'organisation')]
+    private Collection $organisationClients;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toRfc4122();
@@ -68,6 +74,7 @@ class Organisation
         $this->organisationModules = new ArrayCollection();
         $this->employes = new ArrayCollection();
         $this->organisationFiles = new ArrayCollection();
+        $this->organisationClients = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -276,5 +283,35 @@ class Organisation
             'id' => $this->getUuid(),
             'name' => $this->getName(),
         ];
+    }
+
+    /**
+     * @return Collection<int, OrganisationClient>
+     */
+    public function getOrganisationClients(): Collection
+    {
+        return $this->organisationClients;
+    }
+
+    public function addOrganisationClient(OrganisationClient $organisationClient): static
+    {
+        if (!$this->organisationClients->contains($organisationClient)) {
+            $this->organisationClients->add($organisationClient);
+            $organisationClient->setOrganisation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrganisationClient(OrganisationClient $organisationClient): static
+    {
+        if ($this->organisationClients->removeElement($organisationClient)) {
+            // set the owning side to null (unless already changed)
+            if ($organisationClient->getOrganisation() === $this) {
+                $organisationClient->setOrganisation(null);
+            }
+        }
+
+        return $this;
     }
 }

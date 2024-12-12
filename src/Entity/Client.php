@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\ClientRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 class Client
@@ -14,7 +17,7 @@ class Client
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::GUID)]
+    #[ORM\Column(unique: true)]
     private ?string $uuid = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -27,10 +30,35 @@ class Client
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $name = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $phone = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $updatedAt = null;
+
+    #[ORM\Column]
+    private ?bool $archived = false;
+
+    #[ORM\Column]
+    private ?bool $deleted = false;
+
+    /**
+     * @var Collection<int, OrganisationClient>
+     */
+    #[ORM\OneToMany(targetEntity: OrganisationClient::class, mappedBy: 'client')]
+    private Collection $organisationClients;
+
+    public function __construct()
+    {
+        $this->uuid = Uuid::v7()->toRfc4122();
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+        $this->archived = false;
+        $this->deleted = false;
+        $this->organisationClients = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -47,14 +75,6 @@ class Client
         $this->uuid = $uuid;
 
         return $this;
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->getId(),
-            'uuid' => $this->getUuid(),
-        ];
     }
 
     public function getEmail(): ?string
@@ -95,14 +115,7 @@ class Client
 
     public function getName(): ?string
     {
-        return $this->name;
-    }
-
-    public function setName(?string $name): static
-    {
-        $this->name = $name;
-
-        return $this;
+        return $this->firstname . ' ' . $this->lastname;
     }
 
     public function getPhone(): ?string
@@ -115,5 +128,96 @@ class Client
         $this->phone = $phone;
 
         return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function isArchived(): ?bool
+    {
+        return $this->archived;
+    }
+
+    public function setArchived(bool $archived): static
+    {
+        $this->archived = $archived;
+
+        return $this;
+    }
+
+    public function isDeleted(): ?bool
+    {
+        return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): static
+    {
+        $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrganisationClient>
+     */
+    public function getOrganisationClients(): Collection
+    {
+        return $this->organisationClients;
+    }
+
+    public function addOrganisationClient(OrganisationClient $organisationClient): static
+    {
+        if (!$this->organisationClients->contains($organisationClient)) {
+            $this->organisationClients->add($organisationClient);
+            $organisationClient->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrganisationClient(OrganisationClient $organisationClient): static
+    {
+        if ($this->organisationClients->removeElement($organisationClient)) {
+            // set the owning side to null (unless already changed)
+            if ($organisationClient->getClient() === $this) {
+                $organisationClient->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'id' => $this->getUuid(),
+            'email' => $this->getEmail(),
+            'name' => $this->getName(),
+            'firstname' => $this->getFirstname(),
+            'lastname' => $this->getLastname(),
+            'phone' => $this->getPhone(),
+        ];
     }
 }

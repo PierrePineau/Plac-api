@@ -136,7 +136,8 @@ abstract class AbstractCoreService
             foreach ($errors as $error) {
                 $errorsString .= $error->getMessage()."||";
             }
-            throw new \Exception($errorsString);
+            // throw new \Exception($errorsString);
+            $this->errorException($errorsString);
             return false;
         }else{
             return true;
@@ -148,7 +149,8 @@ abstract class AbstractCoreService
     {
         // On vérifie que l'entité est bien un objet
         if (!is_object($entity)) {
-            throw new \Exception('entity.not_found');
+            // throw new \Exception('entity.not_found');
+            $this->notFoundException('entity.not_found');
         }
 
         foreach ($index as $key => $option) {
@@ -156,39 +158,46 @@ abstract class AbstractCoreService
                 $setter = 'set'.ucfirst($key);
 
                 if (!method_exists($entity, $setter)) {
-                    throw new \Exception($this->ELEMENT.'.'.$key.'.undefined');
+                    // throw new \Exception($this->ELEMENT.'.'.$key.'.undefined');
+                    $this->errorException($this->ELEMENT.'.'.$key.'.undefined');
                 }
 
                 if (!(isset($option['nullable']) && $option['nullable'] === true) && ($data[$key] == null || $data[$key] == '')) {
-                    throw new \Exception($this->ELEMENT.'.'.$key.'.invalid');
+                    // throw new \Exception($this->ELEMENT.'.'.$key.'.invalid');
+                    $this->errorException($this->ELEMENT.'.'.$key.'.invalid');
                 }
 
                 // On vérifie la valeur
                 $type = $option['type'] ?? 'string';
                 if (!in_array($type, ['string', 'int', 'int+', 'integer', 'float', 'float+', 'bool', 'boolean'])) {
-                    throw new \Exception($this->ELEMENT.'.'.$key.'.type.invalid');
+                    // throw new \Exception($this->ELEMENT.'.'.$key.'.type.invalid');
+                    $this->errorException($this->ELEMENT.'.'.$key.'.type.invalid');
                 }
 
                 if (in_array($type, ['string'])) {
                     // On vérifie si c'est une chaine de caractère
                     if (!is_string($data[$key])) {
-                        throw new \Exception($this->ELEMENT.'.'.$key.'.invalid');
+                        // throw new \Exception($this->ELEMENT.'.'.$key.'.invalid');
+                        $this->errorException($this->ELEMENT.'.'.$key.'.invalid');
                     }
                     // $data[$key] = (string) $data[$key];
                 }elseif (in_array($type, ['int', 'integer', 'float', 'int+', 'float+'])) {
                     // On vérifie si c'est un nombre
                     if (!is_numeric($data[$key])) {
-                        throw new \Exception($this->ELEMENT.'.'.$key.'.invalid');
+                        // throw new \Exception($this->ELEMENT.'.'.$key.'.invalid');
+                        $this->errorException($this->ELEMENT.'.'.$key.'.invalid');
                     }
 
                     // Si int+ et float+ on vérifie si c'est un entier positif
                     if (in_array($type, ['int+', 'float+']) && !($data[$key] > 0)) {
-                        throw new \Exception($this->ELEMENT.'.'.$key.'.invalid');
+                        // throw new \Exception($this->ELEMENT.'.'.$key.'.invalid');
+                        $this->errorException($this->ELEMENT.'.'.$key.'.invalid');
                     }
                 }elseif (in_array($type, ['bool', 'boolean'])) {
                     // On vérifie si c'est un booléen
                     if (!in_array($data[$key], ['0', 0, 'false', false, '1', 1, 'true', true, 'on'])) {
-                        throw new \Exception($this->ELEMENT.'.'.$key.'.invalid');
+                        // throw new \Exception($this->ELEMENT.'.'.$key.'.invalid');
+                        $this->errorException($this->ELEMENT.'.'.$key.'.invalid');
                     }else{
                         $data[$key] = ($data[$key] === true || in_array($data[$key], ['1', 1, 'true', 'on'])) ? true : false;
                     }
@@ -198,7 +207,8 @@ abstract class AbstractCoreService
                 
             }else if (isset($option['required']) && $option['required'] === true) {
                 // Si la valeur est obligatoire et qu'elle n'est pas présente
-                throw new \Exception($this->ELEMENT.'.'.$key.'.required');
+                // throw new \Exception($this->ELEMENT.'.'.$key.'.required');
+                $this->errorException($this->ELEMENT.'.'.$key.'.required');
             }
         }
         return $entity;
@@ -235,7 +245,8 @@ abstract class AbstractCoreService
         }
 
         if (!$element && $throwException) {
-            throw new \Exception($this->ELEMENT_NOT_FOUND, 404);
+            // throw new \Exception($this->ELEMENT_NOT_FOUND, 404);
+            $this->notFoundException($this->ELEMENT_NOT_FOUND);
         }
 
         return $element;

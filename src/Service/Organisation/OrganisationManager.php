@@ -37,12 +37,18 @@ class OrganisationManager extends AbstractCoreService
 
     public function _create(array $data)
     {
-        if (!isset($data['name'])) {
-            $this->errorException($this->ELEMENT.'.name.required');
-        }
-
         $organisation = new Organisation();
-        $organisation->setName($data['name']);
+
+        $this->setData(
+            $organisation,
+            [
+                'name' => [
+                    'required' => true,
+                    'nullable' => false,
+                ]
+            ],
+            $data
+        );
 
         $this->em->persist($organisation);
         $this->isValid($organisation);
