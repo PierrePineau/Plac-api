@@ -27,7 +27,8 @@ security:
             pattern: ^/api/admin
             stateless: true 
             switch_user: true
-            jwt: ~
+            jwt:
+                authenticator: admin.user_authenticator
             provider: admin_user_provider
             context: core
             # logout:

@@ -84,6 +84,17 @@ services:
             $adminProvider: '@security.user.provider.concrete.admin_user_provider'
         parent: lexik_jwt_authentication.security.jwt_authenticator
 
+    admin.user_authenticator:
+        class: App\Security\AdminAuthenticator
+        public: true
+        arguments:
+            $container: '@service_container'
+            $translator: '@translator'
+            $passwordHash: '@security.user_password_hasher'
+            $logger: '@logger'
+            $adminProvider: '@security.user.provider.concrete.admin_user_provider'
+        parent: lexik_jwt_authentication.security.jwt_authenticator
+
     # customer.custom_authenticator:
     #     class: App\Security\Customer\CustomerAuthenticator
     #     public: true
