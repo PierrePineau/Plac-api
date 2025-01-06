@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Core\Utils\Messenger;
 use App\Service\Admin\AdminManager;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\InvalidPayloadException;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\MissingTokenException;
 use Lexik\Bundle\JWTAuthenticationBundle\Response\JWTAuthenticationFailureResponse;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Authenticator\JWTAuthenticator;
@@ -132,11 +133,8 @@ class AdminAuthenticator extends JWTAuthenticator
                 $identifier = $data['username'];
                 $password = $data['password'];
 
-                $this->logger->debug(json_encode($data));
-
                 $AdminManager = $this->container->get(AdminManager::class);
                 $user = $AdminManager->findOneByIdentifier($identifier);
-                $this->logger->debug($user ? 'User found' : 'User not found');
             
                 if (!$user) {
                     throw new CustomUserMessageAuthenticationException($this::USER_NOT_FOUND, [], Response::HTTP_UNAUTHORIZED);
@@ -165,7 +163,7 @@ class AdminAuthenticator extends JWTAuthenticator
                     throw new CustomUserMessageAuthenticationException($this::INVALID_CREDENTIALS, [], Response::HTTP_UNAUTHORIZED);
                 }
             } catch (\Throwable $th) {
-                throw new CustomUserMessageAuthenticationException($th->getMessage(), [], Response::HTTP_UNAUTHORIZED);
+                throw new CustomUserMessageAuthenticationException($this::INVALID_CREDENTIALS, [], Response::HTTP_UNAUTHORIZED);
                 return null;
             }
         }
