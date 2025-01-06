@@ -116,7 +116,7 @@ class ClientManager extends AbstractCoreService
         return $client;
     }
 
-    public function _delete($id)
+    public function _delete($id, array $data = []) 
     {
         $client = $this->getClient([
             'idClient' => $id,
