@@ -46,6 +46,7 @@ class HttpExceptionListener implements EventSubscriberInterface
                 )
             );
         }else{
+            $this->messenger->errorResponse($event->getThrowable());
             return;
         }
         // optionally set the custom response
