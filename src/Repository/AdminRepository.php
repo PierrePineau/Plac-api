@@ -17,7 +17,19 @@ class AdminRepository extends AbstractCoreRepository implements PasswordUpgrader
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Admin::class);
+        parent::__construct($registry, Admin::class, [
+            'alias' => 'a',
+        ]);
+    }
+
+    public function loadUserByIdentifier(string $identifier): ?Admin
+    {
+        return $this->createNewQueryBuilder()
+            ->andWhere('a.email = :identifier')
+            ->setParameter('identifier', $identifier)
+            ->getQuery()
+            ->setMaxResults(1)
+            ->getOneOrNullResult();
     }
 
     /**

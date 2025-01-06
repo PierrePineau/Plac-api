@@ -27,8 +27,8 @@ security:
             pattern: ^/api/admin
             stateless: true 
             switch_user: true
-            jwt:
-                authenticator: admin.user_authenticator
+            jwt: 
+              authenticator: admin.user_authenticator
             provider: admin_user_provider
             context: core
             # logout:
@@ -43,8 +43,8 @@ security:
         app:
             pattern: ^/api/app
             stateless: true
-            jwt:
-                authenticator: app.user_authenticator
+            jwt: 
+              authenticator: app.user_authenticator
             switch_user: true
             provider: app_user_provider
             context: core
@@ -60,12 +60,12 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
-            lazy: true
-            context: core
-            provider: app_user_provider
-            custom_authenticators:
-              - app.user_authenticator
+        # main:
+        #     lazy: true
+        #     context: core
+        #     provider: app_user_provider
+        #     custom_authenticators:
+        #       - app.user_authenticator
               # - App\Security\GoogleAuthenticator
 
             # activate different ways to authenticate

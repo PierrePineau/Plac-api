@@ -20,6 +20,11 @@ class AdminManager extends AbstractCoreService
         ]);
     }
 
+    public function findOneByIdentifier(string $identifier): ?Admin
+    {
+        return $this->em->getRepository(Admin::class)->loadUserByIdentifier($identifier);
+    }
+
     public function _create(array $data): Admin
     {
         if (!isset($data['email'])) {

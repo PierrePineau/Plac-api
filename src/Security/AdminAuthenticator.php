@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Core\Utils\Messenger;
+use App\Service\Admin\AdminManager;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\MissingTokenException;
 use Lexik\Bundle\JWTAuthenticationBundle\Response\JWTAuthenticationFailureResponse;
@@ -72,47 +73,102 @@ class AdminAuthenticator extends JWTAuthenticator
         $this->passwordHash = $passwordHash;
         $this->translator = $translator;
         $this->logger = $logger;
-        $this->adminProvider = $adminProvider;
+        $this->userProvider = $adminProvider;
+    }
+
+    public function supports(Request $request): ?bool
+    {
+        // $this->logger->debug($this->getTokenExtractor()->extract($request));
+        // return false !== $this->getTokenExtractor()->extract($request);
+        return true;
     }
 
     public function authenticate(Request $request): Passport
     {
+        $this->logger->debug('orem');
+
         $token = $this->getTokenExtractor()->extract($request);
-        if ($token === false) {
-            throw new \LogicException('Unable to extract a JWT token from the request. Also, make sure to call `supports()` before `authenticate()` to get a proper client error.');
-        }
+        if ($token) {
+            try {
+                if ($token === false) {
+                    throw new \LogicException('Unable to extract a JWT token from the request. Also, make sure to call `supports()` before `authenticate()` to get a proper client error.');
+                }
+                if (!$payload = $this->jwtManager->parse($token)) {
+                    // throw new InvalidTokenException('Invalid JWT Token');
+                    throw new CustomUserMessageAuthenticationException($this::CREDENTIALS_EXPIRED, [], Response::HTTP_UNAUTHORIZED);
+                }
+            } catch (JWTDecodeFailureException $e) {
+                if (JWTDecodeFailureException::EXPIRED_TOKEN === $e->getReason()) {
+                    // throw new ExpiredTokenException();
+                    throw new CustomUserMessageAuthenticationException($this::CREDENTIALS_EXPIRED, [], Response::HTTP_UNAUTHORIZED);
+                }
 
-        try {
-            if (!$payload = $this->jwtManager->parse($token)) {
-                // throw new InvalidTokenException('Invalid JWT Token');
+                // throw new InvalidTokenException('Invalid JWT Token', 0, $e);
                 throw new CustomUserMessageAuthenticationException($this::CREDENTIALS_EXPIRED, [], Response::HTTP_UNAUTHORIZED);
             }
-        } catch (JWTDecodeFailureException $e) {
-            if (JWTDecodeFailureException::EXPIRED_TOKEN === $e->getReason()) {
-                // throw new ExpiredTokenException();
-                throw new CustomUserMessageAuthenticationException($this::CREDENTIALS_EXPIRED, [], Response::HTTP_UNAUTHORIZED);
+
+            $idClaim = $this->jwtManager->getUserIdClaim();
+            if (!isset($payload[$idClaim])) {
+                throw new InvalidPayloadException($idClaim);
             }
 
-            // throw new InvalidTokenException('Invalid JWT Token', 0, $e);
-            throw new CustomUserMessageAuthenticationException($this::CREDENTIALS_EXPIRED, [], Response::HTTP_UNAUTHORIZED);
+            $passport = new SelfValidatingPassport(
+                new UserBadge(
+                    (string) $payload[$idClaim],
+                    fn ($userIdentifier) => $this->loadUser($payload, $userIdentifier)
+                )
+            );
+
+            $passport->setAttribute('payload', $payload);
+            $passport->setAttribute('token', $token);
+
+            return $passport;
+
+        }else {
+            // On authentifie l'utilisateur
+            try {
+                $data = $request->getContent();
+                $data = json_decode($data, true);
+                $identifier = $data['username'];
+                $password = $data['password'];
+
+                $this->logger->debug(json_encode($data));
+
+                $AdminManager = $this->container->get(AdminManager::class);
+                $user = $AdminManager->findOneByIdentifier($identifier);
+                $this->logger->debug($user ? 'User found' : 'User not found');
+            
+                if (!$user) {
+                    throw new CustomUserMessageAuthenticationException($this::USER_NOT_FOUND, [], Response::HTTP_UNAUTHORIZED);
+                }
+
+                if ($this->passwordHash->isPasswordValid($user, $password)) {
+                    $token = $this->jwtManager->create($user);
+                    $payload = $this->jwtManager->parse($token);
+                    $idClaim = $this->jwtManager->getUserIdClaim();
+                    if (!isset($payload[$idClaim])) {
+                        throw new InvalidPayloadException($idClaim);
+                    }
+
+                    $passport = new SelfValidatingPassport(
+                        new UserBadge(
+                            (string)$payload[$idClaim],
+                            function ($userIdentifier) use ($user) {
+                                return $this->userProvider->loadUserByIdentifier($userIdentifier);
+                            }
+                        )
+                    );
+                    $passport->setAttribute('payload', $payload);
+                    $passport->setAttribute('token', $token);
+                    return $passport;
+                }else{
+                    throw new CustomUserMessageAuthenticationException($this::INVALID_CREDENTIALS, [], Response::HTTP_UNAUTHORIZED);
+                }
+            } catch (\Throwable $th) {
+                throw new CustomUserMessageAuthenticationException($th->getMessage(), [], Response::HTTP_UNAUTHORIZED);
+                return null;
+            }
         }
-
-        $idClaim = $this->jwtManager->getUserIdClaim();
-        if (!isset($payload[$idClaim])) {
-            throw new InvalidPayloadException($idClaim);
-        }
-
-        $passport = new SelfValidatingPassport(
-            new UserBadge(
-                (string) $payload[$idClaim],
-                fn ($userIdentifier) => $this->loadUser($payload, $userIdentifier)
-            )
-        );
-
-        $passport->setAttribute('payload', $payload);
-        $passport->setAttribute('token', $token);
-
-        return $passport;
     }
 
     public function start(Request $request, AuthenticationException $authException = null): Response
