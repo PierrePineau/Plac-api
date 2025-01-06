@@ -61,6 +61,7 @@ security:
             security: false
         main:
             lazy: true
+            context: core
             provider: app_user_provider
             custom_authenticators:
               - app.user_authenticator
