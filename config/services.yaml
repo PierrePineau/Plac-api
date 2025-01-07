@@ -92,7 +92,7 @@ services:
             $translator: '@translator'
             $passwordHash: '@security.user_password_hasher'
             $logger: '@logger'
-            $adminProvider: '@security.user.provider.concrete.admin_user_provider'
+            $adminProvider: '@App\Security\Provider\AdminProvider'
         parent: lexik_jwt_authentication.security.jwt_authenticator
 
     # customer.custom_authenticator:
