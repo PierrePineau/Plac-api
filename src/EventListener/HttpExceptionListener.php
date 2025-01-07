@@ -25,6 +25,7 @@ class HttpExceptionListener implements EventSubscriberInterface
             // ExceptionListener, to make sure it's called before
             // the default exception listener
             KernelEvents::EXCEPTION => ['onKernelException', 10],
+            KernelEvents::REQUEST => ['onKernelRequest', 10],
         ];
     }
 
@@ -53,5 +54,22 @@ class HttpExceptionListener implements EventSubscriberInterface
         // $event->setCon
         // or stop propagation (prevents the next exception listeners from being called)
         //$event->stopPropagation();
+    }
+
+    public function onKernelRequest(ExceptionEvent $event): void
+    {
+        $this->messenger->debug('onKernelRequest');
+        $request = $event->getRequest();
+
+        $this->messenger->debug([
+            'path' => $request->getPathInfo(),
+            'method' => $request->getMethod(),
+            'content' => $request->getContent(),
+            'query' => $request->query->all(),
+            'headers' => $request->headers->all(),
+            'resquest' => $request->request->all(),
+        ]);
+        // var_dump($event);
+        // die;
     }
 }
