@@ -56,7 +56,7 @@ class HttpExceptionListener implements EventSubscriberInterface
         //$event->stopPropagation();
     }
 
-    public function onKernelRequest(ExceptionEvent $event): void
+    public function onKernelRequest(KernelEvents $event): void
     {
         $this->messenger->debug('onKernelRequest');
         $request = $event->getRequest();
