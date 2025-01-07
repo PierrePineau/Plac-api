@@ -128,7 +128,7 @@ class AdminAuthenticator extends JWTAuthenticator
             // On authentifie l'utilisateur
             try {
                 $data = $request->request->all();
-                $data = json_decode($data, true);
+                // $data = json_decode($data, true);
                 $this->messenger->debug($request->request->all());
                 $this->messenger->debug($request->getContent());
                 throw new \Exception($data, 1);
