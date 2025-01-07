@@ -127,11 +127,14 @@ class AdminAuthenticator extends JWTAuthenticator
         }else {
             // On authentifie l'utilisateur
             try {
-                $data = $request->getContent();
+                $data = $request->request->all();
                 $data = json_decode($data, true);
+                $this->messenger->debug($request->request->all());
+                $this->messenger->debug($request->getContent());
+                throw new \Exception($data, 1);
+
                 $identifier = $data['username'];
                 $password = $data['password'];
-                $this->messenger->debug($data);
 
                 $AdminManager = $this->container->get(AdminManager::class);
                 $user = $AdminManager->findOneByIdentifier($identifier);
