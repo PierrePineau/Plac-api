@@ -87,8 +87,6 @@ class AdminAuthenticator extends JWTAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $this->logger->debug('orem');
-
         $token = $this->getTokenExtractor()->extract($request);
         if ($token) {
             try {
@@ -172,7 +170,7 @@ class AdminAuthenticator extends JWTAuthenticator
                 ]);
                 if ($_ENV['APP_ENV'] === 'dev') {
                     // $this->logger->debug(json);
-                    throw new CustomUserMessageAuthenticationException(json_encode($th->getTrace()), [], Response::HTTP_UNAUTHORIZED);
+                    throw new CustomUserMessageAuthenticationException(json_encode([$th->getMessage(), $th->getLine()]), [], Response::HTTP_UNAUTHORIZED);
                 }
                 throw new CustomUserMessageAuthenticationException($this::INVALID_CREDENTIALS, [], Response::HTTP_UNAUTHORIZED);
                 return null;
