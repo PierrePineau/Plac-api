@@ -75,6 +75,7 @@ class AdminAuthenticator extends JWTAuthenticator
         $this->translator = $translator;
         $this->logger = $logger;
         $this->userProvider = $adminProvider;
+        $this->messenger = new Messenger();
     }
 
     public function supports(Request $request): ?bool
@@ -132,6 +133,7 @@ class AdminAuthenticator extends JWTAuthenticator
                 $data = json_decode($data, true);
                 $identifier = $data['username'];
                 $password = $data['password'];
+                $this->messenger->debug($data);
 
                 $AdminManager = $this->container->get(AdminManager::class);
                 $user = $AdminManager->findOneByIdentifier($identifier);
@@ -140,6 +142,7 @@ class AdminAuthenticator extends JWTAuthenticator
                     throw new CustomUserMessageAuthenticationException($this::USER_NOT_FOUND, [], Response::HTTP_UNAUTHORIZED);
                 }
 
+                $this->messenger->debug($this->passwordHash->isPasswordValid($user, $password) ? 'true' : 'false');
                 if ($this->passwordHash->isPasswordValid($user, $password)) {
                     $token = $this->jwtManager->create($user);
                     $payload = $this->jwtManager->parse($token);
@@ -163,12 +166,12 @@ class AdminAuthenticator extends JWTAuthenticator
                     throw new CustomUserMessageAuthenticationException($this::INVALID_CREDENTIALS, [], Response::HTTP_UNAUTHORIZED);
                 }
             } catch (\Throwable $th) {
+                $this->messenger->debug([
+                    'message' => $th->getMessage(),
+                    'trace' => $th->getTrace(),
+                ]);
                 if ($_ENV['APP_ENV'] === 'dev') {
                     // $this->logger->debug(json);
-                    $this->logger->debug($th->getMessage());
-                    $this->logger->debug($th->getLine());
-                    $this->logger->debug($th->getFile());
-                    $this->logger->debug(json_encode($th->getTrace()));
                     throw new CustomUserMessageAuthenticationException(json_encode($th->getTrace()), [], Response::HTTP_UNAUTHORIZED);
                 }
                 throw new CustomUserMessageAuthenticationException($this::INVALID_CREDENTIALS, [], Response::HTTP_UNAUTHORIZED);
