@@ -75,7 +75,7 @@ class AdminAuthenticator extends JWTAuthenticator
         $this->translator = $translator;
         $this->logger = $logger;
         $this->userProvider = $adminProvider;
-        $this->messenger = new Messenger();
+        $this->messenger = $this->container->get(Messenger::class);
     }
 
     public function supports(Request $request): ?bool
