@@ -38,11 +38,26 @@ class Project
     #[ORM\OneToMany(targetEntity: ProjectFile::class, mappedBy: 'project')]
     private Collection $projectFiles;
 
+    /**
+     * @var Collection<int, OrganisationProject>
+     */
+    #[ORM\OneToMany(targetEntity: OrganisationProject::class, mappedBy: 'project')]
+    private Collection $organisationProjects;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $updatedAt = null;
+
     public function __construct()
     {
         $this->projectNotes = new ArrayCollection();
         $this->uuid = Uuid::v7()->toRfc4122();
         $this->projectFiles = new ArrayCollection();
+        $this->organisationProjects = new ArrayCollection();
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -151,6 +166,60 @@ class Project
                 $projectFile->setProject(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrganisationProject>
+     */
+    public function getOrganisationProjects(): Collection
+    {
+        return $this->organisationProjects;
+    }
+
+    public function addOrganisationProject(OrganisationProject $organisationProject): static
+    {
+        if (!$this->organisationProjects->contains($organisationProject)) {
+            $this->organisationProjects->add($organisationProject);
+            $organisationProject->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrganisationProject(OrganisationProject $organisationProject): static
+    {
+        if ($this->organisationProjects->removeElement($organisationProject)) {
+            // set the owning side to null (unless already changed)
+            if ($organisationProject->getProject() === $this) {
+                $organisationProject->setProject(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }

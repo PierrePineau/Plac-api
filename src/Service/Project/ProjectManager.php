@@ -30,4 +30,21 @@ class ProjectManager extends AbstractCoreService
 
         return $data;
     }
+
+    public function _create(array $data)
+    {
+        $organisation = $data['organisation'];
+
+        $project = new Project();
+        $project->addOrganisationProject($organisation);
+        $project->setName($data['name']);
+        // $project->setDescription($data['description']);
+        // $project->setStartDate(new \DateTime($data['startDate']));
+        // $project->setEndDate(new \DateTime($data['endDate']));
+
+        $this->em->persist($project);
+        $this->isValid($project);
+
+        return $project;
+    }
 }

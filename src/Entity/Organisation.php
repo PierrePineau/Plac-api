@@ -65,6 +65,12 @@ class Organisation
     #[ORM\OneToMany(targetEntity: OrganisationClient::class, mappedBy: 'organisation')]
     private Collection $organisationClients;
 
+    /**
+     * @var Collection<int, OrganisationProject>
+     */
+    #[ORM\OneToMany(targetEntity: OrganisationProject::class, mappedBy: 'organisation')]
+    private Collection $organisationProjects;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toRfc4122();
@@ -75,11 +81,17 @@ class Organisation
         $this->employes = new ArrayCollection();
         $this->organisationFiles = new ArrayCollection();
         $this->organisationClients = new ArrayCollection();
+        $this->organisationProjects = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getIdentifier(): ?string
+    {
+        return $this->uuid;
     }
 
     public function getUuid(): ?string
@@ -309,6 +321,36 @@ class Organisation
             // set the owning side to null (unless already changed)
             if ($organisationClient->getOrganisation() === $this) {
                 $organisationClient->setOrganisation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrganisationProject>
+     */
+    public function getOrganisationProjects(): Collection
+    {
+        return $this->organisationProjects;
+    }
+
+    public function addOrganisationProject(OrganisationProject $organisationProject): static
+    {
+        if (!$this->organisationProjects->contains($organisationProject)) {
+            $this->organisationProjects->add($organisationProject);
+            $organisationProject->setOrganisation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrganisationProject(OrganisationProject $organisationProject): static
+    {
+        if ($this->organisationProjects->removeElement($organisationProject)) {
+            // set the owning side to null (unless already changed)
+            if ($organisationProject->getOrganisation() === $this) {
+                $organisationProject->setOrganisation(null);
             }
         }
 
