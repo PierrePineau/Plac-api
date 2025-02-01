@@ -14,6 +14,9 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends AbstractCoreRepository implements PasswordUpgraderInterface
 {
+    private const SCOPES = [
+        'google' => 'google_id',
+    ];
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class, [
@@ -21,10 +24,20 @@ class UserRepository extends AbstractCoreRepository implements PasswordUpgraderI
         ]);
     }
 
-    public function loadUserByIdentifier(string $identifier): ?User
+    public function loadUserByIdentifierAndPayload(string $identifier, array $payload = []): ?User
     {
-        return $this->createNewQueryBuilder()
-            ->andWhere('u.email = :identifier OR u.uuid = :identifier')
+        if (isset($payload['oauth']) && isset(self::SCOPES[$payload['oauth']])) {
+            // On le connecte via Google
+            $scopeKey = self::SCOPES[$payload['oauth']];
+            $identifier = $payload[$scopeKey];
+            $query = $this->createQueryBuilder('u')
+                ->andWhere('u.'.$scopeKey.' = :scopeIdentifer')
+                ->setParameter('scopeIdentifer', $identifier);
+        }else {
+            $query = $this->createQueryBuilder('u')
+                ->andWhere('u.email = :identifier OR u.uuid = :identifier');
+        }
+        return $query
             ->setParameter('identifier', $identifier)
             ->getQuery()
             ->getOneOrNullResult();

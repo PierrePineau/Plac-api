@@ -3,24 +3,27 @@
 namespace App\Core\Traits;
 
 use App\Entity\Client;
-use App\Event\User\UserGetEvent as newEvent;
+use App\Entity\Organisation;
+use App\Event\Client\ClientGetEvent as newEvent;
 
 trait ClientTrait {
-    public function getClient(array $data): User
+
+    public function __construct() {
+        parent::setGuardAction('client', 'getClient');
+    }
+
+    public function getOrganisation(array $data): Organisation
     {
-        if (isset($data['client']) && $data['client'] instanceof Client) {
-            return $data['client'];
-        }
-        if (!isset($data['idClient'])) {
-            throw new \Exception('client.id.required', 400);
-        }
         $event = new newEvent($data);
+        if (isset($data['organisation']) && $data['organisation'] instanceof Organisation) {
+            $event->setOrganisation($data['organisation']);
+        }
         parent::dispatchEvent($event);
 
         if ($event->hasError()) {
-            throw new \Exception($event->getErrors());
+            throw new \Exception($event->getErrors(true));
         }
 
-        return $event->getClient();
+        return $event->getOrganisation();
     }
 }

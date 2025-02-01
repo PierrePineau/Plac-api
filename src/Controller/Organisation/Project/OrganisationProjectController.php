@@ -7,11 +7,8 @@ use App\Entity\Project;
 use App\Service\Project\ProjectManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
-use OpenApi\Attributes as OA;
-use OpenApi\Attributes\JsonContent;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use OpenApi\Attributes as OA; 
 use Symfony\Component\HttpFoundation\Request;
 
 #[Route('/api/app/organisations/{idOrganisation}/projects', requirements: ['idOrganisation' => '[a-z0-9-]+'])]

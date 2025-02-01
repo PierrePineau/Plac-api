@@ -4,6 +4,7 @@ namespace App\Security\Provider;
 
 use App\Entity\User;
 use Doctrine\Persistence\ManagerRegistry;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\PayloadAwareUserProviderInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -11,13 +12,32 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
-class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
+class UserProvider implements PayloadAwareUserProviderInterface, PasswordUpgraderInterface
 {
     private $em;
     public function __construct(ManagerRegistry $entityManager)
     {
         $this->em = $entityManager;
     }
+    
+    /**
+     * Loads a user from an identifier and JWT token payload.
+     *
+     * @throws UserNotFoundException if the user is not found
+     */
+    public function loadUserByIdentifierAndPayload(string $identifier, array $payload): UserInterface
+    {
+        // Load a User object from your data source or throw UserNotFoundException.
+        // The $identifier argument is whatever value is being returned by the
+        // getUserIdentifier() method in your User class.
+        $user = $this->em->getRepository(User::class)->loadUserByIdentifierAndPayload($identifier, $payload);
+        if (!$user) {
+            throw new UserNotFoundException(sprintf('User "%s" not found.', $identifier));
+        }else{
+            return $user;
+        }
+    }
+
     /**
      * Symfony calls this method if you use features like switch_user
      * or remember_me. If you're not using these features, you do not
@@ -30,7 +50,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
         // Load a User object from your data source or throw UserNotFoundException.
         // The $identifier argument is whatever value is being returned by the
         // getUserIdentifier() method in your User class.
-        $user = $this->em->getRepository(User::class)->loadUserByIdentifier($identifier);
+        $user = $this->em->getRepository(User::class)->loadUserByIdentifierAndPayload($identifier);
         if (!$user) {
             throw new UserNotFoundException(sprintf('User "%s" not found.', $identifier));
         }else{

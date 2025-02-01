@@ -95,4 +95,17 @@ class ProjectNoteRepository extends AbstractCoreRelationnalRepository
                 ->getSingleScalarResult();
         }
     }
+
+    public function findOneByAccess(array $data): ?ProjectNote
+    {
+        $project = $data['project'];
+        $id = $data['idProjectNote'];
+        return $this->createQueryBuilder('pn')
+            ->andWhere('p.id = :id')
+            ->andWhere('pn.project = :project')
+            ->setParameter('project', $project->getId())
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

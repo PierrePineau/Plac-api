@@ -4,6 +4,8 @@ namespace App\Security;
 
 use App\Core\Utils\Messenger;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\InvalidPayloadException;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\MissingTokenException;
 use Lexik\Bundle\JWTAuthenticationBundle\Response\JWTAuthenticationFailureResponse;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Authenticator\JWTAuthenticator;
@@ -55,7 +57,6 @@ class UserAuthenticator extends JWTAuthenticator
         TokenExtractorInterface $tokenExtractor,
         UserProviderInterface $userProvider,
         TranslatorInterface $translator = null,
-        UserProviderInterface $adminProvider,
         $container,
         UserPasswordHasherInterface $passwordHash,
         LoggerInterface $logger,
@@ -74,7 +75,6 @@ class UserAuthenticator extends JWTAuthenticator
         $this->translator = $translator;
         $this->logger = $logger;
         $this->userProvider = $userProvider;
-        $this->adminProvider = $adminProvider;
     }
 
     public function authenticate(Request $request): Passport

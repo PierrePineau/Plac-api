@@ -53,4 +53,18 @@ class ClientRepository extends AbstractCoreRepository
                 ->getSingleScalarResult();
         }
     }
+
+    public function findOneByAccess($data): ?Client
+    {
+        $organisation = $data['organisation'];
+        $id = $data['idClient'];
+        return $this->createQueryBuilder('c')
+            ->innerJoin('c.organisationClients', 'co')
+            ->andWhere('c.id = :id')
+            ->andWhere('co.organisation = :organisation')
+            ->setParameter('organisation', $organisation->getId())
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

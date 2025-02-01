@@ -5,7 +5,7 @@ namespace App\Core\Service;
 use App\Core\Utils\Messenger;
 use App\Core\Utils\Tools;
 use App\Core\Utils\Pagination;
-use App\Model\User;
+use App\Entity\User;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -24,6 +24,7 @@ abstract class AbstractCoreService
 
     public $tools;
     public $messenger;
+    public $guardActions;
 
     // SINGLE ELEMENT
     public const FOUND = 'found';
@@ -56,6 +57,7 @@ abstract class AbstractCoreService
         $this->entityClass = $data['entity'];
         $this->ELEMENT = strtolower($data['code']);
         $this->identifier = $data['identifier'] ?? 'id';
+        $this->guardActions = $data['guardActions'] ?? [];
 
         // UTILS
         $this->tools = $this->container->get(Tools::class);
@@ -79,6 +81,11 @@ abstract class AbstractCoreService
         $this->ELEMENT_ALREADY_EXISTS = $this->ELEMENT.'.'. $this::ALREADY_EXISTS;
     }
 
+    public function setGuardActions(string $key, string $actions)
+    {
+        $this->guardActions[$key] = $actions;
+    }
+
     /**
      * UTILS - METHODS
      */
@@ -92,7 +99,7 @@ abstract class AbstractCoreService
         throw new \Exception($message, $code);
     }
     
-    public function getUser()
+    public function getUser(): User
     {
         if (!$this->user || $this->user instanceof User) {
             $this->user = $this->security->getUser();
@@ -219,10 +226,14 @@ abstract class AbstractCoreService
         return $this->messenger->dispatchEvent($event, $eventName);
     }
 
-    // Cette fonction permet de vérifier avant de faire une action
+    // Pour gérer un project il faut que soit défini une organisation
+    // Le middleware permet de vérifier si l'organisation est bien défini et si l'utilisateur a les droits
     public function guardMiddleware(array $data): array
     {
-        // Add here code for default check
+        foreach ($this->guardActions as $key => $actions) {
+            $data[$key] = $this->$actions($data);
+        }
+
         return $data;
     }
 
@@ -269,6 +280,11 @@ abstract class AbstractCoreService
     public function findBy(array $filters = [])
     {
         return $this->em->getRepository($this->entityClass)->findBy($filters);
+    }
+
+    public function findOneByAccess(array $data)
+    {
+        return $this->em->getRepository($this->entityClass)->findOneByAccess($data);
     }
 
     /**

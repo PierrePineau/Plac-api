@@ -24,17 +24,6 @@ class OrganisationClientManager extends AbstractCoreService
         ]);
     }
 
-    // Pour gérer un project il faut que soit défini une organisation
-    // Le middleware permet de vérifier si l'organisation est bien défini et si l'utilisateur a les droits
-    public function guardMiddleware(array $data): array
-    {
-        $organisation = $this->getOrganisation($data);
-
-        $data['organisation'] = $organisation;
-
-        return $data;
-    }
-
     public function _get($id, array $filters = []): mixed
     {
         $client = $this->getClient($filters);

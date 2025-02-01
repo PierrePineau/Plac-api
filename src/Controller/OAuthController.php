@@ -49,7 +49,7 @@ class OAuthController extends AbstractController
                 Response::HTTP_NOT_FOUND
             );
         }
-        $content = $clientRegistry->getClient($service)->redirect(self::SCOPES[$service]);
+        $content = $clientRegistry->getClient($service)->redirect(self::SCOPES[$service], []);
         if (!is_array($content)) {
             $content = [$content];
         }

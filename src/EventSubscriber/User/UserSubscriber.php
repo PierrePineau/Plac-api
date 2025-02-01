@@ -19,7 +19,7 @@ class UserSubscriber implements EventSubscriberInterface
         return [
             UserGetEvent::class => [
                 ['onUserGetEvent', 10],
-                ['middleware', 9]
+                // ['middleware', 9]
             ],
         ];
     }
@@ -33,9 +33,9 @@ class UserSubscriber implements EventSubscriberInterface
                 $userManager = $this->container->get(UserManager::class);
                 $data = $event->getData();
                 if (!isset($data['idUser'])) {
-                    throw new \Exception($userManager::ELEMENT.'.id.required', );
+                    throw new \Exception($userManager::ELEMENT.'.id.required', 400);
                 }
-                $user = $userManager->find($data['idUser']);
+                $user = $userManager->findOneByAccess($data);
 
                 $event->setUser($user);
             }
@@ -52,17 +52,6 @@ class UserSubscriber implements EventSubscriberInterface
             return $event;
         }
         
-        return $event;
-    }
-
-    public function middleware(UserGetEvent $event): UserGetEvent
-    {
-        // On vérifie si l'utilisateur connecté est le même que celui que l'on veut modifier
-        // Ou si l'utilisateur connecté est un admin
-        $userManager = $this->container->get(UserManager::class);
-        $userManager->middleware([
-            'user' => $event->getUser()
-        ]);
         return $event;
     }
 }

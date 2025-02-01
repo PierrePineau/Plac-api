@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Event\Client;
+namespace App\Event\Project;
 
-use App\Entity\Client;
-use App\Entity\Organisation;
 use App\Core\Event\AbstractCoreEvent;
+use App\Entity\Organisation;
+use App\Entity\Project;
 
-final class ClientGetEvent extends AbstractCoreEvent
+final class ProjectGetEvent extends AbstractCoreEvent
 {
-    private ?Client $client = null;
+    private ?Project $project = null;
     private ?Organisation $organisation = null;
     
     public function __construct(array $data = [])
@@ -17,14 +17,14 @@ final class ClientGetEvent extends AbstractCoreEvent
         $this->organisation = $data['organisation'];
     }
 
-    public function getClient(): ?Client
+    public function getProject(): ?Project
     {
-        return $this->client;
+        return $this->project;
     }
 
-    public function setClient(Client $client): void
+    public function setProject(Project $project): void
     {
-        $this->client = $client;
+        $this->project = $project;
     }
 
     public function getOrganisation(): ?Organisation

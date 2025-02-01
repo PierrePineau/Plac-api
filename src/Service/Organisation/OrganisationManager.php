@@ -30,7 +30,7 @@ class OrganisationManager extends AbstractCoreService
         ]);
         // On vérifie si l'utilisateur connecté à accès à l'organisation
         if (!$userOrganisation && !$this->security->isGranted('ROLE_ADMIN')) {
-            throw new \Exception($this->ELEMENT.'.not_allowed', 423);
+            throw new \Exception('user.not_allowed', 423);
         }
         return $data;
     }

@@ -11,7 +11,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 class ClientManager extends AbstractCoreService
 {
     use OrganisationTrait;
-    use ClientTrait;
+    // use ClientTrait;
 
     public function __construct($container, $entityManager, Security $security)
     {
@@ -21,34 +21,6 @@ class ClientManager extends AbstractCoreService
             'entity' => Client::class,
             'security' => $security,
         ]);
-    }
-
-    // Pour gérer un project il faut que soit défini une organisation
-    // Le middleware permet de vérifier si l'organisation est bien défini et si l'utilisateur a les droits
-    public function guardMiddleware(array $data): array
-    {
-        $organisation = $this->getOrganisation($data);
-
-        $data['organisation'] = $organisation;
-
-        return $data;
-    }
-
-    public function middleware(array $data): mixed
-    {
-        $client = $data['client'];
-        $organisation = $data['organisation'];
-
-        $clientOrganisation = $this->findOneBy([
-            'id' => $client->getId(),
-            'organisation' => $organisation->getId(),
-        ]);
-
-        // Ou si l'utilisateur connecté est un admin
-        if (!$clientOrganisation && !$this->security->isGranted('ROLE_ADMIN')) {
-            throw new \Exception($this->ELEMENT.'.not_allowed', 423);
-        }
-        return $data;
     }
 
     public function _create(array $data)

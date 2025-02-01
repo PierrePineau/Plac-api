@@ -21,6 +21,11 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 # CORE
+    App\Core\:
+            resource: '../src/Core/'
+            autowire: false
+            # autoconfigure: false
+            public: true
     App\Core\Utils\Messenger:
         public: true
         arguments:

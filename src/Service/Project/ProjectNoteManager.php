@@ -4,6 +4,7 @@ namespace App\Service\Project;
 
 use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\OrganisationTrait;
+use App\Core\Traits\ProjectTrait;
 use App\Entity\ProjectNote;
 use App\Service\Note\NoteManager;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -11,6 +12,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 class ProjectNoteManager extends AbstractCoreService
 {
     use OrganisationTrait;
+    use ProjectTrait;
     
     public function __construct($container, $entityManager, Security $security)
     {
@@ -22,16 +24,6 @@ class ProjectNoteManager extends AbstractCoreService
         ]);
     }
 
-    // Pour gérer une note il faut que soit défini une organisation et un projet
-    public function guardMiddleware(array $data): array
-    {
-        $organisation = $this->getOrganisation($data);
-
-        $data['organisation'] = $organisation;
-
-        return $data;
-    }
-
     public function _search(array $filters = []): array
     {
         return parent::_search($filters);
@@ -39,14 +31,13 @@ class ProjectNoteManager extends AbstractCoreService
 
     public function _add(array $data)
     {
+        $project = $data['project'];
         $noteManager = $this->container->get(NoteManager::class);
-        $organisation = $data['organisation'];
-
         $note = $noteManager->_create($data);
 
         $projectNote = new ProjectNote();
         $projectNote->setNote($note);
-        $projectNote->setOrganisation($organisation);
+        $projectNote->setProject($project);
 
         $this->em->persist($projectNote);
         $this->isValid($projectNote);

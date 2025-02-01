@@ -1,11 +1,11 @@
 <?php
-namespace App\Service;
 
-use App\Entity\Organisation;
-use Aws\Result;
+namespace App\Service\File\Providers;
+
+use App\Core\Interface\FileServiceInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class S3Manager
+class S3Manager implements FileServiceInterface
 {
     private $container;
     private $bucket;
@@ -45,7 +45,7 @@ class S3Manager
         self::FOLDER_ADMIN_FILES
     ];
 
-    public function __construct($container)
+    public function __construct($container, $entityManager)
     {
         $this->container = $container;
         $this->bucket = $_ENV['AWS_S3_BUCKET'];
@@ -88,8 +88,10 @@ class S3Manager
     /**
      * Récupère le chemin absolu d'un fichier
      */
-    private function getAbsolutePath(Organisation $organisation, string $path = "/"): string
+    private function getAbsolutePath(array $options): string
     {
+        $organisation = $options['organisation'];
+        $path = $options['path'];
         // On vérifie aussi que le chemin ne commence pas par le préfix ni par "../"
         if (substr($path, 0, 3) === "../" || substr($path, 0, 2) === "./") {
             // On n'accepte pas les chemins relatifs
@@ -134,14 +136,40 @@ class S3Manager
 
         return $this->prefix.$path."/".$path;
     }
+
+    /**
+	 * Recupère un fichier
+	 */
+	public function get(array $options, bool $throwException = false): mixed
+	{
+        try {
+            $fullPath = $this->getAbsolutePath($options);
+            $result = $this->s3->getObject([
+                'Bucket' => $this->bucket,
+                'Key' => $fullPath
+            ]);
+            return $result;
+        } catch (\Throwable $th) {
+            if ($throwException) {
+                throw new NotFoundHttpException($this::ELEMENT_NOT_FOUND);
+            }
+            return null;
+        }
+	}
     
     /**
 	 * Upload un fichier sur le serveur S3
 	 */
-	public function uploadFile($sourceFile = null, $destPath = null)
+	public function upload(array $options): void
 	{
+        $organisation = $options['organisation'];
+        $sourceFile = $options['sourceFile'];
+        $destPath = $options['destPath'];
 		if ($sourceFile && $destPath) {
-            $destPath = $this->getAbsolutePath($organisation, $destPath);
+            $destPath = $this->getAbsolutePath([
+                'organisation' => $organisation,
+                'path' => $destPath
+            ]);
 
             $mimeType = $this->getMimeType($sourceFile);
 			try {
@@ -161,10 +189,10 @@ class S3Manager
     /**
      * Supprime un fichier
      */
-	public function deleteFile($filePath)
+	public function delete(array $options): void
 	{
         try {
-            $filePath = $this->getAbsolutePath($filePath);
+            $filePath = $this->getAbsolutePath($options);
             $this->s3->deleteObject([
                 'Bucket' => $this->bucket,
                 'Key' => $filePath
@@ -173,34 +201,21 @@ class S3Manager
         }
     }
 
-	/**
-	 * Recupère un fichier
-	 */
-	public function getFile($filePath, string $siteCode = null, $throwException = false): mixed
-	{
-        try {
-            $fullPath = $this->getAbsolutePath($filePath, $siteCode ?? null);
-            $result = $this->s3->getObject([
-                'Bucket' => $this->bucket,
-                'Key' => $fullPath
-            ]);
-            return $result;
-        } catch (\Throwable $th) {
-            if ($throwException) {
-                throw new NotFoundHttpException($this::ELEMENT_NOT_FOUND);
-            }
-            return null;
-        }
-	}
-
-
     /**
 	 * Copy un fichier
 	 */
-    public function copyFile($sourcePath, $destPath)
+    public function copy(array $options)
     {
-        $sourcePath = $this->getAbsolutePath($sourcePath);
-        $destPath = $this->getAbsolutePath($destPath);
+        $sourcePath = $options['sourcePath'];
+        $destPath = $options['destPath'];
+        $sourcePath = $this->getAbsolutePath([
+            'organisation' => $options['organisation'],
+            'path' => $sourcePath
+        ]);
+        $destPath = $this->getAbsolutePath([
+            'organisation' => $options['organisation'],
+            'path' => $destPath
+        ]);
 
         try {
             $this->s3->copyObject([

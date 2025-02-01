@@ -23,9 +23,9 @@ class UserManager extends AbstractCoreService
         ]);
     }
 
-    public function findOneByIdentifier(string $identifier): ?User
+    public function loadUserByIdentifierAndPayload(string $identifier): ?User
     {
-        return $this->em->getRepository(User::class)->loadUserByIdentifier($identifier);
+        return $this->em->getRepository(User::class)->loadUserByIdentifierAndPayload($identifier);
     }
 
     public function middleware(array $data): mixed

@@ -35,7 +35,7 @@ class OrganisationSubscriber implements EventSubscriberInterface
                 if (!isset($data['idOrganisation'])) {
                     throw new \Exception($organisationManager::ELEMENT.'.id.required');
                 }
-                $organisation = $organisationManager->find($data['idOrganisation']);
+                $organisation = $organisationManager->findOneByAccess($data);
 
                 $event->setOrganisation($organisation);
             }

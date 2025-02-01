@@ -1,7 +1,7 @@
 <?php
 namespace App\EventSubscriber\Client;
 
-use App\Event\Client\ClientGetEvent as Event;
+use App\Event\Client\ClientGetEvent;
 use App\Service\Client\ClientManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -18,21 +18,23 @@ class ClientSubscriber implements EventSubscriberInterface
         // return the subscribed events, their methods and priorities
         return [
             ClientGetEvent::class => [
-                ['getElement', 10],
-                ['middleware', 9]
+                ['onClientGetEvent', 10],
             ],
         ];
     }
 
-    public function getElement(Event $event): Event
+    public function onClientGetEvent(ClientGetEvent $event): ClientGetEvent
     {
-        // On récupère l'utilisateur
+        // On récupère client
         try {
             $client = $event->getClient();
             if (!$client) {
                 $clientManager = $this->container->get(ClientManager::class);
                 $data = $event->getData();
-                $client = $clientManager->find($data['idClient']);
+                if (!isset($data['idClient'])) {
+                    throw new \Exception($clientManager::ELEMENT.'.id.required');
+                }
+                $client = $clientManager->findOneByAccess($data);
 
                 $event->setClient($client);
             }
@@ -44,23 +46,9 @@ class ClientSubscriber implements EventSubscriberInterface
             $event->setError($th->getMessage());
             $event->stopPropagation();
 
-            throw new \Exception($th->getMessage(), $th->getCode());
-            
             return $event;
         }
         
-        return $event;
-    }
-
-    public function middleware(UserGetEvent $event): UserGetEvent
-    {
-        // On vérifie si l'utilisateur connecté est le même que celui que l'on veut modifier
-        // Ou si l'utilisateur connecté est un admin
-        $manager = $this->container->get(ClientManager::class);
-        $manager->middleware([
-            'client' => $event->getClient(),
-            'organisation' => $event->getOrganisation(),
-        ]);
         return $event;
     }
 }

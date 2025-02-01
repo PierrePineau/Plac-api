@@ -2,21 +2,53 @@
 
 namespace App\Security;
 
+use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
+use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\MissingTokenException;
+use Lexik\Bundle\JWTAuthenticationBundle\Response\JWTAuthenticationFailureResponse;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\TokenExtractorInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class GoogleAuthenticator extends AbstractOAuthAuthenticator
 {
     protected string $serviceName = 'google';
     protected const FIREWALL_NAME = 'app';
+    private ?TranslatorInterface $translator;
+    private ?EventDispatcherInterface $eventDispatcher;
+    private ?HttpClientInterface $httpClient;
+
+    public function __construct(
+        ClientRegistry $clientRegistry,
+        JWTTokenManagerInterface $jwtManager,
+        EventDispatcherInterface $eventDispatcher,
+        TokenExtractorInterface $tokenExtractor,
+        UserProviderInterface $userProvider,
+        TranslatorInterface $translator = null,
+        HttpClientInterface $httpClient
+    ) {
+        parent::__construct(
+            $jwtManager,
+            $eventDispatcher,
+            $tokenExtractor,
+            $userProvider,
+            $translator
+        );
+        $this->translator = $translator;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->httpClient = $httpClient;
+    }
 
     public function authenticate(Request $request): Passport
     {
@@ -26,9 +58,13 @@ class GoogleAuthenticator extends AbstractOAuthAuthenticator
         }
 
         // Vérifiez le token auprès des serveurs de Google
-        $response = $this->httpClient->request('GET', 'https://www.googleapis.com/oauth2/v3/tokeninfo', [
-            'query' => ['id_token' => $googleToken],
-        ]);
+        $response = $this->httpClient->request(
+            'GET',
+            'https://www.googleapis.com/oauth2/v3/tokeninfo',
+            [
+                'query' => ['id_token' => $googleToken],
+            ]
+        );
 
         if ($response->getStatusCode() !== 200) {
             throw new AuthenticationException('Invalid Google token');
@@ -41,6 +77,14 @@ class GoogleAuthenticator extends AbstractOAuthAuthenticator
             throw new AuthenticationException('Google token does not contain an email');
         }
 
+        $payload = [
+            'email' => $email,
+            'oauth' => 'google',
+            'google_id' => $googleUser['sub'],
+        ];
+
+        $idClaim = 'email';
+
         // Charge ou créer l'utilisateur 
         $passport = new SelfValidatingPassport(
             new UserBadge(
@@ -51,8 +95,8 @@ class GoogleAuthenticator extends AbstractOAuthAuthenticator
 
         $token = $this->createToken($passport, self::FIREWALL_NAME);
 
-        // $passport->setAttribute('payload', $payload);
-        // $passport->setAttribute('token', $token);
+        $passport->setAttribute('payload', $payload);
+        $passport->setAttribute('token', $token);
 
         return $passport;
     }
