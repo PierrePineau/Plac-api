@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Log;
+namespace App\Controller\Admin\Log;
 
 use App\Controller\Core\AbstractCoreController;
 use App\Core\Utils\Messenger;

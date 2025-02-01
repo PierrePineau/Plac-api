@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Client;
+namespace App\Controller\App\Client;
 
 use App\Entity\Client;
 use App\Service\Client\ClientManager;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Organisation\Project;
+namespace App\Controller\App\Organisation\Project;
 
 use App\Controller\Core\AbstractCoreController;
 use App\Entity\Project;

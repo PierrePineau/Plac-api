@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\User;
+namespace App\Controller\App\User;
 
 use App\Controller\Core\AbstractCoreController;
 use App\Service\User\UserOrganisationManager;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Organisation;
+namespace App\Controller\App\Organisation;
 
 use App\Entity\Organisation;
 use App\Service\Organisation\OrganisationManager;

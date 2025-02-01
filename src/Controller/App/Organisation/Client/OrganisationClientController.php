@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Organisation\Client;
+namespace App\Controller\App\Organisation\Client;
 
 use App\Controller\Core\AbstractCoreController;
 use App\Service\Organisation\OrganisationClientManager;
