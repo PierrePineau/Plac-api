@@ -4,7 +4,6 @@ namespace App\Service\User;
 
 use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\OrganisationTrait;
-use App\Core\Traits\UserTrait;
 use App\Entity\UserOrganisation;
 use App\Service\Organisation\OrganisationManager;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -12,7 +11,6 @@ use Symfony\Bundle\SecurityBundle\Security;
 class UserOrganisationManager extends AbstractCoreService
 {
     use OrganisationTrait;
-    use UserTrait;
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [

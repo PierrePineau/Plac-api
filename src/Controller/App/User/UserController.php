@@ -25,33 +25,6 @@ class UserController extends AbstractCoreController
         parent::__construct($manager, User::class);
     }
 
-    #[OA\Get(
-        summary: 'List of',
-        parameters: [
-            new OA\Parameter(
-                ref: '#/components/parameters/page',
-            ),
-            new OA\Parameter(
-                ref: '#/components/parameters/search',
-            ),
-            new OA\Parameter(
-                ref: '#/components/parameters/order',
-            ),
-            new OA\Parameter(
-                ref: '#/components/parameters/limit',
-            ),
-        ],
-        responses:
-        [
-            '200' => new OA\Response(
-                response: 200,
-                description: '',
-                content: new OA\JsonContent(
-                    ref: '#/components/schemas/list'
-                ) 
-            )
-        ]
-    )]
     #[OA\Post(
         summary: 'Create new',
         responses:
@@ -65,12 +38,9 @@ class UserController extends AbstractCoreController
             )
         ]
     )]
-    #[Route('', methods: ['GET', 'POST'])] 
+    #[Route('', methods: ['POST'])] 
     public function index(Request $request): JsonResponse
     {
-        if ($request->isMethod('GET')) {
-            $this->deniedUnlessGranted(self::ROLE_ADMIN, 423);
-        }
         return parent::_index($request);
     }
 

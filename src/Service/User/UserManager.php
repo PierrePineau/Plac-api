@@ -3,14 +3,13 @@
 namespace App\Service\User;
 
 use App\Core\Service\AbstractCoreService;
-use App\Core\Traits\UserTrait;
 use App\Entity\User;
+use App\Security\Middleware\UserMiddleware;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserManager extends AbstractCoreService
 {
-    use UserTrait;
     private $passwordHash;
     public function __construct($container, $entityManager, Security $security, UserPasswordHasherInterface $passwordHash)
     {
@@ -32,23 +31,31 @@ class UserManager extends AbstractCoreService
     {
         $user = $data['user'];
         $userConnected = $this->getUser();
-
         // On vérifie si l'utilisateur connecté est le même que celui que l'on veut modifier
         // Ou si l'utilisateur connecté est un admin
-        if ($user->getId() !== $userConnected->getId() && !$this->security->isGranted('ROLE_ADMIN')) {
-            throw new \Exception($this->ELEMENT.'.not_allowed', 423);
+        if (!$this->security->isGranted(UserMiddleware::ACCESS, [
+            'user' => $user,
+            'userConnected' => $userConnected,
+        ])) {
+            $this->deniedException();
         }
         return $data;
     }
 
-    public function _get($id, array $filters = []): mixed
+    public function find($id, bool $throwException = true)
     {
-        $element = $this->getCustomer([
-            'idUser' => $id,
-        ]);
-        $element = $element->toArray();
+        $element = parent::find($id, $throwException);
+        if ($element->isDeleted() && !$this->security->isGranted('ROLE_ADMIN')) {
+            $this->notFoundException();
+        }
 
         return $element;
+    }
+
+    public function _get($id, array $filters = []): mixed
+    {
+        $element = $this->find($id);
+        return $element->toArray();
     }
     
     public function _create(array $data)
@@ -85,16 +92,10 @@ class UserManager extends AbstractCoreService
 
     public function _update($id, array $data)
     {
-        $customer = $this->getCustomer([
-            'idUser' => $id,
-        ]);
-        // CANNOT UPDATE EMAIL
-        // if (isset($data['email'])) {
-        //     $user->setEmail($data['email']);
-        // }
-
+        $user = $this->find($id);
+        
         $this->setData(
-            $customer,
+            $user,
             [
                 'firstname' => [
                     'required' => false,
@@ -108,18 +109,19 @@ class UserManager extends AbstractCoreService
             $data,
         );
 
-        $this->em->persist($customer);
-        $this->isValid($customer);
+        $this->em->persist($user);
+        $this->isValid($user);
         
-        return $customer;
+        return $user;
     }
 
     public function _delete($id, array $data = [])
     {
-        $customer = $this->getCustomer([
-            'idUser' => $id,
-        ]);
-
-        $this->em->remove($customer);
+        $user = $this->find($id);
+        $user->setDeleted(true);
+        $user->setDeletedAt(new \DateTime());
+        $this->em->persist($user);
+        $this->em->flush();
+        return [];
     }
 }

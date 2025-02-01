@@ -89,12 +89,17 @@ abstract class AbstractCoreService
     /**
      * UTILS - METHODS
      */
+    public function deniedException(string $message = 'access.denied', int $code = 403)
+    {
+        throw new \Exception($message, $code);
+    }
+    
     public function errorException(string $message, int $code = 400)
     {
         throw new \Exception($message, $code);
     }
 
-    public function notFoundException(string $message, int $code = 404)
+    public function notFoundException(string $message = 'not_found', int $code = 404)
     {
         throw new \Exception($message, $code);
     }
@@ -336,6 +341,10 @@ abstract class AbstractCoreService
         try {
             $filters = $this->guardMiddleware($filters);
             $element = $this->_get($id, $filters);
+
+            $this->middleware([
+                $this->ELEMENT => $element,
+            ]);
             
             return $this->messenger->newResponse(
                 [

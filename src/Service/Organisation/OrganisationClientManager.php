@@ -5,7 +5,6 @@ namespace App\Service\Organisation;
 use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\ClientTrait;
 use App\Core\Traits\OrganisationTrait;
-use App\Core\Traits\UserTrait;
 use App\Entity\OrganisationClient;
 use App\Service\Organisation\OrganisationManager;
 use Symfony\Bundle\SecurityBundle\Security;
