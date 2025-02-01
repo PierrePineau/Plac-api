@@ -5,6 +5,7 @@ namespace App\Service\Organisation;
 use App\Core\Service\AbstractCoreService;
 use App\Entity\Organisation;
 use App\Entity\UserOrganisation;
+use App\Security\Middleware\OrganisationMiddleware;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class OrganisationManager extends AbstractCoreService
@@ -21,16 +22,20 @@ class OrganisationManager extends AbstractCoreService
 
     public function middleware(array $data): mixed
     {
-        $organisation = $data['organisation'];
+        // $user = $data['user'];
         $user = $this->getUser();
-
-        $userOrganisation = $this->em->getRepository(UserOrganisation::class)->findOneBy([
-            'user' => $user->getId(),
-            'organisation' => $organisation->getId(),
-        ]);
-        // On vérifie si l'utilisateur connecté à accès à l'organisation
-        if (!$userOrganisation && !$this->security->isGranted('ROLE_ADMIN')) {
-            throw new \Exception('user.not_allowed', 423);
+        $organisation = $data['organisation'];
+        // On vérifie si l'utilisateur connecté est le même que celui que l'on veut modifier
+        // Ou si l'utilisateur connecté est un admin
+        if (!$this->security->isGranted(OrganisationMiddleware::ACCESS, [
+            'user' => $user,
+            'organisation' => $organisation,
+            'userOrganisation' => $this->em->getRepository(UserOrganisation::class)->findOneBy([
+                'user' => $user->getId(),
+                'organisation' => $organisation->getId(),
+            ]),
+        ])) {
+            $this->deniedException();
         }
         return $data;
     }

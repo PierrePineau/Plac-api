@@ -6,11 +6,8 @@ use App\Controller\Core\AbstractCoreController;
 use App\Service\User\UserOrganisationManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use OpenApi\Attributes as OA;
-use OpenApi\Attributes\JsonContent;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 #[Route('/api/app/users/{idUser}/organisations', requirements: ['idUser' => '[a-z0-9-]+'])]

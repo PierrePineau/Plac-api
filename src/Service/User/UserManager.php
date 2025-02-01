@@ -54,8 +54,7 @@ class UserManager extends AbstractCoreService
 
     public function _get($id, array $filters = []): mixed
     {
-        $element = $this->find($id);
-        return $element->toArray();
+        return $this->find($id);
     }
     
     public function _create(array $data)

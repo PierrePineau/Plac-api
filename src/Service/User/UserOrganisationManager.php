@@ -3,14 +3,14 @@
 namespace App\Service\User;
 
 use App\Core\Service\AbstractCoreService;
-use App\Core\Traits\OrganisationTrait;
+use App\Core\Traits\UserTrait;
 use App\Entity\UserOrganisation;
 use App\Service\Organisation\OrganisationManager;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class UserOrganisationManager extends AbstractCoreService
 {
-    use OrganisationTrait;
+    use UserTrait;
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
@@ -19,18 +19,6 @@ class UserOrganisationManager extends AbstractCoreService
             'entity' => UserOrganisation::class,
             'security' => $security,
         ]);
-    }
-
-    public function _get($id, array $filters = []): mixed
-    {
-        $user = $this->getCustomer([
-            'idUser' => $filters['idUser'],
-        ]);
-        $organisation = $this->getOrganisation([
-            'idOrganisation' => $id,
-        ]);
-
-        return $organisation;
     }
 
     public function _create(array $data)
