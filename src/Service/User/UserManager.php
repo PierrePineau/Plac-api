@@ -51,11 +51,6 @@ class UserManager extends AbstractCoreService
 
         return $element;
     }
-
-    public function _get($id, array $filters = []): mixed
-    {
-        return $this->find($id);
-    }
     
     public function _create(array $data)
     {
@@ -91,7 +86,7 @@ class UserManager extends AbstractCoreService
 
     public function _update($id, array $data)
     {
-        $user = $this->find($id);
+        $user = $this->_get($id);
         
         $this->setData(
             $user,
@@ -116,7 +111,7 @@ class UserManager extends AbstractCoreService
 
     public function _delete($id, array $data = [])
     {
-        $user = $this->find($id);
+        $user = $this->_get($id);
         $user->setDeleted(true);
         $user->setDeletedAt(new \DateTime());
         $this->em->persist($user);

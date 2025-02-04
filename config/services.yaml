@@ -86,7 +86,6 @@ services:
             $passwordHash: '@security.user_password_hasher'
             $logger: '@logger'
             $userProvider: '@App\Security\Provider\UserProvider'
-            $adminProvider: '@security.user.provider.concrete.admin_user_provider'
         parent: lexik_jwt_authentication.security.jwt_authenticator
 
     admin.user_authenticator:
@@ -120,6 +119,11 @@ services:
             $entityManager: '@doctrine.orm.default_entity_manager'
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
+
+    App\EventListener\JWTAuthenticationSuccessListener:
+        public: true
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: onAuthenticationSuccessResponse }
 
 # SUBSCRIBERS
     App\EventSubscriber\:

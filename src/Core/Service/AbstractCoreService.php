@@ -287,9 +287,19 @@ abstract class AbstractCoreService
         return $this->em->getRepository($this->entityClass)->findBy($filters);
     }
 
-    public function findOneByAccess(array $data)
+    public function findOneByAccess(array $data, bool $throwException = true)
     {
-        return $this->em->getRepository($this->entityClass)->findOneByAccess($data);
+        $element = $this->em->getRepository($this->entityClass)->findOneByAccess($data);
+        if (!$element && $throwException) {
+            // throw new \Exception($this->ELEMENT_NOT_FOUND, 404);
+            $this->notFoundException($this->ELEMENT_NOT_FOUND);
+        }
+        return $element;
+    }
+
+    public function findByAccess(array $data)
+    {
+        return $this->em->getRepository($this->entityClass)->findByAccess($data);
     }
 
     /**
@@ -342,9 +352,9 @@ abstract class AbstractCoreService
             $filters = $this->guardMiddleware($filters);
             $element = $this->_get($id, $filters);
 
-            $this->middleware([
-                $this->ELEMENT => $element,
-            ]);
+            // $this->middleware([
+            //     $this->ELEMENT => $element,
+            // ]);
             
             return $this->messenger->newResponse(
                 [
@@ -361,10 +371,10 @@ abstract class AbstractCoreService
 
     public function _get($id, array $filters = []): mixed
     {
-        $element = $this->find($id);
-        $this->middleware([
-            $this->ELEMENT => $element,
-        ]);
+        $element = $id instanceof $this->entityClass ? $id : $this->find($id);
+        // $this->middleware([
+        //     $this->ELEMENT => $element,
+        // ]);
         return $element;
     }
 

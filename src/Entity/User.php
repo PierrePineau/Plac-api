@@ -263,4 +263,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'email' => $this->getEmail(),
         ];
     }
+
+    // Utilisé une fois l'authentification faite
+    public function getInfos(): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'id' => $this->getUuid(),
+            'email' => $this->getEmail(),
+        ];
+    }
 }

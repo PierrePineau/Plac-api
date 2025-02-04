@@ -4,10 +4,12 @@ namespace App\Repository;
 
 use App\Entity\Client;
 use App\Core\Repository\AbstractCoreRepository;
+use App\Core\Traits\OrganisationRepositoryTrait;
 use Doctrine\Persistence\ManagerRegistry;
 
 class ClientRepository extends AbstractCoreRepository
 {
+    use OrganisationRepositoryTrait;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Client::class);
@@ -15,24 +17,13 @@ class ClientRepository extends AbstractCoreRepository
 
     public function search(array $search = [], bool $countMode = false)
     {
-        $page = isset($search['page']) && $search['page'] > 0 ? $search['page'] : 1;
-        $limit = isset($search['limit']) && $search['limit'] > 0 ? $search['limit'] : 10;
-        $offset = ($page - 1) * $limit;
-        $idsOrganisation = isset($search['idsOrganisation']) ? $search['idsOrganisation'] : [];
-        if (isset($search['idOrganisation'])) {
-            $idsOrganisation[] = $search['idOrganisation'];
-        }
+        $settings = $this->configureSearch($search);
+        $idOrganisation = $this->getIdOrganisation($search);
 
-        if (empty($idsOrganisation)) {
-            throw new \Exception('idsOrganisation.required');
-        }
-        // $order = (isset($search['order']) && $search['order'] == 'ASC') ? 'ASC' : 'DESC';
-
-        // Ajouoter un element ocnfigurable pour le tri sur le abstract repository
         $query = $this->createNewQueryBuilder()
-            ->join("{$this->alias}.organisations", "o")
-            ->andWhere("o.uuid IN (:idsOrganisation)")
-            ->setParameter('idsOrganisation', $idsOrganisation);
+            ->leftJoin("{$this->alias}.organisationClients", "oc")
+            ->andWhere("oc.organisation = :idOrganisation")
+            ->setParameter('idOrganisation', $idOrganisation);
 
         if (isset($search['search']) && $search['search'] != '') {
             $query = $query
@@ -42,8 +33,8 @@ class ClientRepository extends AbstractCoreRepository
 
         if (!$countMode) {
             $query = $query
-                ->setMaxResults($limit)
-                ->setFirstResult($offset);
+                ->setMaxResults($settings['limit'])
+                ->setFirstResult($settings['offset']);
 
             return $query->getQuery()
                 ->getResult();
@@ -52,6 +43,20 @@ class ClientRepository extends AbstractCoreRepository
             return $query->getQuery()
                 ->getSingleScalarResult();
         }
+    }
+
+    public function findByAccess($data): array
+    {
+        $organisation = $data['organisation'];
+        $id = $data['idClient'];
+        return $this->createQueryBuilder('c')
+            ->innerJoin('c.organisationClients', 'co')
+            ->andWhere('c.id = :id')
+            ->andWhere('co.organisation = :organisation')
+            ->setParameter('organisation', $organisation->getId())
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getResult();
     }
 
     public function findOneByAccess($data): ?Client

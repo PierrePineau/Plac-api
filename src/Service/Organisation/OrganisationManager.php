@@ -60,4 +60,25 @@ class OrganisationManager extends AbstractCoreService
 
         return $organisation;
     }
+
+    public function _update($id, array $data)
+    {
+        $organisation = $this->_get($id);
+
+        $this->setData(
+            $organisation,
+            [
+                'name' => [
+                    'required' => true,
+                    'nullable' => false,
+                ]
+            ],
+            $data
+        );
+
+        $this->em->persist($organisation);
+        $this->isValid($organisation);
+
+        return $organisation;
+    }
 }

@@ -10,9 +10,6 @@ use Symfony\Bundle\SecurityBundle\Security;
 
 class ClientManager extends AbstractCoreService
 {
-    use OrganisationTrait;
-    // use ClientTrait;
-
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
@@ -54,10 +51,7 @@ class ClientManager extends AbstractCoreService
 
     public function _update($id, array $data)
     {
-        $client = $this->getClient([
-            'idClient' => $id,
-            'organisation' => $data['organisation'],
-        ]);
+        $client = $this->_get($id);
 
         $this->setData(
             $client,
@@ -90,11 +84,7 @@ class ClientManager extends AbstractCoreService
 
     public function _delete($id, array $data = []) 
     {
-        $client = $this->getClient([
-            'idClient' => $id,
-            'organisation' => $data['organisation'],
-        ]);
-
+        $client = $this->_get($id);
         $client->setDeleted(true);
 
         // TODO : Supprimer les relations avec le client ? ou alors archiver aussi ces projets ?

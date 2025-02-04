@@ -124,14 +124,23 @@ abstract class AbstractCoreRepository extends ServiceEntityRepository
     //     return $query->getQuery()
     //         ->getResult();
     // }
-
-    public function search(array $search = [], bool $countMode = false)
+    private function configureSearch(array $search = [])
     {
         $page = isset($search['page']) && $search['page'] > 0 ? $search['page'] : 1;
         $limit = isset($search['limit']) && $search['limit'] > 0 ? $search['limit'] : 10;
         $offset = ($page - 1) * $limit;
-        // $order = (isset($search['order']) && $search['order'] == 'ASC') ? 'ASC' : 'DESC';
+        $order = (isset($search['order']) && $search['order'] == 'ASC') ? 'ASC' : 'DESC';
+        return [
+            'page' => $page,
+            'limit' => $limit,
+            'offset' => $offset,
+            'order' => $order,
+        ];
+    }
 
+    public function search(array $search = [], bool $countMode = false)
+    {
+        $settings = $this->configureSearch($search);
         // Ajouoter un element ocnfigurable pour le tri sur le abstract repository
         $query = $this->createNewQueryBuilder();
 
@@ -141,8 +150,8 @@ abstract class AbstractCoreRepository extends ServiceEntityRepository
 
         if (!$countMode) {
             $query = $query
-                ->setMaxResults($limit)
-                ->setFirstResult($offset);
+                ->setMaxResults($settings['limit'])
+                ->setFirstResult($settings['offset']);
 
             return $query->getQuery()
                 ->getResult();
