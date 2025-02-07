@@ -7,13 +7,9 @@ use App\Service\User\UserManager;
 use App\Controller\Core\AbstractCoreController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use OpenApi\Attributes as OA;
-use OpenApi\Attributes\JsonContent;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin/users')]
 #[OA\Tag(name: 'Admin.User')]

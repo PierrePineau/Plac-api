@@ -6,11 +6,8 @@ use App\Controller\Core\AbstractCoreController;
 use App\Service\Organisation\OrganisationClientManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use OpenApi\Attributes as OA;
-use OpenApi\Attributes\JsonContent;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 #[Route('/api/app/organisations/{idOrganisation}/clients', requirements: ['idOrganisation' => '[a-z0-9-]+'])]
@@ -67,5 +64,50 @@ class OrganisationClientController extends AbstractCoreController
     public function index($idOrganisation, Request $request): JsonResponse
     {
         return parent::_index($request);
+    }
+
+    #[OA\Get(
+        summary: 'Get one',
+        responses:
+        [
+            '200' => new OA\Response(
+                response: 200,
+                description: '',
+                content: new OA\JsonContent(
+                    ref: '#/components/schemas/response'
+                )
+            )
+        ]
+    )]
+    #[OA\Post(
+        summary: 'Update one',
+        responses:
+        [
+            '200' => new OA\Response(
+                response: 200,
+                description: '',
+                content: new OA\JsonContent(
+                    ref: '#/components/schemas/response'
+                )
+            )
+        ]
+    )]
+    #[OA\Delete(
+        summary: 'Delete',
+        responses:
+        [
+            '200' => new OA\Response(
+                response: 200,
+                description: '',
+                content: new OA\JsonContent(
+                    ref: '#/components/schemas/response'
+                )
+            )
+        ]
+    )]
+    #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '[a-z0-9-]+'])]
+    public function get($id, Request $request): JsonResponse
+    {
+        return parent::_get($id, $request);
     }
 }

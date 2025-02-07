@@ -496,8 +496,14 @@ abstract class AbstractCoreService
         throw new \Exception($this->ELEMENT.'.remove.not_allowed');
     }
 
-    public function _delete($id, array $data = [])
+    public function _delete($id, array $data = []) 
     {
-        throw new \Exception($this->ELEMENT.'.deleted.not_allowed');
+        $element = $this->_get($id);
+        $element->setDeleted(true);
+
+        $this->em->persist($element);
+        $this->isValid($element);
+
+        return $element;
     }
 }

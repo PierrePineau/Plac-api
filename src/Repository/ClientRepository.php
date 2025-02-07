@@ -21,8 +21,8 @@ class ClientRepository extends AbstractCoreRepository
         $idOrganisation = $this->getIdOrganisation($search);
 
         $query = $this->createNewQueryBuilder()
-            ->leftJoin("{$this->alias}.organisationClients", "oc")
-            ->andWhere("oc.organisation = :idOrganisation")
+            ->leftJoin("{$this->alias}.organisationClients", "rel")
+            ->andWhere("rel.organisation = :idOrganisation")
             ->setParameter('idOrganisation', $idOrganisation);
 
         if (isset($search['search']) && $search['search'] != '') {
@@ -43,33 +43,5 @@ class ClientRepository extends AbstractCoreRepository
             return $query->getQuery()
                 ->getSingleScalarResult();
         }
-    }
-
-    public function findByAccess($data): array
-    {
-        $organisation = $data['organisation'];
-        $id = $data['idClient'];
-        return $this->createQueryBuilder('c')
-            ->innerJoin('c.organisationClients', 'co')
-            ->andWhere('c.id = :id')
-            ->andWhere('co.organisation = :organisation')
-            ->setParameter('organisation', $organisation->getId())
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findOneByAccess($data): ?Client
-    {
-        $organisation = $data['organisation'];
-        $id = $data['idClient'];
-        return $this->createQueryBuilder('c')
-            ->innerJoin('c.organisationClients', 'co')
-            ->andWhere('c.id = :id')
-            ->andWhere('co.organisation = :organisation')
-            ->setParameter('organisation', $organisation->getId())
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->getOneOrNullResult();
     }
 }

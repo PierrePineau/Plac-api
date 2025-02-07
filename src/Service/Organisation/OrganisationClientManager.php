@@ -18,9 +18,15 @@ class OrganisationClientManager extends AbstractCoreService
     {
         parent::__construct($container, $entityManager, [
             'code' => 'Organisation.Client',
-            'entity' => Client::class,
+            'entity' => OrganisationClient::class,
             'security' => $security,
         ]);
+    }
+
+    public function _search(array $filters = []): array
+    {
+        $manager = $this->container->get(ClientManager::class);
+        return $manager->_search($filters);
     }
 
     public function _get($id, array $filters = []): mixed
@@ -39,42 +45,38 @@ class OrganisationClientManager extends AbstractCoreService
         $clientManager = $this->container->get(ClientManager::class);
         $client = $clientManager->_create($data);
 
-        $organisationClient = new OrganisationClient();
-        $organisationClient->setClient($client);
-        $organisationClient->setOrganisation($organisation);
+        $orgClient = new OrganisationClient();
+        $orgClient->setClient($client);
+        $orgClient->setOrganisation($organisation);
 
-        $this->em->persist($organisationClient);
-        $this->isValid($organisationClient);
+        $this->em->persist($orgClient);
+        $this->isValid($orgClient);
 
-        return $organisationClient;
+        return $client;
     }
 
     public function _update($id, array $data)
     {
-        $organisationClient = $this->_get($id, [
+        $orgClient = $this->_get($id, [
             'idOrganisation' => $data['organisation']->getId(),
         ]);
 
         $clientManager = $this->container->get(ClientManager::class);
-        $client = $clientManager->_update($organisationClient->getClient()->getId(), $data);
+        $client = $clientManager->_update($orgClient->getClient(), $data);
 
-        $organisationClient->setClient($client);
+        $this->em->persist($orgClient);
+        $this->isValid($orgClient);
 
-        $this->em->persist($organisationClient);
-        $this->isValid($organisationClient);
-
-        return $organisationClient;
+        return $client;
     }
 
     public function _delete($id, array $filters = [])
     {
-        $client = $this->_get($id, [
+        $orgClient = $this->_get($id, [
             'idOrganisation' => $filters['organisation']->getId(),
         ]);
 
         $clientManager = $this->container->get(ClientManager::class);
-        $clientManager->_delete($client);
-
-        return $client;
+        return $clientManager->_delete($orgClient->getClient());
     }
 }

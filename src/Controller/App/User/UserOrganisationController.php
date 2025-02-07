@@ -65,49 +65,4 @@ class UserOrganisationController extends AbstractCoreController
     {
         return parent::_index($request);
     }
-
-    // #[OA\Get(
-    //     summary: 'Get one',
-    //     responses:
-    //     [
-    //         '200' => new OA\Response(
-    //             response: 200,
-    //             description: '',
-    //             content: new OA\JsonContent(
-    //                 ref: '#/components/schemas/response'
-    //             )
-    //         )
-    //     ],
-    // )]
-    // #[OA\Post(
-    //     summary: 'Update one',
-    //     responses:
-    //     [
-    //         '200' => new OA\Response(
-    //             response: 200,
-    //             description: '',
-    //             content: new OA\JsonContent(
-    //                 ref: '#/components/schemas/response'
-    //             )
-    //         )
-    //     ],
-    // )]
-    // #[OA\Delete(
-    //     summary: 'Delete',
-    //     responses:
-    //     [
-    //         '200' => new OA\Response(
-    //             response: 200,
-    //             description: '',
-    //             content: new OA\JsonContent(
-    //                 ref: '#/components/schemas/response'
-    //             )
-    //         )
-    //     ],
-    // )]
-    // #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '[a-z0-9-]+'])]
-    // public function get($idUser, $id, Request $request): JsonResponse
-    // {
-    //     return parent::_get($id, $request);
-    // }
 }

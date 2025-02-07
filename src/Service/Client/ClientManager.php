@@ -2,10 +2,8 @@
 
 namespace App\Service\Client;
 
-use App\Core\Service\AbstractCoreService;
-use App\Core\Traits\ClientTrait;
-use App\Core\Traits\OrganisationTrait;
 use App\Entity\Client;
+use App\Core\Service\AbstractCoreService;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class ClientManager extends AbstractCoreService
@@ -75,19 +73,6 @@ class ClientManager extends AbstractCoreService
             ],
             $data
         );
-
-        $this->em->persist($client);
-        $this->isValid($client);
-
-        return $client;
-    }
-
-    public function _delete($id, array $data = []) 
-    {
-        $client = $this->_get($id);
-        $client->setDeleted(true);
-
-        // TODO : Supprimer les relations avec le client ? ou alors archiver aussi ces projets ?
 
         $this->em->persist($client);
         $this->isValid($client);
