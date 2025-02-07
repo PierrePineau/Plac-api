@@ -4,26 +4,25 @@ namespace App\Service\Organisation;
 
 use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\OrganisationTrait;
-use App\Entity\OrganisationClient;
-use App\Service\Client\ClientManager;
+use App\Entity\EmployeOrganisation;
+use App\Service\Employe\EmployeManager;
 use Symfony\Bundle\SecurityBundle\Security;
 
-class OrganisationClientManager extends AbstractCoreService
+class OrganisationEmployeManager extends AbstractCoreService
 {
     use OrganisationTrait;
-
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
-            'code' => 'Organisation.Client',
-            'entity' => OrganisationClient::class,
+            'code' => 'Organisation.Employe',
+            'entity' => EmployeOrganisation::class,
             'security' => $security,
         ]);
     }
 
     public function _search(array $filters = []): array
     {
-        $manager = $this->container->get(ClientManager::class);
+        $manager = $this->container->get(EmployeManager::class);
         return $manager->_search($filters);
     }
 
@@ -40,41 +39,41 @@ class OrganisationClientManager extends AbstractCoreService
     {
         $organisation = $data['organisation'];
 
-        $clientManager = $this->container->get(ClientManager::class);
-        $client = $clientManager->_create($data);
+        $manager = $this->container->get(EmployeManager::class);
+        $employe = $manager->_create($data);
 
-        $orgClient = new OrganisationClient();
-        $orgClient->setClient($client);
-        $orgClient->setOrganisation($organisation);
+        $employeOrg = new EmployeOrganisation();
+        $employeOrg->setEmploye($employe);
+        $employeOrg->setOrganisation($organisation);
 
-        $this->em->persist($orgClient);
-        $this->isValid($orgClient);
+        $this->em->persist($employeOrg);
+        $this->isValid($employeOrg);
 
-        return $client;
+        return $employe;
     }
 
     public function _update($id, array $data)
     {
-        $orgClient = $this->_get($id, [
+        $employeOrg = $this->_get($id, [
             'idOrganisation' => $data['organisation']->getId(),
         ]);
 
-        $clientManager = $this->container->get(ClientManager::class);
-        $client = $clientManager->_update($orgClient->getClient(), $data);
+        $manager = $this->container->get(EmployeManager::class);
+        $employe = $manager->_update($employeOrg->getEmploye(), $data);
 
-        $this->em->persist($orgClient);
-        $this->isValid($orgClient);
+        $this->em->persist($employeOrg);
+        $this->isValid($employeOrg);
 
-        return $client;
+        return $employe;
     }
 
     public function _delete($id, array $filters = [])
     {
-        $orgClient = $this->_get($id, [
+        $employeOrg = $this->_get($id, [
             'idOrganisation' => $filters['organisation']->getId(),
         ]);
 
-        $clientManager = $this->container->get(ClientManager::class);
-        return $clientManager->_delete($orgClient->getClient());
+        $manager = $this->container->get(EmployeManager::class);
+        return $manager->_delete($employeOrg->getEmploye());
     }
 }

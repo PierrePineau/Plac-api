@@ -51,9 +51,16 @@ class Employe implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $lastname = null;
 
+    /**
+     * @var Collection<int, EmployeOrganisation>
+     */
+    #[ORM\OneToMany(targetEntity: EmployeOrganisation::class, mappedBy: 'employe')]
+    private Collection $employeOrganisations;
+
     public function __construct()
     {
         $this->organisations = new ArrayCollection();
+        $this->employeOrganisations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -199,6 +206,36 @@ class Employe implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastname(?string $lastname): static
     {
         $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, EmployeOrganisation>
+     */
+    public function getEmployeOrganisations(): Collection
+    {
+        return $this->employeOrganisations;
+    }
+
+    public function addEmployeOrganisation(EmployeOrganisation $employeOrganisation): static
+    {
+        if (!$this->employeOrganisations->contains($employeOrganisation)) {
+            $this->employeOrganisations->add($employeOrganisation);
+            $employeOrganisation->setEmploye($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEmployeOrganisation(EmployeOrganisation $employeOrganisation): static
+    {
+        if ($this->employeOrganisations->removeElement($employeOrganisation)) {
+            // set the owning side to null (unless already changed)
+            if ($employeOrganisation->getEmploye() === $this) {
+                $employeOrganisation->setEmploye(null);
+            }
+        }
 
         return $this;
     }
