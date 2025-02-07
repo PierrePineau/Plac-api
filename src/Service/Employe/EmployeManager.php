@@ -2,36 +2,64 @@
 
 namespace App\Service\Employe;
 
-use App\Core\Service\AbstractCoreService;
-use App\Core\Traits\OrganisationTrait;
 use App\Entity\Employe;
+use App\Core\Service\AbstractCoreService;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class EmployeManager extends AbstractCoreService
 {
-    use OrganisationTrait;
-
-    private $passwordHash;
-    public function __construct($container, $entityManager, Security $security, UserPasswordHasherInterface $passwordHash)
+    public function __construct($container, $entityManager, Security $security)
     {
-        $this->passwordHash = $passwordHash;
         parent::__construct($container, $entityManager, [
             'identifier' => 'uuid',
-            'code' => 'employe',
+            'code' => 'Employe',
             'entity' => Employe::class,
             'security' => $security,
         ]);
     }
 
-    // Pour gérer un project il faut que soit défini une organisation
-    // Le middleware permet de vérifier si l'organisation est bien défini et si l'utilisateur a les droits
-    public function guardMiddleware(array $data): array
+    public function _create(array $data)
     {
-        $organisation = $this->getOrganisation($data);
+        $element = new Employe();
+        $this->setData(
+            $element,
+            [
+                'firstname' => [
+                    'nullable' => false,
+                ],
+                'lastname' => [
+                    'nullable' => false,
+                ],
+            ],
+            $data
+        );
 
-        $data['organisation'] = $organisation;
+        $element->setUsername(uniqid(). '-' . $this->tools->generateCode($element->getFirstname()));
 
-        return $data;
+        $this->em->persist($element);
+        $this->isValid($element);
+
+        return $element;
+    }
+
+    public function _update($id, array $data)
+    {
+        $element = $this->_get($id);
+
+        $this->setData(
+            $element,
+            [
+                'firstname' => [
+                ],
+                'lastname' => [
+                ],
+            ],
+            $data
+        );
+
+        $this->em->persist($element);
+        $this->isValid($element);
+
+        return $element;
     }
 }

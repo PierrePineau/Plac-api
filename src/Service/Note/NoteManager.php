@@ -2,24 +2,22 @@
 
 namespace App\Service\Note;
 
-use App\Core\Service\AbstractCoreService;
 use App\Entity\Note;
+use App\Core\Service\AbstractCoreService;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class NoteManager extends AbstractCoreService
 {
-    const Note_STANDARD = 'standard';
-    const Note_PRO = 'pro';
-    const Note_ENTERPRISE = 'enterprise';
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'identifier' => 'uuid',
             'code' => 'Note',
             'entity' => Note::class,
             'security' => $security,
         ]);
     }
-    
+
     public function _create(array $data)
     {
         $element = new Note();
@@ -27,11 +25,9 @@ class NoteManager extends AbstractCoreService
             $element,
             [
                 'name' => [
-                    'required' => false,
-                    'nullable' => true,
+                    'nullable' => false,
                 ],
                 'content' => [
-                    'required' => false,
                     'nullable' => true,
                 ],
             ],
@@ -46,25 +42,15 @@ class NoteManager extends AbstractCoreService
 
     public function _update($id, array $data)
     {
-        if (isset($data['object']) && $data['object'] instanceof Note) {
-            $element = $data['object'];
-        }else{
-            $element = $this->find($id);
-        }
-        
-        if (!$element) {
-            throw new \Exception($this->ELEMENT_NOT_FOUND);
-        }
+        $element = $this->_get($id);
 
         $this->setData(
             $element,
             [
                 'name' => [
-                    'required' => false,
-                    'nullable' => true,
+                    'nullable' => false,
                 ],
                 'content' => [
-                    'required' => false,
                     'nullable' => true,
                 ],
             ],

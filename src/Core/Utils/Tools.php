@@ -39,7 +39,7 @@ class Tools
         // On supprime les tirets '-' en début et fin de chaine
         $code = trim($code, '-');
 
-        $usKebabCase = isset($data['usKebabCase']) && $data['usKebabCase'] == true ? true : false;
+        $usKebabCase = isset($data['useKebabCase']) && $data['useKebabCase'] == true ? true : false;
         if ($usKebabCase) {
             // Si on fait du useKebabCase, on remplace les tirets '_' par des tirets '-'
             $code = str_replace('_', '-', $code);

@@ -38,10 +38,23 @@ class Note
     #[ORM\OneToMany(targetEntity: ProjectNote::class, mappedBy: 'note')]
     private Collection $projectNotes;
 
+    /**
+     * @var Collection<int, OrganisationNote>
+     */
+    #[ORM\OneToMany(targetEntity: OrganisationNote::class, mappedBy: 'note')]
+    private Collection $organisationNotes;
+
+    #[ORM\Column]
+    private ?bool $deleted = false;
+
     public function __construct()
     {
         $this->projectNotes = new ArrayCollection();
         $this->uuid = Uuid::v7()->toRfc4122();
+        $this->organisationNotes = new ArrayCollection();
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+        $this->deleted = false;
     }
 
     public function getId(): ?int
@@ -135,6 +148,48 @@ class Note
                 $projectNote->setNote(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrganisationNote>
+     */
+    public function getOrganisationNotes(): Collection
+    {
+        return $this->organisationNotes;
+    }
+
+    public function addOrganisationNote(OrganisationNote $organisationNote): static
+    {
+        if (!$this->organisationNotes->contains($organisationNote)) {
+            $this->organisationNotes->add($organisationNote);
+            $organisationNote->setNote($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrganisationNote(OrganisationNote $organisationNote): static
+    {
+        if ($this->organisationNotes->removeElement($organisationNote)) {
+            // set the owning side to null (unless already changed)
+            if ($organisationNote->getNote() === $this) {
+                $organisationNote->setNote(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function isDeleted(): ?bool
+    {
+        return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): static
+    {
+        $this->deleted = $deleted;
 
         return $this;
     }

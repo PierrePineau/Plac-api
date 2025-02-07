@@ -50,6 +50,9 @@ class Project
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[ORM\Column]
+    private ?bool $deleted = false;
+
     public function __construct()
     {
         $this->projectNotes = new ArrayCollection();
@@ -58,6 +61,7 @@ class Project
         $this->organisationProjects = new ArrayCollection();
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
+        $this->deleted = false;
     }
 
     public function getId(): ?int
@@ -220,6 +224,18 @@ class Project
     public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function isDeleted(): ?bool
+    {
+        return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): static
+    {
+        $this->deleted = $deleted;
 
         return $this;
     }

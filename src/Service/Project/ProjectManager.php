@@ -19,16 +19,24 @@ class ProjectManager extends AbstractCoreService
 
     public function _create(array $data)
     {
-        $project = new Project();
-        $project->setName($data['name']);
-        // $project->setDescription($data['description']);
-        // $project->setStartDate(new \DateTime($data['startDate']));
-        // $project->setEndDate(new \DateTime($data['endDate']));
+        $element = new Project();
+        $this->setData(
+            $element,
+            [
+                'reference' => [
+                    'nullable' => false,
+                ],
+                'name' => [
+                    'nullable' => true,
+                ],
+            ],
+            $data
+        );
 
-        $this->em->persist($project);
-        $this->isValid($project);
+        $this->em->persist($element);
+        $this->isValid($element);
 
-        return $project;
+        return $element;
     }
 
     public function _update($id, array $data)
@@ -38,8 +46,10 @@ class ProjectManager extends AbstractCoreService
         $this->setData(
             $element,
             [
+                'reference' => [
+                    'nullable' => false,
+                ],
                 'name' => [
-                    'required' => true,
                     'nullable' => true,
                 ],
             ],

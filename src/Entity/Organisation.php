@@ -71,6 +71,12 @@ class Organisation
     #[ORM\OneToMany(targetEntity: OrganisationProject::class, mappedBy: 'organisation')]
     private Collection $organisationProjects;
 
+    /**
+     * @var Collection<int, OrganisationNote>
+     */
+    #[ORM\OneToMany(targetEntity: OrganisationNote::class, mappedBy: 'organisation')]
+    private Collection $organisationNotes;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toRfc4122();
@@ -82,6 +88,7 @@ class Organisation
         $this->organisationFiles = new ArrayCollection();
         $this->organisationClients = new ArrayCollection();
         $this->organisationProjects = new ArrayCollection();
+        $this->organisationNotes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -351,6 +358,36 @@ class Organisation
             // set the owning side to null (unless already changed)
             if ($organisationProject->getOrganisation() === $this) {
                 $organisationProject->setOrganisation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrganisationNote>
+     */
+    public function getOrganisationNotes(): Collection
+    {
+        return $this->organisationNotes;
+    }
+
+    public function addOrganisationNote(OrganisationNote $organisationNote): static
+    {
+        if (!$this->organisationNotes->contains($organisationNote)) {
+            $this->organisationNotes->add($organisationNote);
+            $organisationNote->setOrganisation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrganisationNote(OrganisationNote $organisationNote): static
+    {
+        if ($this->organisationNotes->removeElement($organisationNote)) {
+            // set the owning side to null (unless already changed)
+            if ($organisationNote->getOrganisation() === $this) {
+                $organisationNote->setOrganisation(null);
             }
         }
 
