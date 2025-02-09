@@ -41,6 +41,11 @@ class OrganisationModule
         return $this;
     }
 
+    public function getElement(): ?Module
+    {
+        return $this->module;
+    }
+
     public function getModule(): ?module
     {
         return $this->module;

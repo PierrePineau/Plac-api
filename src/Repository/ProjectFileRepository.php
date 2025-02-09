@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Core\Repository\AbstractCoreRepository;
 use App\Entity\ProjectFile;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -9,7 +10,7 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<ProjectFile>
  */
-class ProjectFileRepository extends ServiceEntityRepository
+class ProjectFileRepository extends AbstractCoreRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

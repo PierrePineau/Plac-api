@@ -4,7 +4,6 @@ namespace App\Service\Project;
 
 use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\OrganisationTrait;
-use App\Core\Traits\ProjectTrait;
 use App\Entity\ProjectNote;
 use App\Service\Note\NoteManager;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -12,8 +11,6 @@ use Symfony\Bundle\SecurityBundle\Security;
 class ProjectNoteManager extends AbstractCoreService
 {
     use OrganisationTrait;
-    use ProjectTrait;
-    
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
@@ -22,6 +19,15 @@ class ProjectNoteManager extends AbstractCoreService
             'entity' => ProjectNote::class,
             'security' => $security,
         ]);
+    }
+
+    public function _get($id, array $filters = []): mixed
+    {
+        $element = $this->findOneByAccess([
+            'id' => $id,
+            'organisation' => $filters['organisation'],
+        ]);
+        return $element;
     }
 
     public function _search(array $filters = []): array

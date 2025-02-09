@@ -38,6 +38,11 @@ class OrganisationNote
         return $this;
     }
 
+    public function getElement(): ?Note
+    {
+        return $this->note;
+    }
+
     public function getNote(): ?Note
     {
         return $this->note;

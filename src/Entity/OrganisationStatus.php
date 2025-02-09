@@ -2,22 +2,22 @@
 
 namespace App\Entity;
 
-use App\Repository\OrganisationProjectRepository;
+use App\Repository\OrganisationStatusRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: OrganisationProjectRepository::class)]
-class OrganisationProject
+#[ORM\Entity(repositoryClass: OrganisationStatusRepository::class)]
+class OrganisationStatus
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'organisationProjects')]
+    #[ORM\ManyToOne(inversedBy: 'organisationStatuses')]
     private ?Organisation $organisation = null;
 
-    #[ORM\ManyToOne(inversedBy: 'organisationProjects')]
-    private ?Project $project = null;
+    #[ORM\ManyToOne(inversedBy: 'organisationStatuses')]
+    private ?Status $status = null;
 
     public function getId(): ?int
     {
@@ -36,19 +36,19 @@ class OrganisationProject
         return $this;
     }
 
-    public function getElement(): ?Project
+    public function getElement(): ?Status
     {
-        return $this->project;
+        return $this->status;
     }
 
-    public function getProject(): ?Project
+    public function getStatus(): ?Status
     {
-        return $this->project;
+        return $this->status;
     }
 
-    public function setProject(?Project $project): static
+    public function setStatus(?Status $status): static
     {
-        $this->project = $project;
+        $this->status = $status;
 
         return $this;
     }

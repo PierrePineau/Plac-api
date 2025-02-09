@@ -10,9 +10,6 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 
-/**
- * @extends ServiceEntityRepository<Admin>
- */
 class AdminRepository extends AbstractCoreRepository implements PasswordUpgraderInterface
 {
     public function __construct(ManagerRegistry $registry)

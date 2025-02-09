@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use App\Core\Repository\AbstractCoreRepository;
+use App\Core\Traits\OrganisationRepositoryTrait;
 use App\Entity\EmployeOrganisation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -9,35 +11,37 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<EmployeOrganisation>
  */
-class EmployeOrganisationRepository extends ServiceEntityRepository
+class EmployeOrganisationRepository extends AbstractCoreRepository
 {
+    use OrganisationRepositoryTrait;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, EmployeOrganisation::class);
     }
 
-    //    /**
-    //     * @return EmployeOrganisation[] Returns an array of EmployeOrganisation objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('e.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function createAccessQueryBuilder(array $data)
+    {
+        $idOrganisation = $this->getIdOrganisation($data);
+        return $this->createNewQueryBuilder()
+            ->innerJoin("{$this->alias}.employeOrganisations", 'rel')
+            ->andWhere('rel.organisation = :organisation')
+            ->setParameter('organisation', $idOrganisation);
+    }
 
-    //    public function findOneBySomeField($value): ?EmployeOrganisation
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findByAccess($data): array
+    {
+        return $this->createAccessQueryBuilder($data)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findOneByAccess($data): ?EmployeOrganisation
+    {
+        $id = $data['idEmploye'];
+        return $this->createAccessQueryBuilder($data)
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->setMaxResults(1)
+            ->getOneOrNullResult();
+    }
 }

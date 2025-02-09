@@ -36,6 +36,11 @@ class OrganisationClient
         return $this;
     }
 
+    public function getElement(): ?Client
+    {
+        return $this->client;
+    }
+
     public function getClient(): ?Client
     {
         return $this->client;

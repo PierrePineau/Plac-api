@@ -17,63 +17,45 @@ class OrganisationEmployeManager extends AbstractCoreService
             'code' => 'Organisation.Employe',
             'entity' => EmployeOrganisation::class,
             'security' => $security,
+            'elementManagerClass' => EmployeManager::class,
         ]);
     }
 
     public function _search(array $filters = []): array
     {
-        $manager = $this->container->get(EmployeManager::class);
+        $manager = $this->getElementManager();
         return $manager->_search($filters);
     }
 
     public function _get($id, array $filters = []): mixed
     {
-        $element = $this->findOneByAccess([
-            'id' => $id,
-            'organisation' => $filters['organisation'],
-        ]);
-        return $element;
+        return $this->_getOrganisationElement($id, $filters);
+    }
+
+    public function _update($id, array $data)
+    {
+        return $this->_updateOrganisationElement($id, $data);
+    }
+
+    public function _delete($id, array $filters = [])
+    {
+        return $this->_deleteOrganisationElement($id, $filters);
     }
 
     public function _create(array $data)
     {
         $organisation = $data['organisation'];
 
-        $manager = $this->container->get(EmployeManager::class);
-        $employe = $manager->_create($data);
+        $manager = $this->getElementManager();
+        $element = $manager->_create($data);
 
         $employeOrg = new EmployeOrganisation();
-        $employeOrg->setEmploye($employe);
+        $employeOrg->setEmploye($element);
         $employeOrg->setOrganisation($organisation);
 
         $this->em->persist($employeOrg);
         $this->isValid($employeOrg);
 
-        return $employe;
-    }
-
-    public function _update($id, array $data)
-    {
-        $employeOrg = $this->_get($id, [
-            'idOrganisation' => $data['organisation']->getId(),
-        ]);
-
-        $manager = $this->container->get(EmployeManager::class);
-        $employe = $manager->_update($employeOrg->getEmploye(), $data);
-
-        $this->em->persist($employeOrg);
-        $this->isValid($employeOrg);
-
-        return $employe;
-    }
-
-    public function _delete($id, array $filters = [])
-    {
-        $employeOrg = $this->_get($id, [
-            'idOrganisation' => $filters['organisation']->getId(),
-        ]);
-
-        $manager = $this->container->get(EmployeManager::class);
-        return $manager->_delete($employeOrg->getEmploye());
+        return $element;
     }
 }

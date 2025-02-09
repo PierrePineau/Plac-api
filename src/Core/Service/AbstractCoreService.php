@@ -18,6 +18,7 @@ abstract class AbstractCoreService
     public $container;
     public $em;
     public $entityClass;
+    public $elementManagerClass;
     public $identifier;
     public $security;
     public $user;
@@ -66,6 +67,11 @@ abstract class AbstractCoreService
         // Services
         if (isset($data['security']) && $data['security'] instanceof Security) {
             $this->security = $data['security'];
+        }
+
+        // Element Manager associated (For OrganisationProject, OrganisationEmploye, OrganisationNote, OrganisationStatus)
+        if (isset($data['elementManagerClass']) && $data['elementManagerClass']) {
+            $this->elementManagerClass = $data['elementManagerClass'];
         }
 
         // Code Messages
@@ -229,6 +235,14 @@ abstract class AbstractCoreService
     public function dispatchEvent(Event $event, ?string $eventName = null): ?Event
     {
         return $this->messenger->dispatchEvent($event, $eventName);
+    }
+
+    public function getElementManager()
+    {
+        if (!$this->elementManagerClass) {
+            throw new \Exception('element.manager.not_found');
+        }
+        return $this->container->get($this->elementManagerClass);
     }
 
     // Pour gérer un project il faut que soit défini une organisation

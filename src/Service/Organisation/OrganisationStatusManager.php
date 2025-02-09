@@ -2,22 +2,22 @@
 
 namespace App\Service\Organisation;
 
+use App\Entity\OrganisationStatus;
 use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\OrganisationTrait;
-use App\Entity\OrganisationProject;
-use App\Service\Project\ProjectManager;
+use App\Service\Status\StatusManager;
 use Symfony\Bundle\SecurityBundle\Security;
 
-class OrganisationProjectManager extends AbstractCoreService
+class OrganisationStatusManager extends AbstractCoreService
 {
     use OrganisationTrait;
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
-            'code' => 'Organisation.Project',
-            'entity' => OrganisationProject::class,
+            'code' => 'Organisation.Status',
+            'entity' => OrganisationStatus::class,
             'security' => $security,
-            'elementManagerClass' => ProjectManager::class,
+            'elementManagerClass' => StatusManager::class,
         ]);
     }
 
@@ -49,8 +49,8 @@ class OrganisationProjectManager extends AbstractCoreService
         $manager = $this->getElementManager();
         $element = $manager->_create($data);
 
-        $orgElement = new OrganisationProject();
-        $orgElement->setProject($element);
+        $orgElement = new OrganisationStatus();
+        $orgElement->setStatus($element);
         $orgElement->setOrganisation($organisation);
 
         $this->em->persist($orgElement);
@@ -58,4 +58,31 @@ class OrganisationProjectManager extends AbstractCoreService
 
         return $element;
     }
+
+    // public function setProjectStatus(array $data)
+    // {
+    //     try {
+    //         $data = $this->guardMiddleware($data);
+    //         $orgStatus = $this->_get($data['idStatus'], [
+    //             'idOrganisation' => $data['organisation']->getId(),
+    //         ]);
+
+    //         return $this->messenger->newResponse(
+    //             [
+    //                 'success' => true,
+    //                 'message' => $search['total'] > 0 ? $this->ELEMENT_FOUND : $this->ELEMENT_NOT_FOUND,
+    //                 'code' => 200,
+    //                 'data' => $search
+    //             ]
+    //         );
+    //     } catch (\Throwable $th) {
+    //         return $this->messenger->errorResponse($th);
+    //     }
+        
+        
+    //     $this->em->persist($orgProject);
+    //     $this->isValid($orgProject);
+
+    //     return $project;
+    // }
 }

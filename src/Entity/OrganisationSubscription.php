@@ -37,6 +37,11 @@ class OrganisationSubscription
         return $this;
     }
 
+    public function getElement(): ?Subscription
+    {
+        return $this->subscription;
+    }
+
     public function getSubscription(): ?Subscription
     {
         return $this->subscription;

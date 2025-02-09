@@ -4,26 +4,22 @@ namespace App\Repository;
 
 use App\Core\Repository\AbstractCoreRepository;
 use App\Core\Traits\OrganisationRepositoryTrait;
-use App\Entity\OrganisationFile;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Entity\OrganisationStatus;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<OrganisationFile>
- */
-class OrganisationFileRepository extends AbstractCoreRepository
+class OrganisationStatusRepository extends AbstractCoreRepository
 {
     use OrganisationRepositoryTrait;
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, OrganisationFile::class);
+        parent::__construct($registry, OrganisationStatus::class);
     }
 
     public function createAccessQueryBuilder(array $data)
     {
         $idOrganisation = $this->getIdOrganisation($data);
         return $this->createNewQueryBuilder()
-            ->innerJoin("{$this->alias}.organisationFiles", 'rel')
+            ->innerJoin("{$this->alias}.organisationStatuss", 'rel')
             ->andWhere('rel.organisation = :organisation')
             ->setParameter('organisation', $idOrganisation);
     }
@@ -35,9 +31,9 @@ class OrganisationFileRepository extends AbstractCoreRepository
             ->getResult();
     }
 
-    public function findOneByAccess($data): ?OrganisationFile
+    public function findOneByAccess($data): ?OrganisationStatus
     {
-        $id = $data['idFile'];
+        $id = $data['idStatus'];
         return $this->createAccessQueryBuilder($data)
             ->setParameter('id', $id)
             ->getQuery()

@@ -36,6 +36,11 @@ class OrganisationFile
         return $this;
     }
 
+    public function getElement(): ?File
+    {
+        return $this->file;
+    }
+
     public function getFile(): ?File
     {
         return $this->file;
