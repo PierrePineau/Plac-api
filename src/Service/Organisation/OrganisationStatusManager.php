@@ -58,31 +58,4 @@ class OrganisationStatusManager extends AbstractCoreService
 
         return $element;
     }
-
-    // public function setProjectStatus(array $data)
-    // {
-    //     try {
-    //         $data = $this->guardMiddleware($data);
-    //         $orgStatus = $this->_get($data['idStatus'], [
-    //             'idOrganisation' => $data['organisation']->getId(),
-    //         ]);
-
-    //         return $this->messenger->newResponse(
-    //             [
-    //                 'success' => true,
-    //                 'message' => $search['total'] > 0 ? $this->ELEMENT_FOUND : $this->ELEMENT_NOT_FOUND,
-    //                 'code' => 200,
-    //                 'data' => $search
-    //             ]
-    //         );
-    //     } catch (\Throwable $th) {
-    //         return $this->messenger->errorResponse($th);
-    //     }
-        
-        
-    //     $this->em->persist($orgProject);
-    //     $this->isValid($orgProject);
-
-    //     return $project;
-    // }
 }
