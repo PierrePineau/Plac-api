@@ -23,10 +23,12 @@ class ProjectManager extends AbstractCoreService
         $this->setData(
             $element,
             [
+                'name' => [
+                ],
                 'reference' => [
                     'nullable' => false,
                 ],
-                'name' => [
+                'description' => [
                     'nullable' => true,
                 ],
             ],
@@ -46,10 +48,13 @@ class ProjectManager extends AbstractCoreService
         $this->setData(
             $element,
             [
+                'name' => [
+                    'nullable' => true,
+                ],
                 'reference' => [
                     'nullable' => false,
                 ],
-                'name' => [
+                'description' => [
                     'nullable' => true,
                 ],
             ],

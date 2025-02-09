@@ -1,7 +1,11 @@
 <?php
 namespace App\EventSubscriber\Project;
 
+use App\Entity\Organisation;
+use App\Event\Organisation\OrganisationCreateEvent;
 use App\Event\Project\ProjectGetEvent;
+use App\Service\Organisation\OrganisationManager;
+use App\Service\Organisation\OrganisationProjectManager;
 use App\Service\Project\ProjectManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -17,26 +21,27 @@ class ProjectSubscriber implements EventSubscriberInterface
     {
         // return the subscribed events, their methods and priorities
         return [
+            OrganisationCreateEvent::class => [
+                ['onOrganisationCreate', 10],
+            ],
             ProjectGetEvent::class => [
                 ['onProjectGetEvent', 10],
             ],
         ];
     }
 
-    public function onProjectGetEvent(ProjectGetEvent $event): ProjectGetEvent
+    public function onOrganisationCreate(OrganisationCreateEvent $event): OrganisationCreateEvent
     {
-        // On récupère project
+        // On récupère organisation qui est en train d'être créée
+        // On crée un premier projet
         try {
-            $project = $event->getProject();
-            if (!$project) {
-                $projectManager = $this->container->get(ProjectManager::class);
-                $data = $event->getData();
-                if (!isset($data['idProject'])) {
-                    throw new \Exception($projectManager::ELEMENT.'.id.required');
-                }
-                $project = $projectManager->findOneByAccess($data);
+            $organisation = $event->getOrganisation();
+            if ($organisation) {
+                $orgProjectManager = $this->container->get(OrganisationProjectManager::class);
 
-                $event->setProject($project);
+                $project = $orgProjectManager->generateDefault([
+                    'organisation' => $organisation,
+                ]);
             }
 
             return $event;
@@ -48,6 +53,35 @@ class ProjectSubscriber implements EventSubscriberInterface
 
             return $event;
         }
+        
+        return $event;
+    }
+
+    public function onProjectGetEvent(ProjectGetEvent $event): ProjectGetEvent
+    {
+        // // On récupère project
+        // try {
+        //     $project = $event->getProject();
+        //     if (!$project) {
+        //         $projectManager = $this->container->get(ProjectManager::class);
+        //         $data = $event->getData();
+        //         if (!isset($data['idProject'])) {
+        //             throw new \Exception($projectManager::ELEMENT.'.id.required');
+        //         }
+        //         $project = $projectManager->findOneByAccess($data);
+
+        //         $event->setProject($project);
+        //     }
+
+        //     return $event;
+
+        // } catch (\Throwable $th) {
+        //     //throw $th;
+        //     $event->setError($th->getMessage());
+        //     $event->stopPropagation();
+
+        //     return $event;
+        // }
         
         return $event;
     }

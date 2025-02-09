@@ -36,6 +36,12 @@ class Status
     #[ORM\OneToMany(targetEntity: OrganisationStatus::class, mappedBy: 'status')]
     private Collection $organisationStatuses;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $action = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $position = null;
+
     public function __construct()
     {
         $this->deleted = false;
@@ -133,6 +139,30 @@ class Status
                 $organisationStatus->setStatus(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getAction(): ?string
+    {
+        return $this->action;
+    }
+
+    public function setAction(?string $action): static
+    {
+        $this->action = $action;
+
+        return $this;
+    }
+
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(?int $position): static
+    {
+        $this->position = $position;
 
         return $this;
     }

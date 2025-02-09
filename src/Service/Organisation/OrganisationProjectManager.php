@@ -21,6 +21,17 @@ class OrganisationProjectManager extends AbstractCoreService
         ]);
     }
 
+    public function generateDefault(array $data = [])
+    {
+        $organisation = $data['organisation'];
+
+        $this->_create([
+            'organisation' => $organisation,
+            'name' => 'Nouveau projet',
+            'description' => 'La description de votre projet',
+        ]);
+    }
+
     public function _search(array $filters = []): array
     {
         $manager = $this->getElementManager();

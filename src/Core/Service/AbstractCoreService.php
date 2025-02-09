@@ -118,7 +118,7 @@ abstract class AbstractCoreService
         return $this->user;        
     }
 
-    public function generateDefault()
+    public function generateDefault(array $data = [])
     {
         // Add here code for default generation
     }

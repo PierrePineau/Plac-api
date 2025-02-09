@@ -21,6 +21,43 @@ class OrganisationStatusManager extends AbstractCoreService
         ]);
     }
 
+    public function generateDefault(array $data = [])
+    {
+        $statusManager = $this->getElementManager();
+
+        // Les status par défaut pour chaque type
+        $projectStatuses = $statusManager->generateDefault([
+            'type' => StatusManager::TYPE_PROJECT,
+        ]);
+
+        // Les status par défaut pour chaque type
+        $taskStatuses = $statusManager->generateDefault([
+            'type' => StatusManager::TYPE_TASK,
+        ]);
+
+        $organisation = $data['organisation'];
+
+        foreach ($projectStatuses as $projectStatus) {
+            $orgElement = new OrganisationStatus();
+            $orgElement->setStatus($projectStatus);
+            $orgElement->setOrganisation($organisation);
+
+            $this->em->persist($orgElement);
+            $this->isValid($orgElement);
+        }
+
+        foreach ($taskStatuses as $taskStatus) {
+            $orgElement = new OrganisationStatus();
+            $orgElement->setStatus($taskStatus);
+            $orgElement->setOrganisation($organisation);
+
+            $this->em->persist($orgElement);
+            $this->isValid($orgElement);
+        }
+
+        return $organisation;
+    }
+
     public function _search(array $filters = []): array
     {
         $manager = $this->getElementManager();
