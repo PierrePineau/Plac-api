@@ -39,12 +39,6 @@ class Employe implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, unique: true)]
     private ?string $username = null;
 
-    /**
-     * @var Collection<int, Organisation>
-     */
-    #[ORM\ManyToMany(targetEntity: Organisation::class, inversedBy: 'employes')]
-    private Collection $organisations;
-
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $firstname = null;
 
@@ -59,7 +53,6 @@ class Employe implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->organisations = new ArrayCollection();
         $this->employeOrganisations = new ArrayCollection();
     }
 
@@ -158,30 +151,6 @@ class Employe implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): static
     {
         $this->username = $username;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Organisation>
-     */
-    public function getOrganisations(): Collection
-    {
-        return $this->organisations;
-    }
-
-    public function addOrganisation(Organisation $organisation): static
-    {
-        if (!$this->organisations->contains($organisation)) {
-            $this->organisations->add($organisation);
-        }
-
-        return $this;
-    }
-
-    public function removeOrganisation(Organisation $organisation): static
-    {
-        $this->organisations->removeElement($organisation);
 
         return $this;
     }

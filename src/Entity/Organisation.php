@@ -39,12 +39,6 @@ class Organisation
     private Collection $organisationModules;
 
     /**
-     * @var Collection<int, Employe>
-     */
-    #[ORM\ManyToMany(targetEntity: Employe::class, mappedBy: 'organisations')]
-    private Collection $employes;
-
-    /**
      * @var Collection<int, OrganisationFile>
      */
     #[ORM\OneToMany(targetEntity: OrganisationFile::class, mappedBy: 'organisation')]
@@ -96,7 +90,6 @@ class Organisation
         $this->updatedAt = new \DateTime();
         $this->userOrganisations = new ArrayCollection();
         $this->organisationModules = new ArrayCollection();
-        $this->employes = new ArrayCollection();
         $this->organisationFiles = new ArrayCollection();
         $this->organisationClients = new ArrayCollection();
         $this->organisationProjects = new ArrayCollection();
@@ -211,33 +204,6 @@ class Organisation
             if ($organisationModule->getOrganisation() === $this) {
                 $organisationModule->setOrganisation(null);
             }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Employe>
-     */
-    public function getEmployes(): Collection
-    {
-        return $this->employes;
-    }
-
-    public function addEmploye(Employe $employe): static
-    {
-        if (!$this->employes->contains($employe)) {
-            $this->employes->add($employe);
-            $employe->addOrganisation($this);
-        }
-
-        return $this;
-    }
-
-    public function removeEmploye(Employe $employe): static
-    {
-        if ($this->employes->removeElement($employe)) {
-            $employe->removeOrganisation($this);
         }
 
         return $this;

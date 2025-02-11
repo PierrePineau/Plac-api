@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Entity\Admin;
 use App\Entity\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
@@ -26,6 +27,10 @@ class JWTAuthenticationSuccessListener
 
 		// Une fois l'authentification réussie, on récupère l'utilisateur pour renvoyer ses informations
 		if ($user instanceof User) {
+			$data['user'] = $user->getInfos();
+		}
+
+		if ($user instanceof Admin) {
 			$data['user'] = $user->getInfos();
 		}
 

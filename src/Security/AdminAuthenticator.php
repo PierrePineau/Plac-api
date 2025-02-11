@@ -174,7 +174,7 @@ class AdminAuthenticator extends JWTAuthenticator
                     'trace' => $th->getTrace(),
                 ]);
                 if ($_ENV['APP_ENV'] === 'dev') {
-                    // $this->logger->debug(json);
+                    // $this->logger->debug();
                     throw new CustomUserMessageAuthenticationException(json_encode([$th->getMessage(), $th->getLine()]), [], Response::HTTP_UNAUTHORIZED);
                 }
                 throw new CustomUserMessageAuthenticationException($this::INVALID_CREDENTIALS, [], Response::HTTP_UNAUTHORIZED);

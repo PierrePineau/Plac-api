@@ -106,6 +106,16 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
+    // Public infos to get on connected user
+    public function getInfos(): array
+    {
+        return [
+            'id' => $this->id,
+            'email' => $this->email,
+            'roles' => $this->roles,
+        ];
+    }
+
     // CANNOT LISTING ADMIN USERS -> RETURN EMPTY ARRAY
     public function toArray(): array
     {
