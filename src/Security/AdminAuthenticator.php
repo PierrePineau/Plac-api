@@ -131,10 +131,11 @@ class AdminAuthenticator extends JWTAuthenticator
             try {
                 $data = $request->getContent();
                 if (empty($data)) {
-                    throw new \Exception('Empty data', 1);
+                    // throw new \Exception('Empty data', 1);
+                    throw new CustomUserMessageAuthenticationException($this::INVALID_CREDENTIALS, [], Response::HTTP_UNAUTHORIZED);
                 }
                 $data = json_decode($data, true);
-                $this->messenger->debug($data);
+                // $this->messenger->debug($data);
                 $identifier = $data['username'];
                 $password = $data['password'];
 

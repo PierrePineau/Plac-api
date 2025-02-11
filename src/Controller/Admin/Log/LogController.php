@@ -34,25 +34,32 @@ class LogController extends AbstractController
     public function index($path, Request $request, Messenger $messenger): JsonResponse
     {
         try {
+            $log = null;
             if (in_array($path, ['dev.log', 'dev_test.log', 'prod.log'])) {
-                return $this->json($messenger->newResponse([
+                $log = $this->getParameter('kernel.logs_dir') . '/' . $path;
+                if (!file_exists($log)) {
+                    $log = null;
+                }
+                $resp = $messenger->newResponse([
                     'success' => true,
-                    'data' => [
-                        file_get_contents($this->getParameter('kernel.logs_dir') . '/' . $path),
-                    ],
-                ]));
+                    'code' => 'log.found',
+                    'message' => $log,
+                    'data' => file_get_contents($log),
+                ]);
+            }else{
+                $resp = $messenger->newResponse([
+                    'success' => false,
+                    'code' => 'log.not_found',
+                    'message' => 'Log not found',
+                ]);
             }
-            return $this->json($messenger->newResponse([
-                'success' => false,
-                'code' => 'file.not_found',
-            ]));
+            return $this->json($resp, $resp['success'] ? 200 : 404);
         } catch (\Throwable $th) {
-            return $this->json($messenger->newResponse([
+            return $this->json([$messenger->newResponse([
                 'success' => false,
                 'code' => 'file.error',
                 'message' => $th->getMessage(),
-            ]));
+            ])], 500);
         }
-        
     }
 }
