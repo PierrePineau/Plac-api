@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 #[Route('/api/app/organisations/{idOrganisation}/projects/{idProject}/clients', requirements: ['idOrganisation' => '[a-z0-9-]+', 'idProject' => '[a-z0-9-]+'])]
 #[OA\Tag(name: 'Organisation.Project')]
 #[Security(name: 'JWT')]
-class OrganisationProjectNoteController extends AbstractCoreController
+class OrganisationProjectClientController extends AbstractCoreController
 {
     public function __construct(OrganisationProjectClientManager $manager)
     {
