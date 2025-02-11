@@ -18,16 +18,23 @@ class LogController extends AbstractController
     #[OA\Get(
         summary: 'List of logs',
         parameters: [
-        ],
-        responses:
-        [
+            new OA\Parameter(
+                name: 'path',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(
+                    type: 'string',
+                    enum: ['dev.log', 'dev_test.log', 'prod.log']
+                ),
+                description: 'The log file to retrieve'
+            )
         ],
     )]
     #[Route('/{path}', methods: ['GET'])] 
     public function index($path, Request $request, Messenger $messenger): JsonResponse
     {
         try {
-            if (in_array($path, ['dev.log', 'dev_test.log'])) {
+            if (in_array($path, ['dev.log', 'dev_test.log', 'prod.log'])) {
                 return $this->json($messenger->newResponse([
                     'success' => true,
                     'data' => [
