@@ -2,27 +2,24 @@
 
 namespace App\Entity;
 
-use App\Repository\ProjectNoteRepository;
+use App\Repository\ProjectClientRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: ProjectNoteRepository::class)]
-class ProjectNote
+#[ORM\Entity(repositoryClass: ProjectClientRepository::class)]
+class ProjectClient
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'projectNotes')]
+    #[ORM\ManyToOne(inversedBy: 'projectClients')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Project $project = null;
 
-    #[ORM\ManyToOne(inversedBy: 'projectNotes')]
-    private ?Note $note = null;
-
-    public function __construct()
-    {
-    }
+    #[ORM\ManyToOne(inversedBy: 'projectClients')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Client $client = null;
 
     public function getId(): ?int
     {
@@ -41,14 +38,14 @@ class ProjectNote
         return $this;
     }
 
-    public function getNote(): ?Note
+    public function getClient(): ?Client
     {
-        return $this->note;
+        return $this->client;
     }
 
-    public function setNote(?Note $note): static
+    public function setClient(?Client $client): static
     {
-        $this->note = $note;
+        $this->client = $client;
 
         return $this;
     }

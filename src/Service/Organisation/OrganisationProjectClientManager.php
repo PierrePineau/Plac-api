@@ -5,12 +5,12 @@ namespace App\Service\Organisation;
 use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\OrganisationTrait;
 use App\Entity\OrganisationProject;
-use App\Entity\ProjectNote;
+use App\Service\Client\ClientManager;
 use App\Service\Note\NoteManager;
-use App\Service\Project\ProjectNoteManager;
+use App\Service\Project\ProjectClientManager;
 use Symfony\Bundle\SecurityBundle\Security;
 
-class OrganisationProjectNoteManager extends AbstractCoreService
+class OrganisationProjectClientManager extends AbstractCoreService
 {
     use OrganisationTrait;
     public function __construct($container, $entityManager, Security $security)
@@ -19,7 +19,7 @@ class OrganisationProjectNoteManager extends AbstractCoreService
             'code' => 'Organisation.Project',
             'entity' => OrganisationProject::class,
             'security' => $security,
-            'elementManagerClass' => ProjectNoteManager::class,
+            'elementManagerClass' => ProjectClientManager::class,
         ]);
     }
 
@@ -50,18 +50,18 @@ class OrganisationProjectNoteManager extends AbstractCoreService
             $ids[] = $data['id'];
         }
 
-        // On récupère les notes par ids qui ne sont pas déjà liées au projet
-        $noteManager = $this->container->get(NoteManager::class);
-        $notes = $noteManager->_search([
+        // On récupère par ids qui ne sont pas déjà liées au projet
+        $ClientManager = $this->container->get(ClientManager::class);
+        $clients = $ClientManager->_search([
             'organisation' => $data['organisation'],
             'ids' => $data['ids'],
             'excludeIdsProject' => [$project->getId()],
         ]);
 
-        $projectNoteManager = $this->getElementManager();
-        $projectNoteManager->_add([
+        $elementManager = $this->getElementManager();
+        $elementManager->_add([
             'project' => $project,
-            'notes' => $notes,
+            'clients' => $clients,
         ]);
     }
 
@@ -73,9 +73,11 @@ class OrganisationProjectNoteManager extends AbstractCoreService
 
     public function _remove(array $data)
     {
-        $orgProject = $this->_get($data['organisationProject']);
-        $project = $orgProject->getProject();
+        // On va chercher le projet par l'organisation
+        $orgProject = $this->_get($data['idProject']);
+        // $project = $orgProject->getProject();
 
+        // Les ids correspondent aux ids des relations à supprimer
         $ids = $data['ids'] ?? [];
         if (isset($data['id'])) {
             $ids[] = $data['id'];
@@ -83,7 +85,7 @@ class OrganisationProjectNoteManager extends AbstractCoreService
 
         $projectNoteManager = $this->getElementManager();
         $projectNoteManager->_remove([
-            'project' => $project,
+            // 'project' => $project,
             'ids' => $ids,
         ]);
     }
