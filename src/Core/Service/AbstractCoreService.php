@@ -512,7 +512,12 @@ abstract class AbstractCoreService
     public function _delete($id, array $data = []) 
     {
         $element = $this->_get($id);
-        $element->setDeleted(true);
+        if (method_exists($element, 'setDeleted')) {
+            $element->setDeleted(true);
+        }
+        if (method_exists($element, 'setDeletedAt')) {
+            $element->setDeletedAt(new \DateTime());
+        }
 
         $this->em->persist($element);
         $this->isValid($element);

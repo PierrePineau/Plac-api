@@ -83,6 +83,9 @@ class Organisation
     #[ORM\OneToMany(targetEntity: OrganisationStatus::class, mappedBy: 'organisation')]
     private Collection $organisationStatuses;
 
+    #[ORM\Column]
+    private ?bool $deleted = null;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toRfc4122();
@@ -96,6 +99,7 @@ class Organisation
         $this->organisationNotes = new ArrayCollection();
         $this->employeOrganisations = new ArrayCollection();
         $this->organisationStatuses = new ArrayCollection();
+        $this->deleted = false;
     }
 
     public function getId(): ?int
@@ -275,15 +279,6 @@ class Organisation
         return $this;
     }
 
-    public function toArray(): array
-    {
-        return [
-            // 'id' => $this->getId(),
-            'id' => $this->getUuid(),
-            'name' => $this->getName(),
-        ];
-    }
-
     /**
      * @return Collection<int, OrganisationClient>
      */
@@ -430,6 +425,29 @@ class Organisation
                 $organisationStatus->setOrganisation(null);
             }
         }
+
+        return $this;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'uuid' => $this->getUuid(),
+            'name' => $this->getName(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+        ];
+    }
+
+    public function isDeleted(): ?bool
+    {
+        return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): static
+    {
+        $this->deleted = $deleted;
 
         return $this;
     }
