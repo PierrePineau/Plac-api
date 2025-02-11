@@ -110,7 +110,6 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     public function getInfos(): array
     {
         return [
-            'id' => $this->id,
             'email' => $this->email,
             'roles' => $this->roles,
         ];
