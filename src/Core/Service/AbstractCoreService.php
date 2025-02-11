@@ -265,7 +265,7 @@ abstract class AbstractCoreService
     /**
      * REPOSITORY - METHODS
      */
-    public function find($id, bool $throwException = true)
+    public function find($id, bool $throwException = false)
     {
         if ($this->identifier == 'id' && is_numeric($id)) {
             $element = $this->em->getRepository($this->entityClass)->find($id);
@@ -278,7 +278,19 @@ abstract class AbstractCoreService
             $this->notFoundException($this->ELEMENT_NOT_FOUND);
         }
 
-        return $element;
+        if (method_exists($element, 'isDeleted')) {
+            if ($element->isDeleted() && $throwException) {
+                // Si l'utilisateur est un admin, on peut récupérer l'élément
+                if ($this->security->isGranted('ROLE_ADMIN')) {
+                    # code...
+                }else{
+                    // throw new \Exception($this->ELEMENT_NOT_FOUND, 404);
+                    $this->notFoundException($this->ELEMENT_NOT_FOUND);
+                }
+            }
+        }
+
+        return $element ?? null;
     }
     
     public function findByIds(array $ids)
@@ -365,9 +377,9 @@ abstract class AbstractCoreService
             $filters = $this->guardMiddleware($filters);
             $element = $this->_get($id, $filters);
 
-            // $this->middleware([
-            //     $this->ELEMENT => $element,
-            // ]);
+            $this->middleware([
+                $this->ELEMENT => $element,
+            ]);
             
             return $this->messenger->newResponse(
                 [
@@ -384,7 +396,7 @@ abstract class AbstractCoreService
 
     public function _get($id, array $filters = []): mixed
     {
-        $element = $id instanceof $this->entityClass ? $id : $this->find($id);
+        $element = $id instanceof $this->entityClass ? $id : $this->find($id, true);
         // $this->middleware([
         //     $this->ELEMENT => $element,
         // ]);

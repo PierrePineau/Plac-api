@@ -435,8 +435,10 @@ class Organisation
             // 'id' => $this->getId(),
             'uuid' => $this->getUuid(),
             'name' => $this->getName(),
+            'deleted' => $this->isDeleted(),
             'createdAt' => $this->getCreatedAt(),
             'updatedAt' => $this->getUpdatedAt(),
+            'deletedAt' => $this->getDeletedAt(),
         ];
     }
 

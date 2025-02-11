@@ -61,7 +61,7 @@ class OrganisationMiddleware extends Voter
         }
 
         $organisation = $subject['organisation'];
-        if (!$organisation instanceof Organisation) {
+        if (!$organisation instanceof Organisation || $organisation->isDeleted()) {
             // the organisation must exist; if not, deny access
             return false;
         }
