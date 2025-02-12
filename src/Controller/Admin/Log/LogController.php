@@ -43,7 +43,7 @@ class LogController extends AbstractController
                 $resp = $messenger->newResponse([
                     'success' => true,
                     'code' => 'log.found',
-                    'message' => $log,
+                    'message' => 'Log found',
                     'data' => file_get_contents($log),
                 ]);
             }else{
