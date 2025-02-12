@@ -61,7 +61,7 @@ class UserController extends AbstractCoreController
             )
         ]
     )]
-    #[Route('', methods: ['GET'])] 
+    #[Route('', methods: ['GET', 'POST'])] 
     public function index(Request $request): JsonResponse
     {
         return parent::_index($request);
@@ -106,7 +106,7 @@ class UserController extends AbstractCoreController
             )
         ]
     )]
-    #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '[a-z0-9-]+'])]
+    #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '[a-z0-9-]+'])]
     public function get($id, Request $request): JsonResponse
     {
         return parent::_get($id, $request);
