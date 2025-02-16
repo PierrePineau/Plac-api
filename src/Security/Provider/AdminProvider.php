@@ -18,6 +18,7 @@ class AdminProvider implements UserProviderInterface, PasswordUpgraderInterface
     {
         $this->em = $entityManager;
     }
+
     /**
      * Symfony calls this method if you use features like switch_user
      * or remember_me. If you're not using these features, you do not
