@@ -341,7 +341,7 @@ abstract class AbstractCoreService
             foreach ($results as $element) {
                 // On véririe si $product est un objet ou array
                 if (is_object($element)) {
-                    $resultsArray[] = $element->toArray();
+                    $resultsArray[] = $element->toArray('search');
                 } else {
                     $resultsArray[] = $element;
                 }

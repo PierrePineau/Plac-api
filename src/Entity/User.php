@@ -255,13 +255,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function toArray(): array
+    // Pour les listes
+    public function toArray(string $kind = 'default'): array
     {
-        return [
-            'id' => $this->getId(),
-            'uuid' => $this->getUuid(),
-            'email' => $this->getEmail(),
-        ];
+        // Quand on recherche des utilisateurs
+        if ($kind === 'search') {
+            return [
+                'id' => $this->getId(),
+                'uuid' => $this->getUuid(),
+                'email' => $this->getEmail(),
+                'createdAt' => $this->getCreatedAt(),
+                'updatedAt' => $this->getUpdatedAt(),
+            ];
+        }else {
+            return [
+                'id' => $this->getId(),
+                'uuid' => $this->getUuid(),
+                'email' => $this->getEmail(),
+            ];
+        }
     }
 
     // Utilisé une fois l'authentification faite
@@ -272,8 +284,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'id' => $this->getUuid(),
             'email' => $this->getEmail(),
             'roles' => $this->getRoles(),
-            'createdAt' => $this->getCreatedAt(),
-            'updatedAt' => $this->getUpdatedAt(),
         ];
     }
 }

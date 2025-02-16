@@ -116,7 +116,7 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     // CANNOT LISTING ADMIN USERS -> RETURN EMPTY ARRAY
-    public function toArray(): array
+    public function toArray(string $kind = 'default'): array
     {
         return [];
     }

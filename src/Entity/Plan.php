@@ -146,7 +146,7 @@ class Plan
         return $this;
     }
 
-    public function toArray(): array
+    public function toArray(string $kind = 'default'): array
     {
         return [
             'id' => $this->getId(),
