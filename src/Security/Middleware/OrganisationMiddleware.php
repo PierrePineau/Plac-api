@@ -56,7 +56,11 @@ class OrganisationMiddleware extends Voter
         }
 
         $user = $subject['user'];
-        if (!$user instanceof User || !$user instanceof Admin) {
+        if ($user && $user instanceof Admin) {
+            return true;
+        }
+
+        if (!$user instanceof User) {
             // the user must be logged in; if not, deny access
             return false;
         }
