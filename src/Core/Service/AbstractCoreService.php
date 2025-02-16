@@ -5,13 +5,7 @@ namespace App\Core\Service;
 use App\Core\Utils\Messenger;
 use App\Core\Utils\Tools;
 use App\Core\Utils\Pagination;
-use App\Entity\Admin;
-use App\Entity\User;
 use App\Model\AuthenticateUser;
-use Doctrine\Common\Collections\Collection;
-use Symfony\Component\Serializer\Encoder\CsvEncoder;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Serializer\Serializer;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Contracts\EventDispatcher\Event;
 

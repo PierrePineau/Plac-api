@@ -2,6 +2,7 @@
 
 namespace App\Security\Middleware;
 
+use App\Entity\Admin;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
@@ -34,7 +35,7 @@ class UserMiddleware extends Voter
 
         $user = $subject['user'] ?? null;
 
-        if (!$user instanceof User) {
+        if (!$user instanceof User || !$user instanceof Admin) {
             return false;
         }
 

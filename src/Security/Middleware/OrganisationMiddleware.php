@@ -2,6 +2,7 @@
 
 namespace App\Security\Middleware;
 
+use App\Entity\Admin;
 use App\Entity\Organisation;
 use App\Entity\User;
 use App\Entity\UserOrganisation;
@@ -41,7 +42,7 @@ class OrganisationMiddleware extends Voter
             return false;
         }
 
-        if (!$user instanceof User) {
+        if (!$user instanceof User || !$user instanceof Admin) {
             return false;
         }
 
@@ -55,7 +56,7 @@ class OrganisationMiddleware extends Voter
         }
 
         $user = $subject['user'];
-        if (!$user instanceof User) {
+        if (!$user instanceof User || !$user instanceof Admin) {
             // the user must be logged in; if not, deny access
             return false;
         }
