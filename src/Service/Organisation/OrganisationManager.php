@@ -22,19 +22,22 @@ class OrganisationManager extends AbstractCoreService
 
     public function middleware(array $data): mixed
     {
-        // $user = $data['user'];
         $user = $this->getUser();
         $organisation = $data['organisation'];
-        // On vérifie si l'utilisateur connecté est le même que celui que l'on veut modifier
-        // Ou si l'utilisateur connecté est un admin
-        if (!$this->security->isGranted(OrganisationMiddleware::ACCESS, [
+
+        $grantData = [
             'user' => $user,
             'organisation' => $organisation,
-            'userOrganisation' => $this->em->getRepository(UserOrganisation::class)->findOneBy([
+        ];
+
+        // Ou si l'utilisateur connecté est un admin
+        if ($user->isAuthenticate() && !$user->isSuperAdmin()) {
+            $grantData['userOrganisation'] = $this->em->getRepository(UserOrganisation::class)->findOneBy([
                 'user' => $user->getId(),
                 'organisation' => $organisation->getId(),
-            ]),
-        ])) {
+            ]);
+        }
+        if (!$this->security->isGranted(OrganisationMiddleware::ACCESS, $data)) {
             $this->deniedException();
         }
         return $data;

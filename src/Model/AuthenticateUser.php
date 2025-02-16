@@ -20,7 +20,7 @@ class AuthenticateUser implements UserInterface
             $this->email = $user->getEmail();
             $this->roles = $user->getRoles();
             // $this->ref = 
-            $this->type = $user instanceof User ? 'user' : 'admin';
+            $this->type = $user instanceof Admin ? 'admin' : 'user';
         }
     }
 
@@ -42,6 +42,11 @@ class AuthenticateUser implements UserInterface
     public function eraseCredentials(): void
     {
         // Logic to erase the user credentials
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
     }
 
     public function getEmail(): string

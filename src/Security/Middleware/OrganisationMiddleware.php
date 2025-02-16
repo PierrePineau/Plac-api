@@ -6,6 +6,7 @@ use App\Entity\Admin;
 use App\Entity\Organisation;
 use App\Entity\User;
 use App\Entity\UserOrganisation;
+use App\Model\AuthenticateUser;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -42,7 +43,7 @@ class OrganisationMiddleware extends Voter
             return false;
         }
 
-        if (!$user instanceof User || !$user instanceof Admin) {
+        if (!$user instanceof AuthenticateUser || !$user->isAuthenticate()) {
             return false;
         }
 
@@ -56,14 +57,17 @@ class OrganisationMiddleware extends Voter
         }
 
         $user = $subject['user'];
-        if ($user && $user instanceof Admin) {
-            return true;
-        }
-
-        if (!$user instanceof User) {
-            // the user must be logged in; if not, deny access
+        if (!$user instanceof AuthenticateUser || !$user->isAuthenticate()) {
             return false;
         }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+        // if (!$user instanceof User) {
+        //     // the user must be logged in; if not, deny access
+        //     return false;
+        // }
 
         $organisation = $subject['organisation'];
         if (!$organisation instanceof Organisation || $organisation->isDeleted()) {
