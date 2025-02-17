@@ -7,6 +7,40 @@ admin.deleted: 'Administrateur supprimé'
 admin.not_found: 'Administrateur non trouvé'
 admin.already_exists: 'Administrateur déjà existant'
 
+# Entity error #
+entity.not_found: 'Entité non trouvée'
+entity.found: 'Entité trouvée'
+entity.created: 'Entité créée'
+entity.updated: 'Entité mise à jour'
+entity.deleted: 'Entité supprimée'
+entity.already_exists: 'Entité déjà existante'
+entity.email.required: "L'email est requis"
+entity.email.invalid: "L'email est invalide"
+entity.email.already_used: "L'email est déjà utilisé"
+entity.firstname.required: "Le prénom est requis"
+entity.firstname.invalid: "Le prénom est invalide"
+entity.lastname.required: "Le nom est requis"
+entity.lastname.invalid: "Le nom est invalide"
+entity.password.required: "Le mot de passe est requis"
+entity.password.invalid: "Le mot de passe est invalide"
+entity.name.required: "Le nom est requis"
+entity.name.invalid: "Le nom est invalide"
+entity.name.already_used: "Le nom est déjà utilisé"
+entity.name.not_found: "Le nom est introuvable"
+entity.code.required: "Le code est requis"
+entity.code.already_used: "Le code est déjà utilisé"
+entity.code.invalid: "Le code est invalide"
+entity.code.not_found: "Le code est introuvable"
+entity.description.required: "La description est requise"
+entity.description.invalid: "La description est invalide"
+entity.description.not_found: "La description est introuvable"
+entity.position.required: "La position est requise"
+entity.position.invalid: "La position est invalide"
+entity.position.not_found: "La position est introuvable"
+entity.active.required: "L'activation est requise"
+entity.active.invalid: "L'activation est invalide"
+entity.active.not_found: "L'activation est introuvable"
+entity.not_allowed: "Vous ne pouvez pas supprimer ou modifier cet élément"
 
 Site: 'Site'
 Site.created: 'Site créé'
@@ -537,3 +571,5 @@ TeamPerson.found: Membre de l'équipe trouvé
 TeamPerson.created: Membre de l'équipe créé
 TeamPerson.updated: Membre de l'équipe mis à jour
 TeamPerson.deleted: Membre de l'équipe supprimé
+
+organisation.not_allowed: "Vous ne pouvez pas supprimer ou modifier cette organisation"

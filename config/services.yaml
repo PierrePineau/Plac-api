@@ -4,7 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-
+    locale: fr
+    app_locales: en|fr
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -19,6 +20,126 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+# CORE
+    App\Core\:
+            resource: '../src/Core/'
+            autowire: false
+            # autoconfigure: false
+            public: true
+    App\Core\Utils\Messenger:
+        public: true
+        arguments:
+            $container: '@service_container'
+            $logger: '@logger'
+
+    App\Core\Utils\Tools:
+        public: true
+        arguments:
+            # $container: '@service_container'
+            # $logger: '@logger'
+
+# COMMANDES
+    App\Command\:
+        resource: '../src/Command/'
+        public: true
+        arguments:
+            $container: '@service_container'
+
+# SERVICES
+    App\Service\:
+        resource: '../src/Service/'
+        public: true
+        arguments:
+            $container: '@service_container'
+            $entityManager: '@doctrine.orm.default_entity_manager'
+
+
+# SECURITY
+    # App\Security\Customer\CustomerUserProvider:
+    #     public: true
+    #     arguments:
+    #         $container: '@service_container'
+
+    # App\Security\App\AppUserProvider:
+    #     public: true
+    #     arguments:
+    #         $container: '@service_container'
+
+    # App\Security\Shop\ShopAuthenticator:
+    #     public: true
+    #     arguments:
+    #         $container: '@service_container'
+    #         $adminProvider : '@security.user.provider.concrete.admin_user_provider'
+
+# AUTHENTICATORS
+    App\Security\Provider\UserProvider:
+        public: true
+        arguments:
+            # $entityManager: '@doctrine.orm.default_entity_manager'
+    
+    app.user_authenticator:
+        class: App\Security\UserAuthenticator
+        public: true
+        arguments:
+            $container: '@service_container'
+            $translator: '@translator'
+            $passwordHash: '@security.user_password_hasher'
+            $logger: '@logger'
+            $userProvider: '@App\Security\Provider\UserProvider'
+            $adminProvider: '@App\Security\Provider\AdminProvider'
+        parent: lexik_jwt_authentication.security.jwt_authenticator
+
+    admin.user_authenticator:
+        class: App\Security\AdminAuthenticator
+        public: true
+        arguments:
+            $container: '@service_container'
+            $translator: '@translator'
+            $passwordHash: '@security.user_password_hasher'
+            $logger: '@logger'
+            $adminProvider: '@App\Security\Provider\AdminProvider'
+        parent: lexik_jwt_authentication.security.jwt_authenticator
+
+    # customer.custom_authenticator:
+    #     class: App\Security\Customer\CustomerAuthenticator
+    #     public: true
+    #     arguments:
+    #         $translator: '@translator'
+    #         $doctrine: '@doctrine'
+    #         $container: '@service_container'
+    #         $requestStack: '@request_stack'
+    #         $passwordHash: '@security.user_password_hasher'
+    #         $logger: '@logger'
+    #     parent: lexik_jwt_authentication.security.jwt_authenticator
+
+# EVENTS
+    App\EventListener\JWTCreatedListener:
+        public: true
+        arguments:
+            $requestStack: '@request_stack'
+            $entityManager: '@doctrine.orm.default_entity_manager'
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
+
+    App\EventListener\JWTAuthenticationSuccessListener:
+        public: true
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: onAuthenticationSuccessResponse }
+
+# SUBSCRIBERS
+    App\EventSubscriber\:
+        resource: "../src/EventSubscriber/"
+        arguments:
+            $container: "@service_container"
+        tags: ["kernel.event_subscriber"]
+        
+# FIXTURES
+    App\DataFixtures\:
+        resource: '../src/DataFixtures/'
+        public: true
+        arguments:
+            $container: '@service_container'
+
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

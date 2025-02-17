@@ -7,13 +7,18 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "aws/aws-sdk-php": "^3.296",
         "doctrine/dbal": "^3",
         "doctrine/doctrine-bundle": "^2.13",
         "doctrine/doctrine-fixtures-bundle": "^3.6",
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^3.2",
+        "guzzlehttp/guzzle": "^7.9",
+        "knpuniversity/oauth2-client-bundle": "^2.18",
+        "league/oauth2-google": "^4.0",
         "lexik/jwt-authentication-bundle": "^3.1",
         "nelmio/api-doc-bundle": "^4.31",
+        "riskio/oauth2-auth0": "^2.4",
         "sentry/sentry-symfony": "^5.0",
         "symfony/apache-pack": "^1.0",
         "symfony/asset": "7.1.*",
@@ -24,17 +29,20 @@
         "symfony/expression-language": "7.1.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.1.*",
+        "symfony/http-client": "7.1.*",
         "symfony/intl": "7.1.*",
         "symfony/mime": "7.1.*",
         "symfony/monolog-bundle": "^3.10",
         "symfony/notifier": "7.1.*",
         "symfony/password-hasher": "7.1.*",
+        "symfony/rate-limiter": "7.1.*",
         "symfony/runtime": "7.1.*",
         "symfony/security-bundle": "7.1.*",
         "symfony/serializer": "7.1.*",
         "symfony/string": "7.1.*",
         "symfony/translation": "7.1.*",
         "symfony/twig-bundle": "7.1.*",
+        "symfony/uid": "7.1.*",
         "symfony/validator": "7.1.*",
         "symfony/yaml": "7.1.*",
         "twig/extra-bundle": "^3.13",
@@ -90,6 +98,7 @@
         }
     },
     "require-dev": {
-        "symfony/maker-bundle": "^1.61"
+        "symfony/maker-bundle": "^1.61",
+        "symfony/web-profiler-bundle": "7.1.*"
     }
 }

@@ -9,15 +9,16 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
-#[Route('/api')]
+#[Route('/api', name: 'api_')]
 #[OA\Tag(name: 'Auth')]
 class AuthController extends AbstractController
 {
     #[OA\Get(
         summary: 'Logout',
     )]
-    #[Route('/logout', methods: ['GET'])]
+    #[Route('/logout', name: 'logout', methods: ['GET'])]
     public function logout(): JsonResponse
     {
         return $this->json([]);
