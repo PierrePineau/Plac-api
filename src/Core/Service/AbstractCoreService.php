@@ -6,7 +6,9 @@ use App\Core\Utils\Messenger;
 use App\Core\Utils\Tools;
 use App\Core\Utils\Pagination;
 use App\Model\AuthenticateUser;
+use ErrorException;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Contracts\EventDispatcher\Event;
 
 abstract class AbstractCoreService
@@ -91,21 +93,6 @@ abstract class AbstractCoreService
     /**
      * UTILS - METHODS
      */
-    public function deniedException(string $message = 'access.denied', int $code = 403)
-    {
-        throw new \Exception($message, $code);
-    }
-    
-    public function errorException(string $message, int $code = 400)
-    {
-        throw new \Exception($message, $code);
-    }
-
-    public function notFoundException(string $message = 'not_found', int $code = 404)
-    {
-        throw new \Exception($message, $code);
-    }
-    
     public function getUser(): AuthenticateUser
     {
         if (!$this->user || !$this->user instanceof AuthenticateUser) {
@@ -151,7 +138,7 @@ abstract class AbstractCoreService
                 $errorsString .= $error->getMessage()."||";
             }
             // throw new \Exception($errorsString);
-            $this->errorException($errorsString);
+            throw new ErrorException($errorsString);
             return false;
         }else{
             return true;
@@ -164,7 +151,7 @@ abstract class AbstractCoreService
         // On vérifie que l'entité est bien un objet
         if (!is_object($entity)) {
             // throw new \Exception('entity.not_found');
-            $this->notFoundException('entity.not_found');
+            throw new NotFoundHttpException('entity.not_found');
         }
 
         foreach ($index as $key => $option) {
@@ -172,45 +159,45 @@ abstract class AbstractCoreService
                 $setter = 'set'.ucfirst($key);
 
                 if (!method_exists($entity, $setter)) {
-                    $this->errorException('entity.'.$key.'.undefined');
+                    throw new ErrorException('entity.'.$key.'.undefined');
                 }
 
                 if (!(isset($option['nullable']) && $option['nullable'] === true) && ($data[$key] == null || $data[$key] == '')) {
                     // throw new \Exception('entity.'.$key.'.invalid');
-                    $this->errorException('entity.'.$key.'.invalid');
+                    throw new ErrorException('entity.'.$key.'.invalid');
                 }
 
                 // On vérifie la valeur
                 $type = $option['type'] ?? 'string';
                 if (!in_array($type, ['string', 'int', 'int+', 'integer', 'float', 'float+', 'bool', 'boolean'])) {
                     // throw new \Exception('entity.'.$key.'.type.invalid');
-                    $this->errorException('entity.'.$key.'.type.invalid');
+                    throw new ErrorException('entity.'.$key.'.type.invalid');
                 }
 
                 if (in_array($type, ['string'])) {
                     // On vérifie si c'est une chaine de caractère
                     if (!is_string($data[$key])) {
                         // throw new \Exception('entity.'.$key.'.invalid');
-                        $this->errorException('entity.'.$key.'.invalid');
+                        throw new ErrorException('entity.'.$key.'.invalid');
                     }
                     // $data[$key] = (string) $data[$key];
                 }elseif (in_array($type, ['int', 'integer', 'float', 'int+', 'float+'])) {
                     // On vérifie si c'est un nombre
                     if (!is_numeric($data[$key])) {
                         // throw new \Exception('entity.'.$key.'.invalid');
-                        $this->errorException('entity.'.$key.'.invalid');
+                        throw new ErrorException('entity.'.$key.'.invalid');
                     }
 
                     // Si int+ et float+ on vérifie si c'est un entier positif
                     if (in_array($type, ['int+', 'float+']) && !($data[$key] > 0)) {
                         // throw new \Exception('entity.'.$key.'.invalid');
-                        $this->errorException('entity.'.$key.'.invalid');
+                        throw new ErrorException('entity.'.$key.'.invalid');
                     }
                 }elseif (in_array($type, ['bool', 'boolean'])) {
                     // On vérifie si c'est un booléen
                     if (!in_array($data[$key], ['0', 0, 'false', false, '1', 1, 'true', true, 'on'])) {
                         // throw new \Exception('entity.'.$key.'.invalid');
-                        $this->errorException('entity.'.$key.'.invalid');
+                        throw new ErrorException('entity.'.$key.'.invalid');
                     }else{
                         $data[$key] = ($data[$key] === true || in_array($data[$key], ['1', 1, 'true', 'on'])) ? true : false;
                     }
@@ -221,7 +208,7 @@ abstract class AbstractCoreService
             }else if (isset($option['required']) && $option['required'] === true) {
                 // Si la valeur est obligatoire et qu'elle n'est pas présente
                 // throw new \Exception('entity.'.$key.'.required');
-                $this->errorException('entity.'.$key.'.required');
+                throw new ErrorException('entity.'.$key.'.required');
             }
         }
         return $entity;
@@ -235,7 +222,7 @@ abstract class AbstractCoreService
     public function getElementManager()
     {
         if (!$this->elementManagerClass) {
-            throw new \Exception('element.manager.not_found');
+            throw new NotFoundHttpException('element.manager.not_found');
         }
         return $this->container->get($this->elementManagerClass);
     }
@@ -271,7 +258,7 @@ abstract class AbstractCoreService
 
         if (!$element && $throwException) {
             // throw new \Exception($this->ELEMENT_NOT_FOUND, 404);
-            $this->notFoundException($this->ELEMENT_NOT_FOUND);
+            throw new NotFoundHttpException($this->ELEMENT_NOT_FOUND);
         }
 
         if (method_exists($element, 'isDeleted')) {
@@ -281,7 +268,7 @@ abstract class AbstractCoreService
                     # code...
                 }else{
                     // throw new \Exception($this->ELEMENT_NOT_FOUND, 404);
-                    $this->notFoundException($this->ELEMENT_NOT_FOUND);
+                    throw new NotFoundHttpException($this->ELEMENT_NOT_FOUND);
                 }
             }
         }
@@ -313,7 +300,7 @@ abstract class AbstractCoreService
         $element = $this->em->getRepository($this->entityClass)->findOneByAccess($data);
         if (!$element && $throwException) {
             // throw new \Exception($this->ELEMENT_NOT_FOUND, 404);
-            $this->notFoundException($this->ELEMENT_NOT_FOUND);
+            throw new NotFoundHttpException($this->ELEMENT_NOT_FOUND);
         }
         return $element;
     }
