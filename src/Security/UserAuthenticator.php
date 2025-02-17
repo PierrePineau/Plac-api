@@ -58,11 +58,11 @@ class UserAuthenticator extends JWTAuthenticator
         EventDispatcherInterface $eventDispatcher,
         TokenExtractorInterface $tokenExtractor,
         UserProviderInterface $userProvider,
-        TranslatorInterface $translator = null,
+        TranslatorInterface $translator,
         $container,
         UserPasswordHasherInterface $passwordHash,
         LoggerInterface $logger,
-        AdminProvider $adminProvider
+        UserProviderInterface $adminProvider
     )
     {
         parent::__construct(
@@ -107,7 +107,7 @@ class UserAuthenticator extends JWTAuthenticator
         if (!isset($payload[$idClaim])) {
             throw new InvalidPayloadException($idClaim);
         }
-        
+
         // Si dans les roles de l'utilisateur on trouve ROLE_SUPER_ADMIN
         if (in_array("ROLE_SUPER_ADMIN", $payload['roles'])) {
             $passport = new SelfValidatingPassport(

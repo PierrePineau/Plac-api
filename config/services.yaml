@@ -86,6 +86,7 @@ services:
             $passwordHash: '@security.user_password_hasher'
             $logger: '@logger'
             $userProvider: '@App\Security\Provider\UserProvider'
+            $adminProvider: '@App\Security\Provider\AdminProvider'
         parent: lexik_jwt_authentication.security.jwt_authenticator
 
     admin.user_authenticator:
