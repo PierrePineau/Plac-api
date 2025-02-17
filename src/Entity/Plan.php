@@ -21,14 +21,8 @@ class Plan
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column]
-    private ?float $price = 0;
-
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = '';
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $renewalFrequency = null;
 
     /**
      * @var Collection<int, Module>
@@ -37,12 +31,28 @@ class Plan
     private Collection $modules;
 
     #[ORM\Column]
-    private ?bool $enable = null;
+    private ?bool $custom = false;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $monthlyPrice = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $annualPrice = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $maxDevices = null;
+
+    #[ORM\Column]
+    private ?int $position = null;
+
+    #[ORM\Column]
+    private ?bool $enabled = false;
 
     public function __construct()
     {
         $this->modules = new ArrayCollection();
+        $this->custom = false;
+        $this->enabled = false;
     }
 
     public function getId(): ?int
@@ -62,18 +72,6 @@ class Plan
         return $this;
     }
 
-    public function getPrice(): ?float
-    {
-        return $this->price;
-    }
-
-    public function setPrice(float $price): static
-    {
-        $this->price = $price;
-
-        return $this;
-    }
-
     public function getDescription(): ?string
     {
         return $this->description;
@@ -82,18 +80,6 @@ class Plan
     public function setDescription(?string $description): static
     {
         $this->description = $description;
-
-        return $this;
-    }
-
-    public function getRenewalFrequency(): ?string
-    {
-        return $this->renewalFrequency;
-    }
-
-    public function setRenewalFrequency(string $renewalFrequency): static
-    {
-        $this->renewalFrequency = $renewalFrequency;
 
         return $this;
     }
@@ -134,29 +120,87 @@ class Plan
         return $this;
     }
 
-    public function isEnable(): ?bool
-    {
-        return $this->enable;
-    }
-
-    public function setEnable(bool $enable): static
-    {
-        $this->enable = $enable;
-
-        return $this;
-    }
-
     public function toArray(string $kind = 'default'): array
     {
         return [
             'id' => $this->getId(),
-            'name' => $this->getName(),
-            'price' => $this->getPrice(),
-            'description' => $this->getDescription(),
-            'renewalFrequency' => $this->getRenewalFrequency(),
-            // 'modules' => $this->getModules()->map(fn (Module $module) => $module->toArray())->toArray(),
             'reference' => $this->getReference(),
-            'enable' => $this->isEnable(),
+            'name' => $this->getName(),
+            'description' => $this->getDescription(),
+            // 'modules' => $this->getModules()->map(fn (Module $module) => $module->toArray())->toArray(),
+            'enabled' => $this->isEnabled(),
         ];
+    }
+
+    public function isCustom(): ?bool
+    {
+        return $this->custom;
+    }
+
+    public function setCustom(bool $custom): static
+    {
+        $this->custom = $custom;
+
+        return $this;
+    }
+
+    public function getMonthlyPrice(): ?float
+    {
+        return $this->monthlyPrice;
+    }
+
+    public function setMonthlyPrice(?float $monthlyPrice): static
+    {
+        $this->monthlyPrice = $monthlyPrice;
+
+        return $this;
+    }
+
+    public function getAnnualPrice(): ?float
+    {
+        return $this->annualPrice;
+    }
+
+    public function setAnnualPrice(?float $annualPrice): static
+    {
+        $this->annualPrice = $annualPrice;
+
+        return $this;
+    }
+
+    public function getMaxDevices(): ?float
+    {
+        return $this->maxDevices;
+    }
+
+    public function setMaxDevices(?float $maxDevices): static
+    {
+        $this->maxDevices = $maxDevices;
+
+        return $this;
+    }
+
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(int $position): static
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
+    public function isEnabled(): ?bool
+    {
+        return $this->enabled;
+    }
+
+    public function setEnabled(bool $enabled): static
+    {
+        $this->enabled = $enabled;
+
+        return $this;
     }
 }

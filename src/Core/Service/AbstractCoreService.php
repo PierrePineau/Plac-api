@@ -138,7 +138,7 @@ abstract class AbstractCoreService
                 $errorsString .= $error->getMessage()."||";
             }
             // throw new \Exception($errorsString);
-            throw new ErrorException($errorsString);
+            throw new ErrorException($errorsString, 400);
             return false;
         }else{
             return true;
@@ -164,40 +164,40 @@ abstract class AbstractCoreService
 
                 if (!(isset($option['nullable']) && $option['nullable'] === true) && ($data[$key] == null || $data[$key] == '')) {
                     // throw new \Exception('entity.'.$key.'.invalid');
-                    throw new ErrorException('entity.'.$key.'.invalid');
+                    throw new ErrorException('entity.'.$key.'.invalid', 400);
                 }
 
                 // On vérifie la valeur
                 $type = $option['type'] ?? 'string';
                 if (!in_array($type, ['string', 'int', 'int+', 'integer', 'float', 'float+', 'bool', 'boolean'])) {
                     // throw new \Exception('entity.'.$key.'.type.invalid');
-                    throw new ErrorException('entity.'.$key.'.type.invalid');
+                    throw new ErrorException('entity.'.$key.'.type.invalid', 400);
                 }
 
                 if (in_array($type, ['string'])) {
                     // On vérifie si c'est une chaine de caractère
                     if (!is_string($data[$key])) {
                         // throw new \Exception('entity.'.$key.'.invalid');
-                        throw new ErrorException('entity.'.$key.'.invalid');
+                        throw new ErrorException('entity.'.$key.'.invalid', 400);
                     }
                     // $data[$key] = (string) $data[$key];
                 }elseif (in_array($type, ['int', 'integer', 'float', 'int+', 'float+'])) {
                     // On vérifie si c'est un nombre
                     if (!is_numeric($data[$key])) {
                         // throw new \Exception('entity.'.$key.'.invalid');
-                        throw new ErrorException('entity.'.$key.'.invalid');
+                        throw new ErrorException('entity.'.$key.'.invalid', 400);
                     }
 
                     // Si int+ et float+ on vérifie si c'est un entier positif
                     if (in_array($type, ['int+', 'float+']) && !($data[$key] > 0)) {
                         // throw new \Exception('entity.'.$key.'.invalid');
-                        throw new ErrorException('entity.'.$key.'.invalid');
+                        throw new ErrorException('entity.'.$key.'.invalid', 400);
                     }
                 }elseif (in_array($type, ['bool', 'boolean'])) {
                     // On vérifie si c'est un booléen
                     if (!in_array($data[$key], ['0', 0, 'false', false, '1', 1, 'true', true, 'on'])) {
                         // throw new \Exception('entity.'.$key.'.invalid');
-                        throw new ErrorException('entity.'.$key.'.invalid');
+                        throw new ErrorException('entity.'.$key.'.invalid', 400);
                     }else{
                         $data[$key] = ($data[$key] === true || in_array($data[$key], ['1', 1, 'true', 'on'])) ? true : false;
                     }
@@ -208,7 +208,7 @@ abstract class AbstractCoreService
             }else if (isset($option['required']) && $option['required'] === true) {
                 // Si la valeur est obligatoire et qu'elle n'est pas présente
                 // throw new \Exception('entity.'.$key.'.required');
-                throw new ErrorException('entity.'.$key.'.required');
+                throw new ErrorException('entity.'.$key.'.required', 400);
             }
         }
         return $entity;
@@ -248,6 +248,10 @@ abstract class AbstractCoreService
     /**
      * REPOSITORY - METHODS
      */
+    public function findAll()
+    {
+        return $this->em->getRepository($this->entityClass)->findAll();
+    }
     public function find($id, bool $throwException = false)
     {
         if ($this->identifier == 'id' && is_numeric($id)) {
@@ -319,6 +323,9 @@ abstract class AbstractCoreService
         $count = $this->em->getRepository($this->entityClass)->search($filters, true);
         $results = [];
         $resultsArray = [];
+        $userAuth = $this->getUser();
+        $filters['authenticateUser'] = $this->getUser();
+        $filters['isSuperAdmin'] = $userAuth->isSuperAdmin();
         if ($count) {
             $results = $this->em->getRepository($this->entityClass)->search($filters);
             foreach ($results as $element) {

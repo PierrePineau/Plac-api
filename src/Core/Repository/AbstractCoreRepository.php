@@ -124,7 +124,7 @@ abstract class AbstractCoreRepository extends ServiceEntityRepository
     //     return $query->getQuery()
     //         ->getResult();
     // }
-    private function configureSearch(array $search = [])
+    public function configureSearch(array $search = [])
     {
         $page = isset($search['page']) && $search['page'] > 0 ? $search['page'] : 1;
         $limit = isset($search['limit']) && $search['limit'] > 0 ? $search['limit'] : 10;

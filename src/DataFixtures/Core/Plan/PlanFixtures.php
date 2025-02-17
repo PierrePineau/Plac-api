@@ -24,6 +24,7 @@ class PlanFixtures extends Fixture implements FixtureGroupInterface
         ];
     }
 
+    // php bin/console doctrine:fixtures:load --group="default.generate" --append
     public static function getGroups(): array
     {
         return ['default.generate', 'default.plan'];
