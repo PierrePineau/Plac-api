@@ -6,6 +6,7 @@ use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\UserTrait;
 use App\Entity\UserOrganisation;
 use App\Service\Organisation\OrganisationManager;
+use ErrorException;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class UserOrganisationManager extends AbstractCoreService
@@ -34,7 +35,7 @@ class UserOrganisationManager extends AbstractCoreService
 
         // Un utilisateur ne peut avoir qu'une seule organisation
         if ($userOrganisation) {
-            throw new ErrorCoreException($this->ELEMENT_ALREADY_EXISTS);
+            throw new ErrorException($this->ELEMENT_ALREADY_EXISTS);
             // throw new \Exception($this->ELEMENT_ALREADY_EXISTS, 400);
         }
 
