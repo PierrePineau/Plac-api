@@ -120,18 +120,6 @@ class Plan
         return $this;
     }
 
-    public function toArray(string $kind = 'default'): array
-    {
-        return [
-            'id' => $this->getId(),
-            'reference' => $this->getReference(),
-            'name' => $this->getName(),
-            'description' => $this->getDescription(),
-            // 'modules' => $this->getModules()->map(fn (Module $module) => $module->toArray())->toArray(),
-            'enabled' => $this->isEnabled(),
-        ];
-    }
-
     public function isCustom(): ?bool
     {
         return $this->custom;
@@ -202,5 +190,21 @@ class Plan
         $this->enabled = $enabled;
 
         return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            'id' => $this->getId(),
+            'reference' => $this->getReference(),
+            'name' => $this->getName(),
+            'description' => $this->getDescription(),
+            'monthlyPrice' => $this->getMonthlyPrice(),
+            'annualPrice' => $this->getAnnualPrice(),
+            'maxDevices' => $this->getMaxDevices(),
+            'position' => $this->getPosition(),
+            'modules' => $this->getModules()->map(fn (Module $module) => $module->toArray())->toArray(),
+            'enabled' => $this->isEnabled(),
+        ];
     }
 }
