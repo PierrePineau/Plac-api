@@ -34,7 +34,7 @@ class UserOrganisationManager extends AbstractCoreService
 
         // Un utilisateur ne peut avoir qu'une seule organisation
         if ($userOrganisation) {
-            $this->errorException($this->ELEMENT_ALREADY_EXISTS);
+            throw new ErrorCoreException($this->ELEMENT_ALREADY_EXISTS);
             // throw new \Exception($this->ELEMENT_ALREADY_EXISTS, 400);
         }
 

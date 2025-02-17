@@ -104,7 +104,7 @@ class StatusManager extends AbstractCoreService
         $needFlush = $data['flush'] ?? false;
 
         if (!in_array($type, self::TYPES)) {
-            $this->errorException($this->ELEMENT_INVALID. '.type');
+            throw new ErrorCoreException($this->ELEMENT_INVALID. '.type');
         }
 
         $defaultStatus = self::DEFAULT_STATUS[$type];
@@ -125,7 +125,7 @@ class StatusManager extends AbstractCoreService
         $element = new Status();
 
         if (isset($data['type']) && !in_array($data['type'], self::TYPES)) {
-            $this->errorException($this->ELEMENT_INVALID. '.type');
+            throw new ErrorCoreException($this->ELEMENT_INVALID. '.type');
         }
 
         $this->setData(

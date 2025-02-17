@@ -2,10 +2,12 @@
 
 namespace App\Service\User;
 
+use App\Core\Exception\DeniedException;
 use App\Core\Service\AbstractCoreService;
 use App\Entity\User;
 use App\Security\Middleware\UserMiddleware;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserManager extends AbstractCoreService
@@ -37,7 +39,7 @@ class UserManager extends AbstractCoreService
             'user' => $user,
             'userConnected' => $userConnected,
         ])) {
-            $this->deniedException();
+            throw new DeniedException();
         }
         return $data;
     }
@@ -46,7 +48,7 @@ class UserManager extends AbstractCoreService
     {
         $element = parent::find($id, $throwException);
         if ($element->isDeleted() && !$this->security->isGranted('ROLE_ADMIN')) {
-            $this->notFoundException();
+            throw new NotFoundHttpException();
         }
 
         return $element;
@@ -55,18 +57,18 @@ class UserManager extends AbstractCoreService
     public function _create(array $data)
     {
         if (!isset($data['email'])) {
-            $this->errorException($this->ELEMENT.'.email.required');
+            throw new NotFoundHttpException($this->ELEMENT.'.email.required');
         }
 
         if (!isset($data['password'])) {
-            $this->errorException($this->ELEMENT.'.password.required');
+            throw new NotFoundHttpException($this->ELEMENT.'.password.required');
         }
 
         $email = $data['email'];
         $password = $data['password'];
 
         if ($this->findOneBy(['email' => $email])) {
-            $this->errorException($this->ELEMENT_ALREADY_EXISTS);
+            throw new NotFoundHttpException($this->ELEMENT_ALREADY_EXISTS);
         }
         
         $user = new User();

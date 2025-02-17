@@ -6,6 +6,7 @@ use App\Core\Service\AbstractCoreService;
 use App\Entity\Organisation;
 use App\Entity\UserOrganisation;
 use App\Security\Middleware\OrganisationMiddleware;
+use App\Core\Exception\DeniedException;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class OrganisationManager extends AbstractCoreService
@@ -24,7 +25,6 @@ class OrganisationManager extends AbstractCoreService
     {
         $user = $this->getUser();
         $organisation = $data['organisation'];
-
         $grantData = [
             'user' => $user,
             'organisation' => $organisation,
@@ -37,8 +37,8 @@ class OrganisationManager extends AbstractCoreService
                 'organisation' => $organisation->getId(),
             ]);
         }
-        if (!$this->security->isGranted(OrganisationMiddleware::ACCESS, $data)) {
-            $this->deniedException();
+        if (!$this->security->isGranted(OrganisationMiddleware::ACCESS, $grantData)) {
+            throw new DeniedException();
         }
         return $data;
     }

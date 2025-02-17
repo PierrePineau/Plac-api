@@ -35,18 +35,15 @@ class OrganisationMiddleware extends Voter
         if (!in_array($attribute, self::VOTERS)) {
             return false;
         }
-
         $organisation = $subject['organisation'] ?? null;
         $user = $subject['user'] ?? null;
 
         if (!$organisation instanceof Organisation) {
             return false;
         }
-
         if (!$user instanceof AuthenticateUser || !$user->isAuthenticate()) {
             return false;
         }
-
         return true;
     }
 
