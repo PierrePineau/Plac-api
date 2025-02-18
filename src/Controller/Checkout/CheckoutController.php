@@ -30,11 +30,17 @@ class CheckoutController extends AbstractCoreController
                 schema: new OA\Schema(
                     type: 'object',
                     properties: [
-                        'host' => new OA\Property(
+                        'success_url' => new OA\Property(
                             type: 'string',
-                            property: 'host',
-                            description: 'App host for return url',
-                            example: 'http://localhost:3000'
+                            property: 'success_url',
+                            description: 'Success url after payment',
+                            example: 'http://localhost:3000/checkout/success'
+                        ),
+                        'cancel_url' => new OA\Property(
+                            type: 'string',
+                            property: 'cancel_url',
+                            description: 'cancel url after payment',
+                            example: 'http://localhost:3000/checkout/cancel'
                         ),
                         'idPlan' => new OA\Property(
                             type: 'integer',

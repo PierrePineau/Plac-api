@@ -20,20 +20,28 @@ class StripeGateway implements CheckoutInterface
         $plan = $data['plan'];
         $subscription = $data['subscription'];
 
-        $host = $data['host'];
+        $successUrl = $data['success_url'];
+        $cancelUrl = $data['cancel_url'];
+        // $host = $data['host'];
         
-        // On vérifie que host est bien un domaine du style "https://ton-site.com"
-        if (!filter_var($host, FILTER_VALIDATE_URL)) {
-            throw new \Exception('Invalid host');
+        // On vérifie que les urls est bien un domaine du style "https://ton-site.com"
+        if (!filter_var($successUrl, FILTER_VALIDATE_URL)) {
+            throw new \Exception('Invalid success url');
         }
-        // On check que host ne termine pas par un slash
-        if (substr($host, -1) === '/') {
-            $host = substr($host, 0, -1);
+        if (!filter_var($cancelUrl, FILTER_VALIDATE_URL)) {
+            throw new \Exception('Invalid cancel url');
+        }
+        // On check que mes urls ne termine pas par un slash
+        if (substr($successUrl, -1) === '/') {
+            $successUrl = substr($successUrl, 0, -1);
+        }
+        if (substr($cancelUrl, -1) === '/') {
+            $cancelUrl = substr($cancelUrl, 0, -1);
         }
 
         $priceId = $plan->getStripeId();
-        $successUrl = $host . '/checkout/success?session_id={CHECKOUT_SESSION_ID}';
-        $cancelUrl = $host . '/checkout/cancel';
+        $successUrl = $successUrl . '?session_id={CHECKOUT_SESSION_ID}';
+        // $cancelUrl = $cancelUrl . '/checkout/cancel';
 
         // Create a new session
         Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);

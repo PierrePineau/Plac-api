@@ -100,7 +100,8 @@ class CheckoutManager extends AbstractCoreService
         return $gateway->create([
             'plan' => $plan,
             'subscription' => $subscription,
-            'host' => $data['host']
+            'success_url' => $data['success_url'],
+            'cancel_url' => $data['cancel_url'],
         ]);
     }
 
