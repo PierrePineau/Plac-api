@@ -20,6 +20,7 @@
         "nelmio/api-doc-bundle": "^4.31",
         "riskio/oauth2-auth0": "^2.4",
         "sentry/sentry-symfony": "^5.0",
+        "stripe/stripe-php": "^16.5",
         "symfony/apache-pack": "^1.0",
         "symfony/asset": "7.1.*",
         "symfony/cache": "7.1.*",

@@ -29,9 +29,6 @@ class Organisation
     #[ORM\OneToMany(targetEntity: UserOrganisation::class, mappedBy: 'organisation')]
     private Collection $userOrganisations;
 
-    #[ORM\OneToOne(mappedBy: 'organisation', cascade: ['persist', 'remove'])]
-    private ?OrganisationSubscription $organisationSubscription = null;
-
     /**
      * @var Collection<int, OrganisationModule>
      */
@@ -86,6 +83,15 @@ class Organisation
     #[ORM\Column]
     private ?bool $deleted = null;
 
+    #[ORM\OneToOne(inversedBy: 'organisation', cascade: ['persist', 'remove'])]
+    private ?Subscription $currentSubscription = null;
+
+    /**
+     * @var Collection<int, Subscription>
+     */
+    #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'organisation')]
+    private Collection $subscriptions;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toRfc4122();
@@ -100,6 +106,7 @@ class Organisation
         $this->employeOrganisations = new ArrayCollection();
         $this->organisationStatuses = new ArrayCollection();
         $this->deleted = false;
+        $this->subscriptions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -162,23 +169,6 @@ class Organisation
                 $userOrganisation->setOrganisation(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getOrganisationSubscription(): ?OrganisationSubscription
-    {
-        return $this->organisationSubscription;
-    }
-
-    public function setOrganisationSubscription(OrganisationSubscription $organisationSubscription): static
-    {
-        // set the owning side of the relation if necessary
-        if ($organisationSubscription->getOrganisation() !== $this) {
-            $organisationSubscription->setOrganisation($this);
-        }
-
-        $this->organisationSubscription = $organisationSubscription;
 
         return $this;
     }
@@ -450,6 +440,48 @@ class Organisation
     public function setDeleted(bool $deleted): static
     {
         $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    public function getCurrentSubscription(): ?Subscription
+    {
+        return $this->currentSubscription;
+    }
+
+    public function setCurrentSubscription(?Subscription $currentSubscription): static
+    {
+        $this->currentSubscription = $currentSubscription;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Subscription>
+     */
+    public function getSubscriptions(): Collection
+    {
+        return $this->subscriptions;
+    }
+
+    public function addSubscription(Subscription $subscription): static
+    {
+        if (!$this->subscriptions->contains($subscription)) {
+            $this->subscriptions->add($subscription);
+            $subscription->setOrganisation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubscription(Subscription $subscription): static
+    {
+        if ($this->subscriptions->removeElement($subscription)) {
+            // set the owning side to null (unless already changed)
+            if ($subscription->getOrganisation() === $this) {
+                $subscription->setOrganisation(null);
+            }
+        }
 
         return $this;
     }
