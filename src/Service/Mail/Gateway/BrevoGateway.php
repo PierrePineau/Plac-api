@@ -34,19 +34,15 @@ class BrevoGateway implements MailGatewayInterface
             'name' => $expediteur['nom'] ?? $_ENV['MAIL_SENDER_NAME'],
             'email' => $expediteur['email'] ?? $_ENV['MAIL_SENDER_EMAIL']
         ];
-
-        $recipients = [];
         // Les destinataires
-        foreach ($mail->getDestinataires() as $dest) {
-            $recipients[] = ['email' => $dest['email'], 'name' => $dest['nom']];
-        }
-
         $emailData = [
             'sender' => $sender,
             'to' => $mail->getDestinataires(),
             'subject' => $mail->getSubject(),
             'htmlContent' => $mail->getHtml()
         ];
+
+        dump($mail->getDestinataires());
 
         // Les destinataires en copie cachée
         if (!empty($mail->getBcc())) {

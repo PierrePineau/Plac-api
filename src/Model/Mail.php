@@ -44,12 +44,6 @@ class Mail
         return $this->to;
     }
 
-    public function setTo(array $to): self
-    {
-        $this->to = $to;
-        return $this;
-    }
-
     public function addTo(array $destinataire): self
     {
         $this->to[] = [

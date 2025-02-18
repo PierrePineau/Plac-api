@@ -29,7 +29,7 @@ class MailTransactionnelTestCommand extends Command
     {
         $this
             // the command help shown when running the command with the "--help" option
-            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Skip confirmation')
+            // ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Skip confirmation')
         ;
     }
 
@@ -39,15 +39,7 @@ class MailTransactionnelTestCommand extends Command
 
         $io->title('Test mail Transactionnel');
         // $emailReceiver = $input->getArgument('email');
-        if (!$input->getOption('yes')) {
-            $confirm = $io->confirm('Do you want to send a transactionnal email ? (Penser à désactiver les autres subscribers avant d\envoyer les emails de test)', true);
-            if (!$confirm) {
-                $io->text('Aborted');
-                return Command::SUCCESS;
-            }
-        }
-
-        $emailReceiver = $io->ask('Email receiver', 'user@gmail.com');
+        $emailReceiver = $io->ask('Email receiver', 'pierrepineau.pro@gmail.com');
         try {
             $io->text('Send emails to ' . $emailReceiver);
             $userManager = $this->container->get(UserManager::class);

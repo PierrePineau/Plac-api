@@ -35,15 +35,17 @@ class MailSubscriber implements EventSubscriberInterface
                 $mailManager = $this->container->get(MailManager::class);
 
                 $mail = new Mail();
-                $mail->setTo([
+                $mail->addDestinataire([
                     'name' => $user->getFullName(),
                     'email' => $user->getEmail()
                 ]);
+                $mail->setSubject(MailManager::SUBJECT_USER_ACTIVATION);
                 $resp = $mailManager->send($mail, [
                     'template' => MailManager::TEMPLATE_USER_ACTIVATION,
                     'data' => [
                         'user' => $user,
-                        'url' => 'https://gestion-plac.fr/verify'
+                        'url' => 'https://gestion-plac.fr/verify',
+                        'subject' => $mail->getSubject() // Pour le render twig
                     ]
                 ]);
             }
@@ -51,7 +53,9 @@ class MailSubscriber implements EventSubscriberInterface
             return $event;
         } catch (\Throwable $th) {
             //throw $th;
+            throw new \Exception($th->getMessage(), 400, $th);
             $event->setError($th->getMessage());
+            
             $event->stopPropagation();
 
             return $event;

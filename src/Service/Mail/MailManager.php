@@ -2,6 +2,7 @@
 
 namespace App\Service\Mail;
 
+use App\Core\Utils\Messenger;
 use App\Model\Mail;
 use App\Service\Mail\Gateway\BrevoGateway;
 use Twig\Environment;
@@ -10,6 +11,7 @@ class MailManager
 {
     private $container;
     private $em;
+    private $messenger;
     private $twig;
 
     public const ELEMENT = 'Mail';
@@ -17,10 +19,19 @@ class MailManager
 
     // CODE TEMPLATE
     public const TEMPLATE_USER_ACTIVATION = 'user/activation';
+    public const SUBJECT_USER_ACTIVATION = 'mail.subject.user_activation';
+    
     public const TEMPLATE_USER_PASSWORD_RESET = 'user/password_reset';
+    public const SUBJECT_USER_PASSWORD_RESET = 'mail.subject.user_password_reset';
+
     public const TEMPLATE_USER_PASSWORD_RESET_SUCCESS = 'user/password_reset_success';
+    public const SUBJECT_USER_PASSWORD_RESET_SUCCESS = 'mail.subject.user_password_reset_success';
+
     public const TEMPLATE_USER_WELCOME = 'user/welcome';
+    public const TEMPLATE_USER_WELCOME_SUBJECT = 'mail.subject.user_welcome';
+    
     public const TEMPLATE_USER_DELETED = 'user/deleted';
+    public const SUBJECT_USER_DELETED = 'mail.subject.user_deleted';
 
     public const TEMPLATES = [
         'USER_ACTIVATION' => self::TEMPLATE_USER_ACTIVATION,
@@ -38,6 +49,7 @@ class MailManager
     {
         $this->container = $container;
         $this->em = $entityManager;
+        $this->messenger = $this->container->get(Messenger::class);
         $this->twig = $twig;
     }
 
