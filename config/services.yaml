@@ -113,18 +113,18 @@ services:
     #     parent: lexik_jwt_authentication.security.jwt_authenticator
 
 # EVENTS
-    App\EventListener\JWTCreatedListener:
-        public: true
-        arguments:
-            $requestStack: '@request_stack'
-            $entityManager: '@doctrine.orm.default_entity_manager'
-        tags:
-            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
+    # App\EventListener\JWTCreatedListener:
+    #     public: true
+    #     arguments:
+    #         $requestStack: '@request_stack'
+    #         $entityManager: '@doctrine.orm.default_entity_manager'
+    #     tags:
+    #         - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
 
-    App\EventListener\JWTAuthenticationSuccessListener:
-        public: true
-        tags:
-            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: onAuthenticationSuccessResponse }
+    # App\EventListener\JWTAuthenticationSuccessListener:
+    #     public: true
+    #     tags:
+    #         - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: onAuthenticationSuccessResponse }
 
 # SUBSCRIBERS
     App\EventSubscriber\:

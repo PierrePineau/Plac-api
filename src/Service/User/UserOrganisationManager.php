@@ -4,6 +4,7 @@ namespace App\Service\User;
 
 use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\UserTrait;
+use App\Entity\Organisation;
 use App\Entity\UserOrganisation;
 use App\Service\Organisation\OrganisationManager;
 use ErrorException;
@@ -20,6 +21,30 @@ class UserOrganisationManager extends AbstractCoreService
             'entity' => UserOrganisation::class,
             'security' => $security,
         ]);
+    }
+
+    public function getOrganisationsByUser(array $data)
+    {
+        // On récupère les organisation non deleted
+        $userOrganisations = $this->repo->getUserOrganisationsByUser([
+            'idUser' => $data['idUser'],
+        ]);
+
+        $org = [];
+        foreach ($userOrganisations as $userOrganisation) {
+            $org[] = $userOrganisation->getOrganisation();
+        }
+
+        return $org;
+    }
+
+    public function getOneOrganisationsByUser(array $data): Organisation
+    {
+        // On récupère les organisation non deleted
+        $userOrganisation = $this->repo->getOneUserOrganisationsByUser([
+            'idUser' => $data['idUser'],
+        ]);
+        return $userOrganisation ? $userOrganisation->getOrganisation() : null;
     }
 
     public function _create(array $data)
@@ -45,6 +70,8 @@ class UserOrganisationManager extends AbstractCoreService
         $userOrganisation = new UserOrganisation();
         $userOrganisation->setUser($user);
         $userOrganisation->setOrganisation($organisation);
+
+        $organisation->setOwner($user);
 
         $this->em->persist($userOrganisation);
         $this->isValid($userOrganisation);

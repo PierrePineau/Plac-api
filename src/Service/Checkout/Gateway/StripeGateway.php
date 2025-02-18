@@ -2,12 +2,12 @@
 
 namespace App\Service\Checkout\Gateway;
 
-use App\Core\Interface\CheckoutInterface;
+use App\Core\Interface\CheckoutGatewayInterface;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use Symfony\Bundle\SecurityBundle\Security;
 
-class StripeGateway implements CheckoutInterface
+class StripeGateway implements CheckoutGatewayInterface
 {
     public function __construct(
         private $container,
@@ -68,5 +68,4 @@ class StripeGateway implements CheckoutInterface
 
         return [];
     }
-
 }

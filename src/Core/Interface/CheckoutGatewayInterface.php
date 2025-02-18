@@ -2,7 +2,7 @@
 
 namespace App\Core\Interface;
 
-interface CheckoutInterface
+interface CheckoutGatewayInterface
 {
     /**
      * Create a new session.

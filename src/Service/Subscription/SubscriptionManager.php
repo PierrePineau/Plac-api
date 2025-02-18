@@ -41,9 +41,6 @@ class SubscriptionManager extends AbstractCoreService
         /**
          * ABONNEMENT MENSUEL - ANNUEL
          */
-        // $subscription->setRenewalFrequency($renewalFrequency);
-        // $subscription->setPrice($renewalFrequency === 'monthly' ? $plan->getMonthlyPrice() : $plan->getAnnualPrice());
-        
         if ($subscription->getRenewalFrequency() === 'monthly') {
             $subscription->setEndAt((new \DateTime())->modify('+1 month'));
         } else {

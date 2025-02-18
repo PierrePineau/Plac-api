@@ -92,6 +92,9 @@ class Organisation
     #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'organisation')]
     private Collection $subscriptions;
 
+    #[ORM\ManyToOne]
+    private ?User $owner = null;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toRfc4122();
@@ -419,19 +422,6 @@ class Organisation
         return $this;
     }
 
-    public function toArray(string $kind = 'default'): array
-    {
-        return [
-            // 'id' => $this->getId(),
-            'uuid' => $this->getUuid(),
-            'name' => $this->getName(),
-            'deleted' => $this->isDeleted(),
-            'createdAt' => $this->getCreatedAt(),
-            'updatedAt' => $this->getUpdatedAt(),
-            'deletedAt' => $this->getDeletedAt(),
-        ];
-    }
-
     public function isDeleted(): ?bool
     {
         return $this->deleted;
@@ -484,5 +474,42 @@ class Organisation
         }
 
         return $this;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): static
+    {
+        $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'uuid' => $this->getUuid(),
+            'name' => $this->getName(),
+            'deleted' => $this->isDeleted(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+            'deletedAt' => $this->getDeletedAt(),
+        ];
+    }
+
+    // Utilisé au moment de la connection
+    public function getInfos(): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'uuid' => $this->getUuid(),
+            'name' => $this->getName(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+        ];
     }
 }

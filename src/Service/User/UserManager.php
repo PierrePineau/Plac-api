@@ -5,6 +5,7 @@ namespace App\Service\User;
 use App\Core\Exception\DeniedException;
 use App\Core\Service\AbstractCoreService;
 use App\Entity\User;
+use App\Event\Client\UserCreateEvent;
 use App\Security\Middleware\UserMiddleware;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -83,6 +84,21 @@ class UserManager extends AbstractCoreService
         // $this->em->flush(); // Le flush est fait dans le AbstractCoreService
         // Vérifie si l'entité est valide
         $this->isValid($user);
+
+        $this->em->flush();
+        
+        $authenticateUser = $this->getUser();
+        if ($authenticateUser->isAuthenticate() && $authenticateUser->isSuperAdmin()) {
+            // On ne fait rien si c'est le superAdmin qui créer un compte
+        }else{
+            // Envoie email activation du compte
+            // On send un event pour la création d'un compte
+            $newEvent = new UserCreateEvent([
+                'user' => $user,
+            ]);
+            // Send Event
+            $this->dispatchEvent($newEvent);
+        }
         return $user;
     }
 

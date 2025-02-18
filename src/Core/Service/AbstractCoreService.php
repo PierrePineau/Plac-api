@@ -15,6 +15,7 @@ abstract class AbstractCoreService
 {
     public $container;
     public $em;
+    public $repo;
     public $entityClass;
     public $elementManagerClass;
     public $identifier;
@@ -54,6 +55,7 @@ abstract class AbstractCoreService
         $this->container = $container;
         $this->em = $entityManager;
         $this->entityClass = $data['entity'];
+        $this->repo = $this->em->getRepository($this->entityClass);
         $this->ELEMENT = strtolower($data['code']);
         $this->identifier = $data['identifier'] ?? 'id';
         $this->guardActions = $data['guardActions'] ?? [];
@@ -250,14 +252,14 @@ abstract class AbstractCoreService
      */
     public function findAll()
     {
-        return $this->em->getRepository($this->entityClass)->findAll();
+        return $this->repo->findAll();
     }
     public function find($id, bool $throwException = false)
     {
         if ($this->identifier == 'id' && is_numeric($id)) {
-            $element = $this->em->getRepository($this->entityClass)->find($id);
+            $element = $this->repo->find($id);
         }else{
-            $element = $this->em->getRepository($this->entityClass)->findOneBy([$this->identifier => $id]);
+            $element = $this->repo->findOneBy([$this->identifier => $id]);
         }
 
         if (!$element && $throwException) {
@@ -283,25 +285,25 @@ abstract class AbstractCoreService
     public function findByIds(array $ids)
     {
         if ($this->identifier == 'id') {
-            return $this->em->getRepository($this->entityClass)->findBy(['id' => $ids]);
+            return $this->repo->findBy(['id' => $ids]);
         }else {
-            return $this->em->getRepository($this->entityClass)->findBy([$this->identifier => $ids]);
+            return $this->repo->findBy([$this->identifier => $ids]);
         }
     }
 
     public function findOneBy(array $filters = [])
     {
-        return $this->em->getRepository($this->entityClass)->findOneBy($filters);
+        return $this->repo->findOneBy($filters);
     }
 
     public function findBy(array $filters = [])
     {
-        return $this->em->getRepository($this->entityClass)->findBy($filters);
+        return $this->repo->findBy($filters);
     }
 
     public function findOneByAccess(array $data, bool $throwException = true)
     {
-        $element = $this->em->getRepository($this->entityClass)->findOneByAccess($data);
+        $element = $this->repo->findOneByAccess($data);
         if (!$element && $throwException) {
             // throw new \Exception($this->ELEMENT_NOT_FOUND, 404);
             throw new NotFoundHttpException($this->ELEMENT_NOT_FOUND);
@@ -311,7 +313,7 @@ abstract class AbstractCoreService
 
     public function findByAccess(array $data)
     {
-        return $this->em->getRepository($this->entityClass)->findByAccess($data);
+        return $this->repo->findByAccess($data);
     }
 
     /**
@@ -320,14 +322,14 @@ abstract class AbstractCoreService
 
     public function _search(array $filters = []): array
     {
-        $count = $this->em->getRepository($this->entityClass)->search($filters, true);
+        $count = $this->repo->search($filters, true);
         $results = [];
         $resultsArray = [];
         $userAuth = $this->getUser();
         $filters['authenticateUser'] = $this->getUser();
         $filters['isSuperAdmin'] = $userAuth->isSuperAdmin();
         if ($count) {
-            $results = $this->em->getRepository($this->entityClass)->search($filters);
+            $results = $this->repo->search($filters);
             foreach ($results as $element) {
                 // On véririe si $product est un objet ou array
                 if (is_object($element)) {

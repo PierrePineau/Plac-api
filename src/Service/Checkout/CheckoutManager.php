@@ -64,6 +64,8 @@ class CheckoutManager extends AbstractCoreService
         $idPlan = $data['idPlan'];
         $idOrganisation = $data['idOrganisation'];
 
+        throw new \Exception('Webhook stripe not configured');
+
         // On récupère l'organisation via l'id (uuid)
         $organisationManager = $this->container->get(OrganisationManager::class);
         $organisation = $organisationManager->findOneBy(['uuid' => $idOrganisation]);
@@ -111,6 +113,4 @@ class CheckoutManager extends AbstractCoreService
         $gateway = $this->container->get(self::GATEWAYS['STRIPE']);
         return $gateway->webhook($data);
     }
-    
-
 }
