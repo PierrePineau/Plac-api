@@ -4,7 +4,7 @@ namespace App\Controller\App\Organisation\Project;
 
 use App\Controller\Core\AbstractCoreController;
 use App\Entity\Project;
-use App\Service\Project\ProjectManager;
+use App\Service\Organisation\OrganisationProjectManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Security;
@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 #[Security(name: 'JWT')]
 class OrganisationProjectController extends AbstractCoreController
 {
-    public function __construct(ProjectManager $manager)
+    public function __construct(OrganisationProjectManager $manager)
     {
         parent::__construct($manager, Project::class);
     }

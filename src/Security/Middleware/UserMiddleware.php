@@ -2,7 +2,9 @@
 
 namespace App\Security\Middleware;
 
+use App\Entity\Admin;
 use App\Entity\User;
+use App\Model\AuthenticateUser;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -33,7 +35,6 @@ class UserMiddleware extends Voter
         }
 
         $user = $subject['user'] ?? null;
-
         if (!$user instanceof User) {
             return false;
         }
@@ -49,9 +50,13 @@ class UserMiddleware extends Voter
             return true;
         }
 
-        if (!$userConnected instanceof User) {
+        if (!$userConnected instanceof AuthenticateUser || !$userConnected->isAuthenticate()) {
             // the user must be logged in; if not, deny access
             return false;
+        }
+
+        if ($userConnected->isSuperAdmin()) {
+            return true;
         }
 
         // you know $subject is a User object, thanks to `supports()`
@@ -66,20 +71,20 @@ class UserMiddleware extends Voter
         };
     }
 
-    private function canAccess(User $user, User $userConnected): bool
+    private function canAccess(User $user, AuthenticateUser $userConnected): bool
     {
-        return $userConnected === $user;
+        return $userConnected->getId() === $user->getId();
     }
 
-    private function canUpdate(User $user, User $userConnected): bool
+    private function canUpdate(User $user, AuthenticateUser $userConnected): bool
     {
         // Spécification de la logique métier pour update ?  
-        return $userConnected === $user;
+        return $userConnected->getId() === $user->getId();
     }
 
-    private function canDelete(User $user, User $userConnected): bool
+    private function canDelete(User $user, AuthenticateUser $userConnected): bool
     {
         // Spécification de la logique métier pour delete ?  
-        return $userConnected === $user;
+        return $userConnected->getId() === $user->getId();
     }
 }

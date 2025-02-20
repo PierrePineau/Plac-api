@@ -18,34 +18,48 @@ class LogController extends AbstractController
     #[OA\Get(
         summary: 'List of logs',
         parameters: [
-        ],
-        responses:
-        [
+            new OA\Parameter(
+                name: 'path',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(
+                    type: 'string',
+                    enum: ['dev.log', 'dev_test.log', 'prod.log']
+                ),
+                description: 'The log file to retrieve'
+            )
         ],
     )]
     #[Route('/{path}', methods: ['GET'])] 
     public function index($path, Request $request, Messenger $messenger): JsonResponse
     {
         try {
-            if (in_array($path, ['dev.log', 'dev_test.log'])) {
-                return $this->json($messenger->newResponse([
+            $log = null;
+            if (in_array($path, ['dev.log', 'dev_test.log', 'prod.log'])) {
+                $log = $this->getParameter('kernel.logs_dir') . '/' . $path;
+                if (!file_exists($log)) {
+                    $log = null;
+                }
+                $resp = $messenger->newResponse([
                     'success' => true,
-                    'data' => [
-                        file_get_contents($this->getParameter('kernel.logs_dir') . '/' . $path),
-                    ],
-                ]));
+                    'code' => 'log.found',
+                    'message' => 'Log found',
+                    'data' => file_get_contents($log),
+                ]);
+            }else{
+                $resp = $messenger->newResponse([
+                    'success' => false,
+                    'code' => 'log.not_found',
+                    'message' => 'Log not found',
+                ]);
             }
-            return $this->json($messenger->newResponse([
-                'success' => false,
-                'code' => 'file.not_found',
-            ]));
+            return $this->json($resp, $resp['success'] ? 200 : 404);
         } catch (\Throwable $th) {
-            return $this->json($messenger->newResponse([
+            return $this->json([$messenger->newResponse([
                 'success' => false,
                 'code' => 'file.error',
                 'message' => $th->getMessage(),
-            ]));
+            ])], 500);
         }
-        
     }
 }

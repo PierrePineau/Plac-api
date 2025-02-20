@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Core\Utils\Messenger;
+use App\Security\Provider\AdminProvider;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\InvalidPayloadException;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
@@ -39,6 +40,7 @@ class UserAuthenticator extends JWTAuthenticator
     private $passwordHash;
 
     private $userProvider;
+    private $adminProvider;
     private $jwtManager;
 
     public const API_KEY_INVALID = 'api_key_invalid';
@@ -56,10 +58,11 @@ class UserAuthenticator extends JWTAuthenticator
         EventDispatcherInterface $eventDispatcher,
         TokenExtractorInterface $tokenExtractor,
         UserProviderInterface $userProvider,
-        TranslatorInterface $translator = null,
+        TranslatorInterface $translator,
         $container,
         UserPasswordHasherInterface $passwordHash,
         LoggerInterface $logger,
+        UserProviderInterface $adminProvider
     )
     {
         parent::__construct(
@@ -75,6 +78,7 @@ class UserAuthenticator extends JWTAuthenticator
         $this->translator = $translator;
         $this->logger = $logger;
         $this->userProvider = $userProvider;
+        $this->adminProvider = $adminProvider;
     }
 
     public function authenticate(Request $request): Passport
@@ -104,12 +108,22 @@ class UserAuthenticator extends JWTAuthenticator
             throw new InvalidPayloadException($idClaim);
         }
 
-        $passport = new SelfValidatingPassport(
-            new UserBadge(
-                (string) $payload[$idClaim],
-                fn ($userIdentifier) => $this->loadUser($payload, $userIdentifier)
-            )
-        );
+        // Si dans les roles de l'utilisateur on trouve ROLE_SUPER_ADMIN
+        if (in_array("ROLE_SUPER_ADMIN", $payload['roles'])) {
+            $passport = new SelfValidatingPassport(
+                new UserBadge(
+                    (string) $payload[$idClaim],
+                    fn ($userIdentifier) => $this->adminProvider->loadUserByIdentifier($userIdentifier)
+                )
+            );
+        }else{
+            $passport = new SelfValidatingPassport(
+                new UserBadge(
+                    (string) $payload[$idClaim],
+                    fn ($userIdentifier) => $this->loadUser($payload, $userIdentifier)
+                )
+            );
+        }
 
         $passport->setAttribute('payload', $payload);
         $passport->setAttribute('token', $token);

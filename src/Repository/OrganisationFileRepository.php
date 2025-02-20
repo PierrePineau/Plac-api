@@ -13,35 +13,11 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class OrganisationFileRepository extends AbstractCoreRepository
 {
+    private $accessRelation;
     use OrganisationRepositoryTrait;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, OrganisationFile::class);
-    }
-
-    public function createAccessQueryBuilder(array $data)
-    {
-        $idOrganisation = $this->getIdOrganisation($data);
-        return $this->createNewQueryBuilder()
-            ->innerJoin("{$this->alias}.organisationFiles", 'rel')
-            ->andWhere('rel.organisation = :organisation')
-            ->setParameter('organisation', $idOrganisation);
-    }
-
-    public function findByAccess($data): array
-    {
-        return $this->createAccessQueryBuilder($data)
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findOneByAccess($data): ?OrganisationFile
-    {
-        $id = $data['idFile'];
-        return $this->createAccessQueryBuilder($data)
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->setMaxResults(1)
-            ->getOneOrNullResult();
+        $this->accessRelation = 'organisationFiles';
     }
 }

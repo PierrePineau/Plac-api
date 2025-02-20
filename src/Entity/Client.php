@@ -50,6 +50,12 @@ class Client
     #[ORM\OneToMany(targetEntity: OrganisationClient::class, mappedBy: 'client')]
     private Collection $organisationClients;
 
+    /**
+     * @var Collection<int, ProjectClient>
+     */
+    #[ORM\OneToMany(targetEntity: ProjectClient::class, mappedBy: 'client')]
+    private Collection $projectClients;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toRfc4122();
@@ -58,6 +64,7 @@ class Client
         $this->archived = false;
         $this->deleted = false;
         $this->organisationClients = new ArrayCollection();
+        $this->projectClients = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -208,7 +215,7 @@ class Client
         return $this;
     }
 
-    public function toArray(): array
+    public function toArray(string $kind = 'default'): array
     {
         return [
             // 'id' => $this->getId(),
@@ -219,5 +226,35 @@ class Client
             'lastname' => $this->getLastname(),
             'phone' => $this->getPhone(),
         ];
+    }
+
+    /**
+     * @return Collection<int, ProjectClient>
+     */
+    public function getProjectClients(): Collection
+    {
+        return $this->projectClients;
+    }
+
+    public function addProjectClient(ProjectClient $projectClient): static
+    {
+        if (!$this->projectClients->contains($projectClient)) {
+            $this->projectClients->add($projectClient);
+            $projectClient->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProjectClient(ProjectClient $projectClient): static
+    {
+        if ($this->projectClients->removeElement($projectClient)) {
+            // set the owning side to null (unless already changed)
+            if ($projectClient->getClient() === $this) {
+                $projectClient->setClient(null);
+            }
+        }
+
+        return $this;
     }
 }

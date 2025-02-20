@@ -29,20 +29,11 @@ class Organisation
     #[ORM\OneToMany(targetEntity: UserOrganisation::class, mappedBy: 'organisation')]
     private Collection $userOrganisations;
 
-    #[ORM\OneToOne(mappedBy: 'organisation', cascade: ['persist', 'remove'])]
-    private ?OrganisationSubscription $organisationSubscription = null;
-
     /**
      * @var Collection<int, OrganisationModule>
      */
     #[ORM\OneToMany(targetEntity: OrganisationModule::class, mappedBy: 'organisation')]
     private Collection $organisationModules;
-
-    /**
-     * @var Collection<int, Employe>
-     */
-    #[ORM\ManyToMany(targetEntity: Employe::class, mappedBy: 'organisations')]
-    private Collection $employes;
 
     /**
      * @var Collection<int, OrganisationFile>
@@ -89,6 +80,21 @@ class Organisation
     #[ORM\OneToMany(targetEntity: OrganisationStatus::class, mappedBy: 'organisation')]
     private Collection $organisationStatuses;
 
+    #[ORM\Column]
+    private ?bool $deleted = null;
+
+    #[ORM\OneToOne(inversedBy: 'organisation', cascade: ['persist', 'remove'])]
+    private ?Subscription $currentSubscription = null;
+
+    /**
+     * @var Collection<int, Subscription>
+     */
+    #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'organisation')]
+    private Collection $subscriptions;
+
+    #[ORM\ManyToOne]
+    private ?User $owner = null;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toRfc4122();
@@ -96,13 +102,14 @@ class Organisation
         $this->updatedAt = new \DateTime();
         $this->userOrganisations = new ArrayCollection();
         $this->organisationModules = new ArrayCollection();
-        $this->employes = new ArrayCollection();
         $this->organisationFiles = new ArrayCollection();
         $this->organisationClients = new ArrayCollection();
         $this->organisationProjects = new ArrayCollection();
         $this->organisationNotes = new ArrayCollection();
         $this->employeOrganisations = new ArrayCollection();
         $this->organisationStatuses = new ArrayCollection();
+        $this->deleted = false;
+        $this->subscriptions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -169,23 +176,6 @@ class Organisation
         return $this;
     }
 
-    public function getOrganisationSubscription(): ?OrganisationSubscription
-    {
-        return $this->organisationSubscription;
-    }
-
-    public function setOrganisationSubscription(OrganisationSubscription $organisationSubscription): static
-    {
-        // set the owning side of the relation if necessary
-        if ($organisationSubscription->getOrganisation() !== $this) {
-            $organisationSubscription->setOrganisation($this);
-        }
-
-        $this->organisationSubscription = $organisationSubscription;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, OrganisationModule>
      */
@@ -211,33 +201,6 @@ class Organisation
             if ($organisationModule->getOrganisation() === $this) {
                 $organisationModule->setOrganisation(null);
             }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Employe>
-     */
-    public function getEmployes(): Collection
-    {
-        return $this->employes;
-    }
-
-    public function addEmploye(Employe $employe): static
-    {
-        if (!$this->employes->contains($employe)) {
-            $this->employes->add($employe);
-            $employe->addOrganisation($this);
-        }
-
-        return $this;
-    }
-
-    public function removeEmploye(Employe $employe): static
-    {
-        if ($this->employes->removeElement($employe)) {
-            $employe->removeOrganisation($this);
         }
 
         return $this;
@@ -307,15 +270,6 @@ class Organisation
         $this->deletedAt = $deletedAt;
 
         return $this;
-    }
-
-    public function toArray(): array
-    {
-        return [
-            // 'id' => $this->getId(),
-            'id' => $this->getUuid(),
-            'name' => $this->getName(),
-        ];
     }
 
     /**
@@ -466,5 +420,96 @@ class Organisation
         }
 
         return $this;
+    }
+
+    public function isDeleted(): ?bool
+    {
+        return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): static
+    {
+        $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    public function getCurrentSubscription(): ?Subscription
+    {
+        return $this->currentSubscription;
+    }
+
+    public function setCurrentSubscription(?Subscription $currentSubscription): static
+    {
+        $this->currentSubscription = $currentSubscription;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Subscription>
+     */
+    public function getSubscriptions(): Collection
+    {
+        return $this->subscriptions;
+    }
+
+    public function addSubscription(Subscription $subscription): static
+    {
+        if (!$this->subscriptions->contains($subscription)) {
+            $this->subscriptions->add($subscription);
+            $subscription->setOrganisation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubscription(Subscription $subscription): static
+    {
+        if ($this->subscriptions->removeElement($subscription)) {
+            // set the owning side to null (unless already changed)
+            if ($subscription->getOrganisation() === $this) {
+                $subscription->setOrganisation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): static
+    {
+        $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'uuid' => $this->getUuid(),
+            'name' => $this->getName(),
+            'deleted' => $this->isDeleted(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+            'deletedAt' => $this->getDeletedAt(),
+        ];
+    }
+
+    // Utilisé au moment de la connection
+    public function getInfos(): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'uuid' => $this->getUuid(),
+            'name' => $this->getName(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+        ];
     }
 }

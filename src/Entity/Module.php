@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\ModuleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ModuleRepository::class)]
@@ -23,7 +22,7 @@ class Module
     private ?string $name = null;
 
     #[ORM\Column]
-    private ?bool $enable = false;
+    private ?bool $enabled = false;
 
     /**
      * @var Collection<int, OrganisationModule>
@@ -31,9 +30,13 @@ class Module
     #[ORM\OneToMany(targetEntity: OrganisationModule::class, mappedBy: 'module')]
     private Collection $organisationModules;
 
+    #[ORM\Column]
+    private ?int $position = null;
+
     public function __construct()
     {
         $this->organisationModules = new ArrayCollection();
+        $this->enabled = false;
     }
 
     public function getId(): ?int
@@ -65,14 +68,14 @@ class Module
         return $this;
     }
 
-    public function isEnable(): ?bool
+    public function isEnabled(): ?bool
     {
-        return $this->enable;
+        return $this->enabled;
     }
 
-    public function setEnable(bool $enable): static
+    public function setEnabled(bool $enabled): static
     {
-        $this->enable = $enable;
+        $this->enabled = $enabled;
 
         return $this;
     }
@@ -107,13 +110,26 @@ class Module
         return $this;
     }
 
-    public function toArray(): array
+    public function toArray(string $kind = 'default'): array
     {
         return [
             'id' => $this->getId(),
             'reference' => $this->getReference(),
             'name' => $this->getName(),
-            'enable' => $this->isEnable(),
+            'position' => $this->getPosition(),
+            'enabled' => $this->isEnabled(),
         ];
+    }
+
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(int $position): static
+    {
+        $this->position = $position;
+
+        return $this;
     }
 }

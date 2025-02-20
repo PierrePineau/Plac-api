@@ -48,20 +48,20 @@ class UserController extends AbstractCoreController
             )
         ]
     )]
-    // #[OA\Post(
-    //     summary: 'Create new',
-    //     responses:
-    //     [
-    //         '201' => new OA\Response(
-    //             response: 201,
-    //             description: '',
-    //             content: new OA\JsonContent(
-    //                 ref: '#/components/schemas/response'
-    //             ) 
-    //         )
-    //     ]
-    // )]
-    #[Route('', methods: ['GET'])] 
+    #[OA\Post(
+        summary: 'Create new',
+        responses:
+        [
+            '201' => new OA\Response(
+                response: 201,
+                description: '',
+                content: new OA\JsonContent(
+                    ref: '#/components/schemas/response'
+                ) 
+            )
+        ]
+    )]
+    #[Route('', methods: ['GET', 'POST'])] 
     public function index(Request $request): JsonResponse
     {
         return parent::_index($request);
@@ -106,7 +106,7 @@ class UserController extends AbstractCoreController
             )
         ]
     )]
-    #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '[a-z0-9-]+'])]
+    #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '[a-z0-9-]+'])]
     public function get($id, Request $request): JsonResponse
     {
         return parent::_get($id, $request);

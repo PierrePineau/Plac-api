@@ -10,13 +10,13 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<ProjectNote>
  */
-class ProjectNoteRepository extends AbstractCoreRelationnalRepository
+class ProjectNoteRepository extends AbstractCoreRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ProjectNote::class, [
             'alias' => 'pn',
-            'identifiers' => ['project', 'note'],
+            // 'identifiers' => ['project', 'note'],
         ]);
     }
 

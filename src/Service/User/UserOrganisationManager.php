@@ -4,8 +4,10 @@ namespace App\Service\User;
 
 use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\UserTrait;
+use App\Entity\Organisation;
 use App\Entity\UserOrganisation;
 use App\Service\Organisation\OrganisationManager;
+use ErrorException;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class UserOrganisationManager extends AbstractCoreService
@@ -21,6 +23,30 @@ class UserOrganisationManager extends AbstractCoreService
         ]);
     }
 
+    public function getOrganisationsByUser(array $data)
+    {
+        // On récupère les organisation non deleted
+        $userOrganisations = $this->repo->getUserOrganisationsByUser([
+            'idUser' => $data['idUser'],
+        ]);
+
+        $org = [];
+        foreach ($userOrganisations as $userOrganisation) {
+            $org[] = $userOrganisation->getOrganisation();
+        }
+
+        return $org;
+    }
+
+    public function getOneOrganisationsByUser(array $data): Organisation
+    {
+        // On récupère les organisation non deleted
+        $userOrganisation = $this->repo->getOneUserOrganisationsByUser([
+            'idUser' => $data['idUser'],
+        ]);
+        return $userOrganisation ? $userOrganisation->getOrganisation() : null;
+    }
+
     public function _create(array $data)
     {
         $user = $this->getCustomer([
@@ -32,8 +58,9 @@ class UserOrganisationManager extends AbstractCoreService
             'user' => $user->getId(),
         ]);
 
+        // Un utilisateur ne peut avoir qu'une seule organisation
         if ($userOrganisation) {
-            $this->errorException($this->ELEMENT_ALREADY_EXISTS);
+            throw new ErrorException($this->ELEMENT_ALREADY_EXISTS);
             // throw new \Exception($this->ELEMENT_ALREADY_EXISTS, 400);
         }
 
@@ -44,9 +71,11 @@ class UserOrganisationManager extends AbstractCoreService
         $userOrganisation->setUser($user);
         $userOrganisation->setOrganisation($organisation);
 
+        $organisation->setOwner($user);
+
         $this->em->persist($userOrganisation);
         $this->isValid($userOrganisation);
 
-        return $userOrganisation;
+        return $organisation;
     }
 }

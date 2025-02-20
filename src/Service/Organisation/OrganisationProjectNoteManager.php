@@ -34,10 +34,15 @@ class OrganisationProjectNoteManager extends AbstractCoreService
         return $this->_getOrganisationElement($id, $filters);
     }
 
+    public function _create(array $data)
+    {
+        return $this->_add($data);
+    }
+
     public function _add(array $data)
     {
         // On ajoute une ou plusieurs notes à un projet
-        $orgProject = $this->_get($data['organisationProject']);
+        $orgProject = $this->_get($data['idProject']);
         $project = $orgProject->getProject();
 
         $ids = $data['ids'] ?? [];

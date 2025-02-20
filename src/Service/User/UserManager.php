@@ -2,10 +2,13 @@
 
 namespace App\Service\User;
 
+use App\Core\Exception\DeniedException;
 use App\Core\Service\AbstractCoreService;
 use App\Entity\User;
+use App\Event\Client\UserCreateEvent;
 use App\Security\Middleware\UserMiddleware;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserManager extends AbstractCoreService
@@ -37,7 +40,7 @@ class UserManager extends AbstractCoreService
             'user' => $user,
             'userConnected' => $userConnected,
         ])) {
-            $this->deniedException();
+            throw new DeniedException();
         }
         return $data;
     }
@@ -46,7 +49,7 @@ class UserManager extends AbstractCoreService
     {
         $element = parent::find($id, $throwException);
         if ($element->isDeleted() && !$this->security->isGranted('ROLE_ADMIN')) {
-            $this->notFoundException();
+            throw new NotFoundHttpException();
         }
 
         return $element;
@@ -55,18 +58,18 @@ class UserManager extends AbstractCoreService
     public function _create(array $data)
     {
         if (!isset($data['email'])) {
-            $this->errorException($this->ELEMENT.'.email.required');
+            throw new NotFoundHttpException($this->ELEMENT.'.email.required');
         }
 
         if (!isset($data['password'])) {
-            $this->errorException($this->ELEMENT.'.password.required');
+            throw new NotFoundHttpException($this->ELEMENT.'.password.required');
         }
 
         $email = $data['email'];
         $password = $data['password'];
 
         if ($this->findOneBy(['email' => $email])) {
-            $this->errorException($this->ELEMENT_ALREADY_EXISTS);
+            throw new NotFoundHttpException($this->ELEMENT_ALREADY_EXISTS);
         }
         
         $user = new User();
@@ -81,6 +84,21 @@ class UserManager extends AbstractCoreService
         // $this->em->flush(); // Le flush est fait dans le AbstractCoreService
         // Vérifie si l'entité est valide
         $this->isValid($user);
+
+        $this->em->flush();
+        
+        $authenticateUser = $this->getUser();
+        if ($authenticateUser->isAuthenticate() && $authenticateUser->isSuperAdmin()) {
+            // On ne fait rien si c'est le superAdmin qui créer un compte
+        }else{
+            // Envoie email activation du compte
+            // On send un event pour la création d'un compte
+            $newEvent = new UserCreateEvent([
+                'user' => $user,
+            ]);
+            // Send Event
+            $this->dispatchEvent($newEvent);
+        }
         return $user;
     }
 

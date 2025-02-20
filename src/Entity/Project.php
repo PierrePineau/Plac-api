@@ -56,6 +56,12 @@ class Project
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
+    /**
+     * @var Collection<int, ProjectClient>
+     */
+    #[ORM\OneToMany(targetEntity: ProjectClient::class, mappedBy: 'project')]
+    private Collection $projectClients;
+
     public function __construct()
     {
         $this->projectNotes = new ArrayCollection();
@@ -65,6 +71,7 @@ class Project
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
         $this->deleted = false;
+        $this->projectClients = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -108,7 +115,7 @@ class Project
         return $this;
     }
 
-    public function toArray(): array
+    public function toArray(string $kind = 'default'): array
     {
         return [
             'id' => $this->getId(),
@@ -251,6 +258,36 @@ class Project
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ProjectClient>
+     */
+    public function getProjectClients(): Collection
+    {
+        return $this->projectClients;
+    }
+
+    public function addProjectClient(ProjectClient $projectClient): static
+    {
+        if (!$this->projectClients->contains($projectClient)) {
+            $this->projectClients->add($projectClient);
+            $projectClient->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProjectClient(ProjectClient $projectClient): static
+    {
+        if ($this->projectClients->removeElement($projectClient)) {
+            // set the owning side to null (unless already changed)
+            if ($projectClient->getProject() === $this) {
+                $projectClient->setProject(null);
+            }
+        }
 
         return $this;
     }

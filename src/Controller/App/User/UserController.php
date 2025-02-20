@@ -84,7 +84,7 @@ class UserController extends AbstractCoreController
         ]
     )]
     #[IsGranted('ROLE_USER', statusCode: 423)]
-    #[Route('/{id}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '[a-z0-9-]+'])]
+    #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '[a-z0-9-]+'])]
     public function get($id, Request $request): JsonResponse
     {
         return parent::_get($id, $request);

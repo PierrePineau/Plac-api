@@ -21,14 +21,8 @@ class Plan
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column]
-    private ?float $price = 0;
-
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = '';
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $renewalFrequency = null;
 
     /**
      * @var Collection<int, Module>
@@ -37,12 +31,38 @@ class Plan
     private Collection $modules;
 
     #[ORM\Column]
-    private ?bool $enable = null;
+    private ?bool $custom = false;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $maxDevices = null;
+
+    #[ORM\Column]
+    private ?int $position = null;
+
+    #[ORM\Column]
+    private ?bool $enabled = false;
+
+    /**
+     * @var Collection<int, Subscription>
+     */
+    #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'plan')]
+    private Collection $subscriptions;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $stripeId = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $price = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $renewalFrequency = null;
 
     public function __construct()
     {
         $this->modules = new ArrayCollection();
+        $this->custom = false;
+        $this->enabled = false;
+        $this->subscriptions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -62,18 +82,6 @@ class Plan
         return $this;
     }
 
-    public function getPrice(): ?float
-    {
-        return $this->price;
-    }
-
-    public function setPrice(float $price): static
-    {
-        $this->price = $price;
-
-        return $this;
-    }
-
     public function getDescription(): ?string
     {
         return $this->description;
@@ -82,18 +90,6 @@ class Plan
     public function setDescription(?string $description): static
     {
         $this->description = $description;
-
-        return $this;
-    }
-
-    public function getRenewalFrequency(): ?string
-    {
-        return $this->renewalFrequency;
-    }
-
-    public function setRenewalFrequency(string $renewalFrequency): static
-    {
-        $this->renewalFrequency = $renewalFrequency;
 
         return $this;
     }
@@ -134,29 +130,131 @@ class Plan
         return $this;
     }
 
-    public function isEnable(): ?bool
+    public function isCustom(): ?bool
     {
-        return $this->enable;
+        return $this->custom;
     }
 
-    public function setEnable(bool $enable): static
+    public function setCustom(bool $custom): static
     {
-        $this->enable = $enable;
+        $this->custom = $custom;
 
         return $this;
     }
 
-    public function toArray(): array
+    public function getMaxDevices(): ?float
+    {
+        return $this->maxDevices;
+    }
+
+    public function setMaxDevices(?float $maxDevices): static
+    {
+        $this->maxDevices = $maxDevices;
+
+        return $this;
+    }
+
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(int $position): static
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
+    public function isEnabled(): ?bool
+    {
+        return $this->enabled;
+    }
+
+    public function setEnabled(bool $enabled): static
+    {
+        $this->enabled = $enabled;
+
+        return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
     {
         return [
             'id' => $this->getId(),
-            'name' => $this->getName(),
-            'price' => $this->getPrice(),
-            'description' => $this->getDescription(),
-            'renewalFrequency' => $this->getRenewalFrequency(),
-            // 'modules' => $this->getModules()->map(fn (Module $module) => $module->toArray())->toArray(),
             'reference' => $this->getReference(),
-            'enable' => $this->isEnable(),
+            'name' => $this->getName(),
+            'description' => $this->getDescription(),
+            'maxDevices' => $this->getMaxDevices(),
+            'position' => $this->getPosition(),
+            'modules' => $this->getModules()->map(fn (Module $module) => $module->toArray())->toArray(),
+            'enabled' => $this->isEnabled(),
         ];
+    }
+
+    /**
+     * @return Collection<int, Subscription>
+     */
+    public function getSubscriptions(): Collection
+    {
+        return $this->subscriptions;
+    }
+
+    public function addSubscription(Subscription $subscription): static
+    {
+        if (!$this->subscriptions->contains($subscription)) {
+            $this->subscriptions->add($subscription);
+            $subscription->setPlan($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubscription(Subscription $subscription): static
+    {
+        if ($this->subscriptions->removeElement($subscription)) {
+            // set the owning side to null (unless already changed)
+            if ($subscription->getPlan() === $this) {
+                $subscription->setPlan(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getStripeId(): ?string
+    {
+        return $this->stripeId;
+    }
+
+    public function setStripeId(?string $stripeId): static
+    {
+        $this->stripeId = $stripeId;
+
+        return $this;
+    }
+
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+
+    public function setPrice(?float $price): static
+    {
+        $this->price = $price;
+
+        return $this;
+    }
+
+    public function getRenewalFrequency(): ?string
+    {
+        return $this->renewalFrequency;
+    }
+
+    public function setRenewalFrequency(?string $renewalFrequency): static
+    {
+        $this->renewalFrequency = $renewalFrequency;
+
+        return $this;
     }
 }

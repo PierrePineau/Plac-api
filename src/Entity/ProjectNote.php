@@ -13,9 +13,6 @@ class ProjectNote
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-    
-    #[ORM\Column(type: 'uuid')]
-    private ?Uuid $uuid = null;
 
     #[ORM\ManyToOne(inversedBy: 'projectNotes')]
     private ?Project $project = null;
@@ -25,7 +22,6 @@ class ProjectNote
 
     public function __construct()
     {
-        $this->uuid = Uuid::v7()->toRfc4122();
     }
 
     public function getId(): ?int
@@ -53,18 +49,6 @@ class ProjectNote
     public function setNote(?Note $note): static
     {
         $this->note = $note;
-
-        return $this;
-    }
-
-    public function getUuid(): ?Uuid
-    {
-        return $this->uuid;
-    }
-
-    public function setUuid(Uuid $uuid): static
-    {
-        $this->uuid = $uuid;
 
         return $this;
     }

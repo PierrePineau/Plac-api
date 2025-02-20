@@ -67,6 +67,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?bool $enable = null;
 
+    #[ORM\Column]
+    private ?bool $emailVerified = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $firstname = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $lastname = null;
+
     public function __construct()
     {
         $this->userOrganisations = new ArrayCollection();
@@ -75,6 +84,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
         $this->roles = ['ROLE_USER'];
+        $this->emailVerified = false;
         $this->enable = true;
     }
 
@@ -255,13 +265,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function toArray(): array
+    // Pour les listes
+    public function toArray(string $kind = 'default'): array
     {
-        return [
-            'id' => $this->getId(),
-            'uuid' => $this->getUuid(),
-            'email' => $this->getEmail(),
-        ];
+        // Quand on recherche des utilisateurs
+        if ($kind === 'search') {
+            return [
+                'id' => $this->getId(),
+                'uuid' => $this->getUuid(),
+                'email' => $this->getEmail(),
+                'createdAt' => $this->getCreatedAt(),
+                'updatedAt' => $this->getUpdatedAt(),
+            ];
+        }else {
+            return [
+                'id' => $this->getId(),
+                'uuid' => $this->getUuid(),
+                'email' => $this->getEmail(),
+            ];
+        }
     }
 
     // Utilisé une fois l'authentification faite
@@ -271,6 +293,48 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // 'id' => $this->getId(),
             'id' => $this->getUuid(),
             'email' => $this->getEmail(),
+            'roles' => $this->getRoles(),
         ];
+    }
+
+    public function isEmailVerified(): ?bool
+    {
+        return $this->emailVerified;
+    }
+
+    public function setEmailVerified(bool $emailVerified): static
+    {
+        $this->emailVerified = $emailVerified;
+
+        return $this;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(?string $firstname): static
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(?string $lastname): static
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    public function getFullName(): ?string
+    {
+        return $this->firstname.' '.$this->lastname;
     }
 }

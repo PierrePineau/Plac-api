@@ -1,41 +1,43 @@
 <?php
-
-namespace App\EventListener;
+namespace App\EventSubscriber\Error;
 
 use App\Core\Utils\Messenger;
+use App\Entity\Admin;
+use App\Entity\User;
+use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-class HttpExceptionListener implements EventSubscriberInterface
+class ErrorExceptionSubscriber implements EventSubscriberInterface
 {
-    private $messenger;
-    public function __construct(Messenger $messenger)
+    private $container;
+	private $messenger;
+    public function __construct($container)
     {
-        $this->messenger = $messenger;
+        $this->container = $container;
+		$this->messenger = $this->container->get(Messenger::class);
     }
+
     public static function getSubscribedEvents(): array
     {
+        // return the subscribed events, their methods and priorities
         return [
-            // the priority must be greater than the Security HTTP
-            // ExceptionListener, to make sure it's called before
-            // the default exception listener
-            KernelEvents::EXCEPTION => ['onKernelException', 10],
-            // KernelEvents::REQUEST => ['onKernelRequest', 10],
+            ExceptionEvent::class => [
+				['onKernelException', 10],
+			],
         ];
     }
 
-    public function onKernelException(ExceptionEvent $event): void
+    public function onKernelException(ExceptionEvent $event): ExceptionEvent
     {
         $env = $_ENV['APP_ENV'];
         if ($env == 'prod') {
             $exception = $event->getThrowable();
             if (!$exception instanceof HttpException) {
-                return;
+                return $event;
             }
             $responsedata = $this->messenger->newResponse([
                 'success' => false,
@@ -49,11 +51,8 @@ class HttpExceptionListener implements EventSubscriberInterface
             );
         }else{
             $this->messenger->errorResponse($event->getThrowable());
-            return;
         }
-        // optionally set the custom response
-        // $event->setCon
-        // or stop propagation (prevents the next exception listeners from being called)
-        //$event->stopPropagation();
+
+		return $event;
     }
 }
