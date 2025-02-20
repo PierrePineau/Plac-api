@@ -473,7 +473,7 @@ class Organisation
     {
         return [
             // 'id' => $this->getId(),
-            'uuid' => $this->getUuid(),
+            'id' => $this->getUuid(),
             'name' => $this->getName(),
             'freeTrialEndAt' => $this->getFreeTrialEndAt(),
             'createdAt' => $this->getCreatedAt(),
