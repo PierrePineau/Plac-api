@@ -2,10 +2,8 @@
 namespace App\EventSubscriber\Mail;
 
 use App\Event\Client\UserCreateEvent;
-use App\Event\Organisation\OrganisationGetEvent;
 use App\Model\Mail;
 use App\Service\Mail\MailManager;
-use App\Service\Organisation\OrganisationManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class MailSubscriber implements EventSubscriberInterface

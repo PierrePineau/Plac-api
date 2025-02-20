@@ -50,9 +50,10 @@ class UserOrganisationManager extends AbstractCoreService
 
     public function _create(array $data)
     {
-        $user = $this->getCustomer([
-            'idUser' => $data['idUser'],
-        ]);
+        // $user = $this->getCustomer([
+        //     'idUser' => $data['idUser'],
+        // ]);
+        $user = $data['user'];
 
         // On vérifie que l'utilisateur n'a pas déjà une organisation
         $userOrganisation = $this->findOneBy([

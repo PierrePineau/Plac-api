@@ -35,7 +35,7 @@ class UserRepository extends AbstractCoreRepository implements PasswordUpgraderI
                 ->setParameter('scopeIdentifer', $identifier);
         }else {
             $query = $this->createQueryBuilder('u')
-                ->andWhere('u.email = :identifier AND u.deleted = 0 AND u.email IS NOT NULL');
+                ->andWhere('(u.email = :identifier OR u.uuid = :identifier) AND u.deleted = 0 AND u.email IS NOT NULL');
         }
         return $query
             ->setParameter('identifier', $identifier)
