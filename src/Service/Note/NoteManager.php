@@ -11,10 +11,10 @@ class NoteManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'identifier' => 'uuid',
             'code' => 'Note',
             'entity' => Note::class,
-            'security' => $security,
         ]);
     }
 

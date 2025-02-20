@@ -21,10 +21,10 @@ class UserManager extends AbstractCoreService
     {
         $this->passwordHash = $passwordHash;
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'identifier' => 'uuid',
             'code' => 'user',
             'entity' => User::class,
-            'security' => $security,
         ]);
     }
 

@@ -14,6 +14,7 @@ class ProjectManager extends AbstractCoreService
             'identifier' => 'uuid',
             'code' => 'Project',
             'entity' => Project::class,
+            'security' => $security,
         ]);
     }
 

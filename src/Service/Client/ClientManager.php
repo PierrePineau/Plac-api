@@ -11,10 +11,10 @@ class ClientManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'identifier' => 'uuid',
             'code' => 'Client',
             'entity' => Client::class,
-            'security' => $security,
         ]);
     }
 

@@ -14,9 +14,9 @@ class OrganisationProjectManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'code' => 'Organisation.Project',
             'entity' => OrganisationProject::class,
-            'security' => $security,
             'elementManagerClass' => ProjectManager::class,
         ]);
     }

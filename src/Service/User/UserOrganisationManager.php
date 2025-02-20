@@ -16,10 +16,10 @@ class UserOrganisationManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'identifier' => 'uuid',
             'code' => 'User.Organisation',
             'entity' => UserOrganisation::class,
-            'security' => $security,
         ]);
     }
 

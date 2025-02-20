@@ -12,9 +12,9 @@ class SubscriptionManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'code' => 'Subscription',
             'entity' => Subscription::class,
-            'security' => $security,
         ]);
     }
 
