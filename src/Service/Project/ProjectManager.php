@@ -20,6 +20,9 @@ class ProjectManager extends AbstractCoreService
 
     public function _create(array $data)
     {
+        $this->debug($data);
+        throw new \Exception(json_encode($data['name'] ?? 'NONN'), 1);
+        
         $element = new Project();
         $this->setData(
             $element,
