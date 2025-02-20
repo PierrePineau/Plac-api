@@ -39,7 +39,7 @@ class UserOrganisationRepository extends AbstractCoreRepository
             ->setParameter('user', $data['idUser'])
             ->setMaxResults(1)
             ->getQuery()
-            ->getResult();
+            ->getOneOrNullResult();
     }
 
 

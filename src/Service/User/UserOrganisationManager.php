@@ -38,12 +38,13 @@ class UserOrganisationManager extends AbstractCoreService
         return $org;
     }
 
-    public function getOneOrganisationsByUser(array $data): Organisation
+    public function getOneOrganisationsByUser(array $data): ?Organisation
     {
         // On récupère les organisation non deleted
         $userOrganisation = $this->repo->getOneUserOrganisationsByUser([
             'idUser' => $data['idUser'],
         ]);
+
         return $userOrganisation ? $userOrganisation->getOrganisation() : null;
     }
 

@@ -460,6 +460,7 @@ class Organisation
             // 'id' => $this->getId(),
             'uuid' => $this->getUuid(),
             'name' => $this->getName(),
+            'freeTrialEndAt' => $this->getFreeTrialEndAt(),
             'deleted' => $this->isDeleted(),
             'createdAt' => $this->getCreatedAt(),
             'updatedAt' => $this->getUpdatedAt(),
@@ -474,6 +475,7 @@ class Organisation
             // 'id' => $this->getId(),
             'uuid' => $this->getUuid(),
             'name' => $this->getName(),
+            'freeTrialEndAt' => $this->getFreeTrialEndAt(),
             'createdAt' => $this->getCreatedAt(),
             'updatedAt' => $this->getUpdatedAt(),
         ];
