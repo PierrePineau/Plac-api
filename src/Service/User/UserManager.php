@@ -13,6 +13,9 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserManager extends AbstractCoreService
 {
+    public const ROLE_USER = 'ROLE_USER'; // Les utilisateurs avec ce role peuvent se connecter
+    public const ROLE_ADMIN = 'ROLE_ADMIN'; // Les utilisateurs avec ce role peuvent modifier les autres utilisateurs
+    public const ROLE_EMPLOYE = 'ROLE_EMPLOYE'; // Les utilisateurs au sein d'une organisation
     private $passwordHash;
     public function __construct($container, $entityManager, Security $security, UserPasswordHasherInterface $passwordHash)
     {
@@ -33,12 +36,12 @@ class UserManager extends AbstractCoreService
     public function middleware(array $data): mixed
     {
         $user = $data['user'];
-        $userConnected = $this->getUser();
+        $authenticateUser = $this->getUser();
         // On vérifie si l'utilisateur connecté est le même que celui que l'on veut modifier
         // Ou si l'utilisateur connecté est un admin
         if (!$this->security->isGranted(UserMiddleware::ACCESS, [
             'user' => $user,
-            'userConnected' => $userConnected,
+            'authenticateUser' => $authenticateUser,
         ])) {
             throw new DeniedException();
         }
@@ -55,34 +58,21 @@ class UserManager extends AbstractCoreService
         return $element;
     }
     
+    // Fonction appelée lors de la création d'un utilisateur (création de compte et d'une organisation)
     public function _create(array $data)
     {
         if (!isset($data['email'])) {
             throw new NotFoundHttpException($this->ELEMENT.'.email.required');
         }
-
-        if (!isset($data['password'])) {
-            throw new NotFoundHttpException($this->ELEMENT.'.password.required');
+        if (FILTER_VAR($data['email'], FILTER_VALIDATE_EMAIL) === false) {
+            throw new NotFoundHttpException($this->ELEMENT.'.email.invalid');
         }
-
-        $email = $data['email'];
-        $password = $data['password'];
-
-        if ($this->findOneBy(['email' => $email])) {
+        if ($this->findOneBy(['email' => $data['email']])) {
             throw new NotFoundHttpException($this->ELEMENT_ALREADY_EXISTS);
         }
+        $user = $this->_createUser($data);
+        $user->setRoles([self::ROLE_USER, self::ROLE_ADMIN]);
         
-        $user = new User();
-        $user->setEmail($email);
-        $hashedPassword = $this->passwordHash->hashPassword(
-            $user,
-            $password
-        );
-        $user->setPassword($hashedPassword);
-
-        $this->em->persist($user);
-        // $this->em->flush(); // Le flush est fait dans le AbstractCoreService
-        // Vérifie si l'entité est valide
         $this->isValid($user);
 
         $this->em->flush();
@@ -99,6 +89,37 @@ class UserManager extends AbstractCoreService
             // Send Event
             $this->dispatchEvent($newEvent);
         }
+        return $user;
+    }
+
+    // Fonction utilisé pour créer un utilisateur, aussi utilisé dans le cadre de la création d'un compte employé
+    public function _createUser(array $data): User
+    {
+        $user = new User();
+
+        $this->setData(
+            $user,
+            [
+                'firstname' => [
+                    'required' => true,
+                    'nullable' => false,
+                ],
+                'lastname' => [
+                    'required' => true,
+                    'nullable' => false,
+                ],
+            ],
+            $data
+        );
+
+        $hashedPassword = $this->passwordHash->hashPassword(
+            $user,
+            $data['password']
+        );
+        $user->setPassword($hashedPassword);
+
+        $this->em->persist($user);
+
         return $user;
     }
 

@@ -83,6 +83,7 @@ class AuthJWTSubscriber implements EventSubscriberInterface
     {
         $data = $event->getData();
 		$user = $event->getUser();
+		// var_dump('lorem');
 
 		if (!$user instanceof UserInterface) {
 			return $event;

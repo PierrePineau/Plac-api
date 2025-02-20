@@ -25,6 +25,7 @@ class OrganisationMiddleware extends Voter
     ];
 
     public function __construct(
+        private $container,
         private AccessDecisionManagerInterface $accessDecisionManager,
     ) {
     }
@@ -36,12 +37,12 @@ class OrganisationMiddleware extends Voter
             return false;
         }
         $organisation = $subject['organisation'] ?? null;
-        $user = $subject['user'] ?? null;
+        $authenticateUser = $subject['authenticateUser'] ?? null;
 
         if (!$organisation instanceof Organisation) {
             return false;
         }
-        if (!$user instanceof AuthenticateUser || !$user->isAuthenticate()) {
+        if (!$authenticateUser instanceof AuthenticateUser || !$authenticateUser->isAuthenticate()) {
             return false;
         }
         return true;
@@ -49,16 +50,16 @@ class OrganisationMiddleware extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        if ($this->accessDecisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
-            return true;
-        }
+        // if ($this->accessDecisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
+        //     return true;
+        // }
 
-        $user = $subject['user'];
-        if (!$user instanceof AuthenticateUser || !$user->isAuthenticate()) {
-            return false;
-        }
+        $authenticateUser = $subject['authenticateUser'];
+        // if (!$authenticateUser instanceof AuthenticateUser || !$user->isAuthenticate()) {
+        //     return false;
+        // }
 
-        if ($user->isSuperAdmin()) {
+        if ($authenticateUser->isSuperAdmin()) {
             return true;
         }
         // if (!$user instanceof User) {
@@ -79,7 +80,7 @@ class OrganisationMiddleware extends Voter
         }
         // you know $subject is a User object, thanks to `supports()`
         /** @var User $user */
-        $user = $subject['user'];
+        $authenticateUser = $subject['authenticateUser'];
 
         return match($attribute) {
             self::ACCESS => $this->canAccess([

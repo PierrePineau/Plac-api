@@ -1,27 +1,28 @@
 <?php
 
-namespace App\Controller\App\Organisation\Note;
+namespace App\Controller\App\Organisation\User;
 
 use App\Controller\Core\AbstractCoreController;
-use App\Service\Organisation\OrganisationNoteManager;
+use App\Entity\User;
+use App\Service\Organisation\OrganisationUserManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Security;
-use OpenApi\Attributes as OA;
+use OpenApi\Attributes as OA; 
 use Symfony\Component\HttpFoundation\Request;
 
-#[Route('/api/app/organisations/{idOrganisation}/notes', requirements: ['idOrganisation' => '[a-z0-9-]+'])]
-#[OA\Tag(name: 'Organisation.Note')]
+#[Route('/api/app/organisations/{idOrganisation}/users', requirements: ['idOrganisation' => '[a-z0-9-]+'])]
+#[OA\Tag(name: 'Organisation.User')]
 #[Security(name: 'JWT')]
-class OrganisationNoteController extends AbstractCoreController
+class OrganisationUserController extends AbstractCoreController
 {
-    public function __construct(OrganisationNoteManager $manager)
+    public function __construct(OrganisationUserManager $manager)
     {
-        parent::__construct($manager);
+        parent::__construct($manager, User::class);
     }
 
     #[OA\Get(
-        summary: 'List of',
+        summary: 'List of members (Employees + Admins)',
         parameters: [
             new OA\Parameter(
                 ref: '#/components/parameters/page',
@@ -48,7 +49,7 @@ class OrganisationNoteController extends AbstractCoreController
         ],
     )]
     #[OA\Post(
-        summary: 'Create new',
+        summary: 'Create new member (Employee)',
         responses:
         [
             '201' => new OA\Response(
@@ -67,7 +68,7 @@ class OrganisationNoteController extends AbstractCoreController
     }
 
     #[OA\Get(
-        summary: 'Get one',
+        summary: 'Get one member (Employee)',
         responses:
         [
             '200' => new OA\Response(
@@ -77,10 +78,10 @@ class OrganisationNoteController extends AbstractCoreController
                     ref: '#/components/schemas/response'
                 )
             )
-        ]
+        ],
     )]
     #[OA\Post(
-        summary: 'Update one',
+        summary: 'Update one member (Employee)',
         responses:
         [
             '200' => new OA\Response(
@@ -90,10 +91,10 @@ class OrganisationNoteController extends AbstractCoreController
                     ref: '#/components/schemas/response'
                 )
             )
-        ]
+        ],
     )]
     #[OA\Delete(
-        summary: 'Delete',
+        summary: 'Delete one member (Employee)',
         responses:
         [
             '200' => new OA\Response(
@@ -103,10 +104,10 @@ class OrganisationNoteController extends AbstractCoreController
                     ref: '#/components/schemas/response'
                 )
             )
-        ]
+        ],
     )]
     #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['uuid' => '[a-z0-9-]+'])]
-    public function get($uuid, Request $request): JsonResponse
+    public function get($idOrganisation, $uuid, Request $request): JsonResponse
     {
         return parent::_get($uuid, $request);
     }

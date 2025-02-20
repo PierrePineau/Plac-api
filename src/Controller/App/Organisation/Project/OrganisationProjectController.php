@@ -107,8 +107,8 @@ class OrganisationProjectController extends AbstractCoreController
         ],
     )]
     #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['uuid' => '[a-z0-9-]+'])]
-    public function get($idOrganisation, $id, Request $request): JsonResponse
+    public function get($idOrganisation, $uuid, Request $request): JsonResponse
     {
-        return parent::_get($id, $request);
+        return parent::_get($uuid, $request);
     }
 }

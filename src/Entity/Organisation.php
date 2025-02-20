@@ -69,12 +69,6 @@ class Organisation
     private Collection $organisationNotes;
 
     /**
-     * @var Collection<int, EmployeOrganisation>
-     */
-    #[ORM\OneToMany(targetEntity: EmployeOrganisation::class, mappedBy: 'organisation')]
-    private Collection $employeOrganisations;
-
-    /**
      * @var Collection<int, OrganisationStatus>
      */
     #[ORM\OneToMany(targetEntity: OrganisationStatus::class, mappedBy: 'organisation')]
@@ -95,6 +89,9 @@ class Organisation
     #[ORM\ManyToOne]
     private ?User $owner = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $freeTrialEndAt = null;
+
     public function __construct()
     {
         $this->uuid = Uuid::v7()->toRfc4122();
@@ -106,7 +103,6 @@ class Organisation
         $this->organisationClients = new ArrayCollection();
         $this->organisationProjects = new ArrayCollection();
         $this->organisationNotes = new ArrayCollection();
-        $this->employeOrganisations = new ArrayCollection();
         $this->organisationStatuses = new ArrayCollection();
         $this->deleted = false;
         $this->subscriptions = new ArrayCollection();
@@ -363,36 +359,6 @@ class Organisation
     }
 
     /**
-     * @return Collection<int, EmployeOrganisation>
-     */
-    public function getEmployeOrganisations(): Collection
-    {
-        return $this->employeOrganisations;
-    }
-
-    public function addEmployeOrganisation(EmployeOrganisation $employeOrganisation): static
-    {
-        if (!$this->employeOrganisations->contains($employeOrganisation)) {
-            $this->employeOrganisations->add($employeOrganisation);
-            $employeOrganisation->setOrganisation($this);
-        }
-
-        return $this;
-    }
-
-    public function removeEmployeOrganisation(EmployeOrganisation $employeOrganisation): static
-    {
-        if ($this->employeOrganisations->removeElement($employeOrganisation)) {
-            // set the owning side to null (unless already changed)
-            if ($employeOrganisation->getOrganisation() === $this) {
-                $employeOrganisation->setOrganisation(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, OrganisationStatus>
      */
     public function getOrganisationStatuses(): Collection
@@ -511,5 +477,17 @@ class Organisation
             'createdAt' => $this->getCreatedAt(),
             'updatedAt' => $this->getUpdatedAt(),
         ];
+    }
+
+    public function getFreeTrialEndAt(): ?\DateTimeInterface
+    {
+        return $this->freeTrialEndAt;
+    }
+
+    public function setFreeTrialEndAt(?\DateTimeInterface $freeTrialEndAt): static
+    {
+        $this->freeTrialEndAt = $freeTrialEndAt;
+
+        return $this;
     }
 }

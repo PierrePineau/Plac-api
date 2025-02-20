@@ -89,7 +89,7 @@ abstract class AbstractCoreService
 
     public function setGuardActions(string $key, string $actions)
     {
-        $this->guardActions[$key] = $actions;
+        $this->guardActions[] = $actions;
     }
 
     /**
