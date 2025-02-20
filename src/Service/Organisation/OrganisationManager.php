@@ -44,6 +44,15 @@ class OrganisationManager extends AbstractCoreService
         return $data;
     }
 
+    public function _get($id, array $filters = []): mixed
+    {
+        $element = parent::_get($id, $filters);
+        $this->middleware([
+            'organisation' => $element,
+        ]);
+        return $element;
+    }
+
     public function _create(array $data)
     {
         $organisation = new Organisation();

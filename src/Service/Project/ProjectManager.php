@@ -25,6 +25,8 @@ class ProjectManager extends AbstractCoreService
             $element,
             [
                 'name' => [
+                    'required' => true,
+                    'nullable' => false,
                 ],
                 'reference' => [
                     'nullable' => false,
@@ -50,7 +52,7 @@ class ProjectManager extends AbstractCoreService
             $element,
             [
                 'name' => [
-                    'nullable' => true,
+                    'nullable' => false,
                 ],
                 'reference' => [
                     'nullable' => false,

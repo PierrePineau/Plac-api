@@ -22,7 +22,8 @@ abstract class AbstractCoreController extends AbstractController
 
     public function _index(Request $request): JsonResponse
     {
-        $data = $request->attributes->all();
+        // $attributes = $request->attributes->all();
+        $data = $request->attributes->get('_route_params') ?? [];
         switch ($request->getMethod()) {
             case 'GET':
                 $data = array_merge($data, $request->query->all());

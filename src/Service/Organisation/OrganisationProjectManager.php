@@ -18,6 +18,9 @@ class OrganisationProjectManager extends AbstractCoreService
             'code' => 'Organisation.Project',
             'entity' => OrganisationProject::class,
             'elementManagerClass' => ProjectManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
 
@@ -51,6 +54,14 @@ class OrganisationProjectManager extends AbstractCoreService
     public function _delete($id, array $filters = [])
     {
         return $this->_deleteOrganisationElement($id, $filters);
+    }
+
+    public function guardMiddleware(array $data): array
+    {
+        foreach ($this->guardActions as $key => $actions) {
+            $data[$key] = $this->$actions($data);
+        }
+        return $data;
     }
 
     public function _create(array $data)
