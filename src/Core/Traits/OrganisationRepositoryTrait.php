@@ -43,7 +43,7 @@ trait OrganisationRepositoryTrait {
             ->getResult();
     }
 
-    public function findOneByAccess($data): ?Entity
+    public function findOneByAccess($data)
     {
         return $this->createAccessQueryBuilder($data)
             ->andWhere("{$this->alias}.uuid = :id")
