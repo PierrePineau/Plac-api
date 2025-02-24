@@ -19,11 +19,12 @@ trait OrganisationTrait {
 
     public function _getOrganisationElement($id, array $filters = []): mixed
     {
-        $orgElement = $this->findOneByAccess([
+        $manager = $this->getElementManager();
+        $element = $manager->findOneByAccess([
             'id' => $id,
             'organisation' => $filters['organisation'],
         ]);
-        return $orgElement;
+        return $element;
     }
 
     public function _updateOrganisationElement($id, array $data)
