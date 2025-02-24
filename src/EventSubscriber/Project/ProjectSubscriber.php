@@ -3,6 +3,7 @@ namespace App\EventSubscriber\Project;
 
 use App\Entity\Organisation;
 use App\Event\Organisation\OrganisationCreateEvent;
+use App\Event\Project\ProjectCreateEvent;
 use App\Event\Project\ProjectGetEvent;
 use App\Service\Organisation\OrganisationManager;
 use App\Service\Organisation\OrganisationProjectManager;

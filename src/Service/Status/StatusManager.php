@@ -185,4 +185,11 @@ class StatusManager extends AbstractCoreService
 
         return $element;
     }
+
+    public function getOneStatus(array $options)
+    {
+        $options['type'] = $options['type'] ?? self::TYPE_PROJECT;
+        $options['action'] = $options['action'] ?? self::ACTION_DEFAULT;
+        return $this->repo->findOneByOrganisationByActionByType($options);
+    }
 }

@@ -7,6 +7,7 @@ use App\Entity\Organisation;
 use App\Entity\UserOrganisation;
 use App\Security\Middleware\OrganisationMiddleware;
 use App\Core\Exception\DeniedException;
+use App\Event\Organisation\OrganisationCreateEvent;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class OrganisationManager extends AbstractCoreService
@@ -70,6 +71,14 @@ class OrganisationManager extends AbstractCoreService
 
         $this->em->persist($organisation);
         $this->isValid($organisation);
+
+        // Envoie email activation du compte par exemple
+        $newEvent = new OrganisationCreateEvent([
+            'organisation' => $organisation,
+            'authenticateUser' => $this->getUser(),
+        ]);
+        // Send Event
+        $this->dispatchEvent($newEvent);
 
         return $organisation;
     }

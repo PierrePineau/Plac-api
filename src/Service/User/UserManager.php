@@ -77,18 +77,25 @@ class UserManager extends AbstractCoreService
 
         $this->em->flush();
         
-        $authenticateUser = $this->getUser();
-        if ($authenticateUser->isAuthenticate() && $authenticateUser->isSuperAdmin()) {
-            // On ne fait rien si c'est le superAdmin qui créer un compte
-        }else{
-            // Envoie email activation du compte
-            // On send un event pour la création d'un compte
-            $newEvent = new UserCreateEvent([
-                'user' => $user,
-            ]);
-            // Send Event
-            $this->dispatchEvent($newEvent);
-        }
+        // if ($authenticateUser->isAuthenticate() && $authenticateUser->isSuperAdmin()) {
+        //     // On ne fait rien si c'est le superAdmin qui créer un compte
+        // }else{
+        //     // On send un event pour la création d'un compte
+        //     $newEvent = new UserCreateEvent([
+        //         'user' => $user,
+        //     ]);
+        //     // Send Event
+        //     $this->dispatchEvent($newEvent);
+        // }
+
+        // Envoie email activation du compte par exemple
+        $newEvent = new UserCreateEvent([
+            'user' => $user,
+            'authenticateUser' => $this->getUser(),
+        ]);
+        // Send Event
+        $this->dispatchEvent($newEvent);
+
         return $user;
     }
 

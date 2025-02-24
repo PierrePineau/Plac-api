@@ -2,6 +2,7 @@
 namespace App\EventSubscriber\Organisation;
 
 use App\Event\Client\UserCreateEvent;
+use App\Event\Organisation\OrganisationCreateEvent;
 use App\Event\Organisation\OrganisationGetEvent;
 use App\Service\Organisation\OrganisationManager;
 use App\Service\User\UserOrganisationManager;
@@ -22,6 +23,9 @@ class OrganisationSubscriber implements EventSubscriberInterface
             OrganisationGetEvent::class => [
                 ['onOrganisationGetEvent', 10],
                 ['middleware', 9]
+            ],
+            OrganisationCreateEvent::class => [
+                ['onOrganisationCreate', 10],
             ],
             UserCreateEvent::class => [
                 ['onUserCreate', 10],
@@ -65,6 +69,20 @@ class OrganisationSubscriber implements EventSubscriberInterface
         $organisationManager->middleware([
             'organisation' => $event->getOrganisation()
         ]);
+        return $event;
+    }
+
+    public function onOrganisationCreate(OrganisationCreateEvent $event): OrganisationCreateEvent
+    {
+        try {
+            // Logic ?
+            return $event;
+        } catch (\Throwable $th) {
+            //throw $th;
+            $event->setError($th->getMessage());
+            $event->stopPropagation();
+            return $event;
+        }
         return $event;
     }
 

@@ -4,6 +4,7 @@ namespace App\Service\Project;
 
 use App\Entity\Project;
 use App\Core\Service\AbstractCoreService;
+use App\Event\Project\ProjectCreateEvent;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class ProjectManager extends AbstractCoreService
@@ -40,6 +41,15 @@ class ProjectManager extends AbstractCoreService
 
         $this->em->persist($element);
         $this->isValid($element);
+
+        // Envoie un event pour la création du projet
+        $newEvent = new ProjectCreateEvent([
+            'organisation' => $data['organisation'],
+            'project' => $element,
+            'em' => $this->em,
+        ]);
+
+        $this->dispatchEvent($newEvent);
 
         return $element;
     }

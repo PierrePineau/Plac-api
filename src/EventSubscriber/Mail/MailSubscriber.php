@@ -29,6 +29,14 @@ class MailSubscriber implements EventSubscriberInterface
         try {
             // On envoie un email pour que l'utilisateur vérifie son compte
             $user = $event->getUser();
+            $data = $event->getData();
+            $authenticateUser = $data['authenticateUser'];
+            // On check que ce n'est pas un admin qui a créé le compte
+            if ($authenticateUser->isAdmin()) {
+                // On set l'email comme vérifié
+                // $user->setEmailVerified(true);
+                return $event;
+            }
             if ($user && $user->isEmailVerified() == false) {
                 $mailManager = $this->container->get(MailManager::class);
 

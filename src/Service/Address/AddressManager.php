@@ -1,0 +1,70 @@
+<?php
+
+namespace App\Service\Address;
+
+use App\Entity\Address;
+use App\Core\Service\AbstractCoreService;
+use Symfony\Bundle\SecurityBundle\Security;
+
+class AddressManager extends AbstractCoreService
+{
+    public function __construct($container, $entityManager, Security $security)
+    {
+        parent::__construct($container, $entityManager, [
+            'security' => $security,
+            'identifier' => 'uuid',
+            'code' => 'Address',
+            'entity' => Address::class,
+        ]);
+    }
+
+    private function _saveData(Address $address, array $data): Address
+    {
+        $this->setData(
+            $address,
+            [
+                'country' => [
+                ],
+                'state' => [
+                ],
+                'city' => [
+                ],
+                'postcode' => [
+                ],
+                'street' => [
+                ],
+                'compl' => [
+                ],
+            ],
+            $data
+        );
+
+        $this->em->persist($address);
+
+        return $address;
+    }
+
+    public function _create(array $data)
+    {
+        $element = new Address();
+
+        $this->_saveData($element, $data);
+
+        $this->em->persist($element);
+        $this->isValid($element);
+
+        return $element;
+    }
+
+    public function _update($id, array $data)
+    {
+        $element = $this->_get($id);
+
+        $this->_saveData($element, $data);
+
+        $this->em->persist($element);
+        $this->isValid($element);
+
+        return $element;
+    }
+}

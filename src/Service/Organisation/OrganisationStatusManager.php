@@ -25,6 +25,14 @@ class OrganisationStatusManager extends AbstractCoreService
     {
         $statusManager = $this->getElementManager();
 
+        $organisation = $data['organisation'];
+
+        $organisationStatuses = $organisation->getOrganisationStatuses();
+        
+        if (count($organisationStatuses) > (count(StatusManager::DEFAULT_STATUS[StatusManager::TYPE_PROJECT]) + count(StatusManager::DEFAULT_STATUS[StatusManager::TYPE_TASK]))) {
+            return $organisation;
+        }
+        
         // Les status par défaut pour chaque type
         $projectStatuses = $statusManager->generateDefault([
             'type' => StatusManager::TYPE_PROJECT,
@@ -56,6 +64,13 @@ class OrganisationStatusManager extends AbstractCoreService
         }
 
         return $organisation;
+    }
+
+    // On récupère un status d'une organisation par action et type
+    public function getOneStatus(array $options)
+    {
+        $manager = $this->getElementManager();
+        return $manager->getOneStatus($options);
     }
 
     public function _search(array $filters = []): array

@@ -378,7 +378,7 @@ abstract class AbstractCoreService
                     'success' => true,
                     'message' => $this->ELEMENT_FOUND,
                     'code' => 200,
-                    'data' => $element->toArray()
+                    'data' => $element->toArray('get')
                 ]
             );
         } catch (\Throwable $th) {
@@ -407,7 +407,7 @@ abstract class AbstractCoreService
                 'success' => true,
                 'message' => $this->ELEMENT_UPDATED,
                 'code' => 200,
-                'data' => $element->toArray()
+                'data' => $element->toArray('update')
             ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
@@ -426,7 +426,7 @@ abstract class AbstractCoreService
                 'success' => true,
                 'message' => $this->ELEMENT_CREATED,
                 'code' => 201,
-                'data' => $element->toArray()
+                'data' => $element->toArray('create')
             ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
@@ -445,7 +445,7 @@ abstract class AbstractCoreService
                 'success' => true,
                 'message' => $this->ELEMENT_ADDED,
                 'code' => 201,
-                'data' => $element->toArray()
+                'data' => $element->toArray('add')
             ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);
@@ -464,7 +464,7 @@ abstract class AbstractCoreService
                 'success' => true,
                 'message' => $this->ELEMENT_REMOVED,
                 'code' => 200,
-                'data' => $element->toArray()
+                'data' => $element->toArray('remove')
             ]);
         } catch (\Throwable $th) {
             return $this->messenger->errorResponse($th);

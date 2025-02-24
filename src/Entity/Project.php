@@ -62,6 +62,12 @@ class Project
     #[ORM\OneToMany(targetEntity: ProjectClient::class, mappedBy: 'project')]
     private Collection $projectClients;
 
+    #[ORM\ManyToOne(inversedBy: 'projects')]
+    private ?Status $status = null;
+
+    #[ORM\ManyToOne(inversedBy: 'projects')]
+    private ?Address $address = null;
+
     public function __construct()
     {
         $this->projectNotes = new ArrayCollection();
@@ -113,15 +119,6 @@ class Project
         $this->name = $name;
 
         return $this;
-    }
-
-    public function toArray(string $kind = 'default'): array
-    {
-        return [
-            'id' => $this->getId(),
-            'uuid' => $this->getUuid(),
-            'name' => $this->getName(),
-        ];
     }
 
     /**
@@ -290,5 +287,61 @@ class Project
         }
 
         return $this;
+    }
+
+    public function getStatus(): ?Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?Status $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getAddress(): ?Address
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?Address $address): static
+    {
+        $this->address = $address;
+
+        return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        $defaultData = [
+            // 'id' => $this->getId(),
+            'id' => $this->getUuid(),
+            'reference' => $this->getReference(),
+            'name' => $this->getName(),
+            'description' => $this->getDescription(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+            'deleted' => $this->isDeleted(),
+        ];
+        
+        if (in_array($kind, ['get', 'update', 'add'])) {
+            $data = array_merge(
+                $defaultData,
+                [
+                    'address' => $this->getAddress()?->toArray(),
+                    'status' => $this->getStatus()?->toArray(),
+                ]
+            );
+        }else{
+            $data = array_merge(
+                $defaultData,
+                [
+                ]
+            );
+        }
+
+        return $data;
     }
 }
