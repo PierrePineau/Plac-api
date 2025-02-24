@@ -13,7 +13,7 @@ class StatusRepository extends AbstractCoreRepository
         parent::__construct($registry, Status::class);
     }
 
-    public function findOneByOrganisationByActionByType(array $option): array
+    public function findOneByOrganisationByActionByType(array $option): ?Status
     {
         $organisation = $option['organisation'];
         $action = $option['action'];
@@ -26,7 +26,8 @@ class StatusRepository extends AbstractCoreRepository
             ->setParameter('action', $action)
             ->andWhere('s.type = :type')
             ->setParameter('type', $type)
+            ->setMaxResults(1)
             ->getQuery()
-            ->getResult();
+            ->getOneOrNullResult();
     }
 }

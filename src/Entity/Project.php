@@ -326,7 +326,7 @@ class Project
             'deleted' => $this->isDeleted(),
         ];
         
-        if (in_array($kind, ['get', 'update', 'add'])) {
+        if (in_array($kind, ['get','create', 'update', 'add'])) {
             $data = array_merge(
                 $defaultData,
                 [

@@ -21,6 +21,7 @@ class ProjectManager extends AbstractCoreService
 
     public function _create(array $data)
     {
+        $data['name'] = $data['name'] ?? 'Nouveau projet';
         $element = new Project();
         $this->setData(
             $element,
@@ -48,8 +49,8 @@ class ProjectManager extends AbstractCoreService
             'project' => $element,
             'em' => $this->em,
         ]);
-
         $this->dispatchEvent($newEvent);
+        $this->em->persist($element);
 
         return $element;
     }

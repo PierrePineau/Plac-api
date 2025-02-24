@@ -73,8 +73,6 @@ class StatusSubscriber implements EventSubscriberInterface
                     'action' => StatusManager::ACTION_DEFAULT,
                 ]);
 
-                var_dump($status->getCode());
-
                 if ($status) {
                     $project->setStatus($status);
                 }
@@ -84,7 +82,6 @@ class StatusSubscriber implements EventSubscriberInterface
             //throw $th;
             $event->setError($th->getMessage());
             $event->stopPropagation();
-
             return $event;
         }
         
