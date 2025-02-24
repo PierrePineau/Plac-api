@@ -25,7 +25,7 @@ class OrganisationSubscriber implements EventSubscriberInterface
                 ['middleware', 9]
             ],
             OrganisationCreateEvent::class => [
-                ['onOrganisationCreate', 10],
+                ['onOrganisationCreate', 15],
             ],
             UserCreateEvent::class => [
                 ['onUserCreate', 10],
@@ -76,6 +76,7 @@ class OrganisationSubscriber implements EventSubscriberInterface
     {
         try {
             // Logic ?
+            $event->addSubscriber('OrganisationSubscriber', 'OK');
             return $event;
         } catch (\Throwable $th) {
             //throw $th;

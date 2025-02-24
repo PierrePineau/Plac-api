@@ -24,7 +24,7 @@ class OrganisationStatusManager extends AbstractCoreService
     public function generateDefault(array $data = [])
     {
         $statusManager = $this->getElementManager();
-
+        $needFlush = $data['flush'] ?? false;
         $organisation = $data['organisation'];
 
         $organisationStatuses = $organisation->getOrganisationStatuses();
@@ -63,7 +63,9 @@ class OrganisationStatusManager extends AbstractCoreService
             $this->isValid($orgElement);
         }
 
-        return $organisation;
+        if ($needFlush) {
+            $this->em->flush();
+        }
     }
 
     // On récupère un status d'une organisation par action et type

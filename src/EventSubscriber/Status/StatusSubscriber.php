@@ -39,7 +39,10 @@ class StatusSubscriber implements EventSubscriberInterface
 
                 $status = $orgStatusManager->generateDefault([
                     'organisation' => $organisation,
+                    'flush' => true,
                 ]);
+
+                $event->addSubscriber('StatusSubscriber', 'OK');
             }
 
             return $event;
@@ -47,6 +50,7 @@ class StatusSubscriber implements EventSubscriberInterface
         } catch (\Throwable $th) {
             //throw $th;
             $event->setError($th->getMessage());
+            $event->addSubscriber('StatusSubscriber', 'K O');
             $event->stopPropagation();
 
             return $event;

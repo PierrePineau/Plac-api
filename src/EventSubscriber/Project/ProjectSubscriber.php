@@ -23,7 +23,7 @@ class ProjectSubscriber implements EventSubscriberInterface
         // return the subscribed events, their methods and priorities
         return [
             OrganisationCreateEvent::class => [
-                ['onOrganisationCreate', 10],
+                ['onOrganisationCreate', 1],
             ],
             ProjectGetEvent::class => [
                 ['onProjectGetEvent', 10],
@@ -42,14 +42,16 @@ class ProjectSubscriber implements EventSubscriberInterface
 
                 $project = $orgProjectManager->generateDefault([
                     'organisation' => $organisation,
+                    'flush' => true,
                 ]);
+
+                $event->addSubscriber('ProjectSubscriber', 'OK');
             }
-
             return $event;
-
         } catch (\Throwable $th) {
             //throw $th;
             $event->setError($th->getMessage());
+            $event->addSubscriber('ProjectSubscriber', 'K O');
             $event->stopPropagation();
 
             return $event;

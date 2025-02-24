@@ -27,12 +27,17 @@ class OrganisationProjectManager extends AbstractCoreService
     public function generateDefault(array $data = [])
     {
         $organisation = $data['organisation'];
+        $needFlush = $data['flush'] ?? false;
 
         $this->_create([
             'organisation' => $organisation,
             'name' => 'Nouveau projet',
             'description' => 'La description de votre projet',
         ]);
+
+        if ($needFlush) {
+            $this->em->flush();
+        }
     }
 
     public function _search(array $filters = []): array
