@@ -62,11 +62,14 @@ class Project
     #[ORM\OneToMany(targetEntity: ProjectClient::class, mappedBy: 'project')]
     private Collection $projectClients;
 
-    #[ORM\ManyToOne(inversedBy: 'projects')]
+    #[ORM\ManyToOne(inversedBy: 'projects', fetch: 'EAGER')]
     private ?Status $status = null;
 
-    #[ORM\ManyToOne(inversedBy: 'projects')]
+    #[ORM\ManyToOne(inversedBy: 'projects', fetch: 'EAGER')]
     private ?Address $address = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
 
     public function __construct()
     {
@@ -313,6 +316,18 @@ class Project
         return $this;
     }
 
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
     public function toArray(string $kind = 'default'): array
     {
         $defaultData = [
@@ -323,6 +338,8 @@ class Project
             'description' => $this->getDescription(),
             'createdAt' => $this->getCreatedAt(),
             'updatedAt' => $this->getUpdatedAt(),
+            'status' => $this->getStatus()?->toArray(),
+            'address' => $this->getAddress()?->toArray(),
             'deleted' => $this->isDeleted(),
         ];
         
@@ -330,8 +347,8 @@ class Project
             $data = array_merge(
                 $defaultData,
                 [
-                    'address' => $this->getAddress()?->toArray(),
-                    'status' => $this->getStatus()?->toArray(),
+                    'deletedAt' => $this->getDeletedAt(),
+                    ''
                 ]
             );
         }else{

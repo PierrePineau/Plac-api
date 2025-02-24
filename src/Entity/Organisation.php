@@ -77,7 +77,7 @@ class Organisation
     #[ORM\Column]
     private ?bool $deleted = null;
 
-    #[ORM\OneToOne(inversedBy: 'organisation', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     private ?Subscription $currentSubscription = null;
 
     /**

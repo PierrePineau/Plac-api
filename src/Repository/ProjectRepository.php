@@ -22,8 +22,6 @@ class ProjectRepository extends AbstractCoreRepository
         $settings = $this->configureSearch($search);
         $idOrganisation = $this->getIdOrganisation($search);
 
-        $query = $this->createNewQueryBuilder();
-
         $query = $this->createNewQueryBuilder()
             ->leftJoin("{$this->alias}.organisationProjects", "rel")
             ->andWhere("rel.organisation = :idOrganisation")
@@ -37,6 +35,7 @@ class ProjectRepository extends AbstractCoreRepository
 
         if (!$countMode) {
             $query = $query
+                ->addOrderBy("{$this->alias}.createdAt", "DESC")
                 ->setMaxResults($settings['limit'])
                 ->setFirstResult($settings['offset']);
 
