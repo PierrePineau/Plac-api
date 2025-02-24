@@ -9,10 +9,12 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class ProjectRepository extends AbstractCoreRepository
 {
+    private $accessRelation;
     use OrganisationRepositoryTrait;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Project::class);
+        $this->accessRelation = 'organisationProjects';
     }
 
     public function search(array $search = [], bool $countMode = false)
