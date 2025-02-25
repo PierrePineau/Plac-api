@@ -21,6 +21,9 @@ class OrganisationUserManager extends AbstractCoreService
             'code' => 'Organisation.User',
             'entity' => UserOrganisation::class,
             'elementManagerClass' => UserManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
 

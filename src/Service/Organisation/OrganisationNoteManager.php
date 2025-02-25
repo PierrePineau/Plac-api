@@ -18,6 +18,9 @@ class OrganisationNoteManager extends AbstractCoreService
             'code' => 'Organisation.Note',
             'entity' => OrganisationNote::class,
             'elementManagerClass' => NoteManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
 

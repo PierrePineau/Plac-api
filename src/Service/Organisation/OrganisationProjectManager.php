@@ -61,14 +61,6 @@ class OrganisationProjectManager extends AbstractCoreService
         return $this->_deleteOrganisationElement($id, $filters);
     }
 
-    public function guardMiddleware(array $data): array
-    {
-        foreach ($this->guardActions as $key => $actions) {
-            $data[$key] = $this->$actions($data);
-        }
-        return $data;
-    }
-
     public function _create(array $data)
     {
         $organisation = $data['organisation'];

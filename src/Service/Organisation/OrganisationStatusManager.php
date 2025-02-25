@@ -18,6 +18,9 @@ class OrganisationStatusManager extends AbstractCoreService
             'code' => 'Organisation.Status',
             'entity' => OrganisationStatus::class,
             'elementManagerClass' => StatusManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
 

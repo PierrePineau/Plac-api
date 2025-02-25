@@ -66,6 +66,10 @@ class ClientManager extends AbstractCoreService
                     'required' => false,
                     'nullable' => true,
                 ],
+                'phone' => [
+                    'required' => false,
+                    'nullable' => true,
+                ],
                 'archived' => [
                     'required' => false,
                     'type' => 'boolean',

@@ -58,6 +58,10 @@ class OrganisationManager extends AbstractCoreService
     {
         $organisation = new Organisation();
 
+        $now = new \DateTime('now');
+        // On ajoute 30 jours à la date actuelle
+        $organisation->setFreeTrialEndAt($now->modify('+30 days'));
+
         $this->setData(
             $organisation,
             [

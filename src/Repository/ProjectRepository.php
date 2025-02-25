@@ -28,9 +28,15 @@ class ProjectRepository extends AbstractCoreRepository
             ->setParameter('idOrganisation', $idOrganisation);
 
         if (isset($search['search']) && $search['search'] != '') {
-            // $query = $query
-            //     ->andWhere("{$this->alias}.firstName LIKE :search OR {$this->alias}.lastName LIKE :search OR {$this->alias}.email LIKE :search OR {$this->alias}.phone LIKE :search")
-            //     ->setParameter('search', "%{$search['search']}%");
+            $query = $query
+                ->andWhere("{$this->alias}.name LIKE :search OR {$this->alias}.description LIKE :search OR {$this->alias}.reference LIKE :search")
+                ->setParameter('search', "%{$search['search']}%");
+        }
+
+        if (isset($search['status']) && !empty($search['status'])) {
+            $query = $query
+                ->andWhere("{$this->alias}.status IN (:status)")
+                ->setParameter('status', $search['status']);
         }
 
         if (!$countMode) {

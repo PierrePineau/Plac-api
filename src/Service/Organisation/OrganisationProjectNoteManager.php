@@ -20,6 +20,9 @@ class OrganisationProjectNoteManager extends AbstractCoreService
             'code' => 'Organisation.Project',
             'entity' => OrganisationProject::class,
             'elementManagerClass' => ProjectNoteManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
 

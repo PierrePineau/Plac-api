@@ -50,9 +50,18 @@ class Address
     #[ORM\OneToMany(targetEntity: Project::class, mappedBy: 'address')]
     private Collection $projects;
 
+    /**
+     * @var Collection<int, Client>
+     */
+    #[ORM\OneToMany(targetEntity: Client::class, mappedBy: 'address')]
+    private Collection $clients;
+
     public function __construct()
     {
+        $this->createdAt = new \DateTime();
+        $this->uuid = Uuid::v7()->toRfc4122();
         $this->projects = new ArrayCollection();
+        $this->clients = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -211,5 +220,35 @@ class Address
             'createdAt' => $this->getCreatedAt(),
             'updatedAt' => $this->getUpdatedAt(),
         ];
+    }
+
+    /**
+     * @return Collection<int, Client>
+     */
+    public function getClients(): Collection
+    {
+        return $this->clients;
+    }
+
+    public function addClient(Client $client): static
+    {
+        if (!$this->clients->contains($client)) {
+            $this->clients->add($client);
+            $client->setAddress($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClient(Client $client): static
+    {
+        if ($this->clients->removeElement($client)) {
+            // set the owning side to null (unless already changed)
+            if ($client->getAddress() === $this) {
+                $client->setAddress(null);
+            }
+        }
+
+        return $this;
     }
 }

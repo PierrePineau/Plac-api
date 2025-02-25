@@ -4,14 +4,95 @@ namespace App\Service\File;
 
 use App\Core\Service\AbstractCoreService;
 use App\Entity\File;
+use App\Service\File\Providers\S3Manager;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class FileManager extends AbstractCoreService
 {
+    public const ALLOWED_MIME_TYPES = [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/svg+xml',
+        'image/x-icon',
+        'image/vnd.microsoft.icon',
+        'image/vnd.wap.wbmp',
+        'image/bmp',
+        'image/tiff',
+        'application/pdf',
+        'text/csv',
+        'text/plain',
+        'application/zip',
+        'application/x-rar-compressed',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'video/mp4',
+        'video/quicktime',
+    ];
+
+    public const ALLOWED_EXTENSIONS = [
+        'pdf',
+        'doc',
+        'docx',
+        'xls',
+        'xlsx',
+        'ppt',
+        'pptx',
+        'jpg',
+        'jpeg',
+        'png',
+        'gif',
+        'svg',
+        'mp4',
+        'avi',
+        'mov',
+        'mp3',
+        'wav',
+        'zip',
+        'rar',
+    ];
+
+    public const TYPE_FILE = 'FILE';
+    public const FILE_EXTENSIONS = [
+        'pdf',
+        'doc',
+        'docx',
+        'xls',
+        'xlsx',
+        'ppt',
+        'pptx',
+        'zip',
+        'rar',
+    ];
+
+    public const TYPE_MEDIA = 'MEDIA';
+    public const MEDIA_EXTENSIONS = [
+        'jpg',
+        'jpeg',
+        'png',
+        'gif',
+        'svg',
+        'mp4',
+        'avi',
+        'mov',
+        'mp3',
+        'wav',
+    ];
+
+    const GATEWAYS = [
+        'OCEAN_S3_BUCKET' => S3Manager::class,
+    ];
+
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
             'security' => $security,
+            'identifier' => 'uuid',
             'code' => 'File',
             'entity' => File::class,
         ]);
@@ -19,14 +100,98 @@ class FileManager extends AbstractCoreService
 
     public function _create(array $data)
     {
-        $file = new File();
-        $file->setPath($data['path']);
-        $file->setMimeType($data['mimeType']);
+        $element = new File();
+
+        $name = $data['name'] ?? null;
+        $data['name'] = explode('.', $name)[0] ?? $name;
         
+        // On fait un explode pour récupérer l'extension du fichier
+        $extension = explode('.', $name);
+        $extension = end($extension);
+        $extension = $data['ext'] ?? $extension;
+        $extension = explode('.', $extension);
+        $extension = end($extension);
+        $extension = strtolower($extension);
+        $data['ext'] = $extension;
+
+        // On vérifie si l'extension est autorisée
+        if (!in_array($extension, self::ALLOWED_EXTENSIONS)) {
+            throw new \Exception($this->ELEMENT_NOT_ALLOWED);
+        }
+
+        if (in_array($extension, self::FILE_EXTENSIONS)) {
+            $data['type'] = self::TYPE_FILE;
+        } elseif (in_array($extension, self::MEDIA_EXTENSIONS)) {
+            $data['type'] = self::TYPE_MEDIA;
+        }
+
+        $this->setData(
+            $element,
+            [
+                'name' => [
+                    'nullable' => true,
+                ],
+                'ext' => [
+                    'nullable' => true,
+                ],
+                'type' => [
+                    'nullable' => true,
+                ],
+            ],
+            $data
+        );
+
+        $this->em->persist($element);
+        $this->isValid($element);
+        
+        $file = $element;
+        $fileSize = filesize($data['file']);
+        $file->setSize($fileSize);
+        
+        // On upload le fichier via le provider
+        $provider = $this->container->get(self::GATEWAYS['OCEAN_S3_BUCKET']);
+        $provider->upload([
+            'organisation' => $data['organisation'],
+            'file' => $data['file'],
+            'path' => $file->getPath(),
+        ]);
+
+        return $element;
     }
 
     public function _update($id, array $data)
     {
-        
+        $element = $this->_get($id);
+
+        $this->setData(
+            $element,
+            [
+                'name' => [
+                    'nullable' => false,
+                ],
+            ],
+            $data
+        );
+
+        $this->em->persist($element);
+        $this->isValid($element);
+
+        return $element;
+    }
+
+    public function _delete($id, array $data = [])
+    {
+        $element = $this->_get($id);
+
+        $provider = $this->container->get(self::GATEWAYS['OCEAN_S3_BUCKET']);
+        $provider->delete([
+            'organisation' => $data['organisation'],
+            'path' => $element->getPath(),
+        ]);
+
+        $this->em->remove($element);
+        $this->em->flush();
+
+        return true;
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Service\File\Providers;
 
 use App\Core\Interface\FileServiceInterface;
+use App\Entity\File;
+use App\Service\File\FileManager;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class S3Manager implements FileServiceInterface
@@ -11,22 +13,6 @@ class S3Manager implements FileServiceInterface
     private $bucket;
     private $s3;
     private $prefix;
-    private $allowedMimeTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'image/webp',
-        'image/svg+xml',
-        'image/x-icon',
-        'image/vnd.microsoft.icon',
-        'image/vnd.wap.wbmp',
-        'image/bmp',
-        'image/tiff',
-        'application/pdf',
-        'text/csv',
-        'text/plain',
-        'application/zip',
-    ];
 
     public const ELEMENT_NOT_FOUND = "File not found";
     public const ELEMENT_FORBIDDEN = "Forbidden path";
@@ -73,7 +59,7 @@ class S3Manager implements FileServiceInterface
     {
         $mimeType = mime_content_type($sourceFile);
 
-        if (in_array($mimeType, $this->allowedMimeTypes)) {
+        if (in_array($mimeType, FileManager::ALLOWED_MIME_TYPES)) {
             return $mimeType;
         } else {
             throw new NotFoundHttpException($this::ELEMENT_TYPE_FORBIDDEN);
@@ -163,19 +149,21 @@ class S3Manager implements FileServiceInterface
 	public function upload(array $options): void
 	{
         $organisation = $options['organisation'];
-        $sourceFile = $options['sourceFile'];
-        $destPath = $options['destPath'];
-		if ($sourceFile && $destPath) {
-            $destPath = $this->getAbsolutePath([
+        // $file = $options['element'] instanceof File ? $options['element'] : null;
+        $sourceFile = $options['file'];
+        $path = $options['path'];
+		if ($sourceFile && $path) {
+            $mimeType = $this->getMimeType($sourceFile);
+            
+            $filePath = $this->getAbsolutePath([
                 'organisation' => $organisation,
-                'path' => $destPath
+                'path' => $path
             ]);
 
-            $mimeType = $this->getMimeType($sourceFile);
 			try {
 				$this->s3->putObject([
 					'Bucket' => $this->bucket,
-					'Key' => $destPath,
+					'Key' => $filePath,
 					'SourceFile' => $sourceFile,
 					'ContentType' => $mimeType
 				]);

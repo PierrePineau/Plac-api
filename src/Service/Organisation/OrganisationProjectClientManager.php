@@ -4,6 +4,7 @@ namespace App\Service\Organisation;
 
 use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\OrganisationTrait;
+use App\Entity\OrganisationClient;
 use App\Entity\OrganisationProject;
 use App\Service\Client\ClientManager;
 use App\Service\Note\NoteManager;
@@ -17,21 +18,20 @@ class OrganisationProjectClientManager extends AbstractCoreService
     {
         parent::__construct($container, $entityManager, [
             'security' => $security,
-            'code' => 'Organisation.Project',
-            'entity' => OrganisationProject::class,
+            'code' => 'Organisation.Client',
+            'entity' => OrganisationClient::class,
             'elementManagerClass' => ProjectClientManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
 
     public function _search(array $filters = []): array
     {
         $manager = $this->getElementManager();
+        $filters['by'] = 'project';
         return $manager->_search($filters);
-    }
-
-    public function _get($id, array $filters = []): mixed
-    {
-        return $this->_getOrganisationElement($id, $filters);
     }
 
     public function _create(array $data)
@@ -41,8 +41,8 @@ class OrganisationProjectClientManager extends AbstractCoreService
 
     public function _add(array $data)
     {
-        // On ajoute une ou plusieurs notes à un projet
-        $orgProject = $this->_get($data['idProject']);
+        $organisationProjectManager = $this->container->get(OrganisationProjectManager::class);
+        $orgProject = $organisationProjectManager->_get($data['idProject'], $data);
         $project = $orgProject->getProject();
 
         $ids = $data['ids'] ?? [];
@@ -51,18 +51,21 @@ class OrganisationProjectClientManager extends AbstractCoreService
         }
 
         // On récupère par ids qui ne sont pas déjà liées au projet
-        $ClientManager = $this->container->get(ClientManager::class);
-        $clients = $ClientManager->_search([
+        $organisationClientManager = $this->container->get(OrganisationClientManager::class);
+        $clients = $organisationClientManager->_search([
             'organisation' => $data['organisation'],
             'ids' => $data['ids'],
-            'excludeIdsProject' => [$project->getId()],
+            'limit' => 100,
         ]);
 
         $elementManager = $this->getElementManager();
         $elementManager->_add([
+            'by' => 'project',
             'project' => $project,
             'clients' => $clients,
         ]);
+
+        $this->em->flush();
     }
 
     public function _delete($id, array $data = [])
@@ -73,8 +76,8 @@ class OrganisationProjectClientManager extends AbstractCoreService
 
     public function _remove(array $data)
     {
-        // On va chercher le projet par l'organisation
-        $orgProject = $this->_get($data['idProject']);
+        $organisationProjectManager = $this->container->get(OrganisationProjectManager::class);
+        $orgProject = $organisationProjectManager->_get($data['idProject'], $data);
         // $project = $orgProject->getProject();
 
         // Les ids correspondent aux ids des relations à supprimer
@@ -83,10 +86,18 @@ class OrganisationProjectClientManager extends AbstractCoreService
             $ids[] = $data['id'];
         }
 
-        $projectNoteManager = $this->getElementManager();
-        $projectNoteManager->_remove([
-            // 'project' => $project,
-            'ids' => $ids,
+        $organisationClientManager = $this->container->get(OrganisationClientManager::class);
+        $clients = $organisationClientManager->_search([
+            'organisation' => $data['organisation'],
+            'ids' => $data['ids'],
+            'limit' => 100,
+        ]);
+
+        $elementManager = $this->getElementManager();
+        $elementManager->_remove([
+            'by' => 'project',
+            'ids' => $orgProject->getProject(),
+            'clients' => $clients,
         ]);
     }
 }
