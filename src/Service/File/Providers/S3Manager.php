@@ -103,9 +103,6 @@ class S3Manager implements FileServiceInterface
             $path = substr($path, strlen($identifier));
         }
 
-        // organisation_identifier/path
-        $path = $identifier."/".$path;
-
         // On vérifie que le chemin commence par l'un des dossiers autorisés
         $found = false;
 
@@ -120,7 +117,11 @@ class S3Manager implements FileServiceInterface
             throw new NotFoundHttpException($this::FOLDER_FORBIDDEN);
         }
 
-        return $this->prefix.$path."/".$path;
+        // organisation_identifier/path
+        $path = $identifier."/".$path;
+
+        // prod/organisation_identifier/path
+        return $this->prefix."/".$path;
     }
 
     /**
