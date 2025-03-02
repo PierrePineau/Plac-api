@@ -4,6 +4,8 @@ namespace App\Controller\App\Organisation;
 
 use App\Service\Organisation\OrganisationManager;
 use App\Controller\Core\AbstractCoreController;
+use App\Entity\Organisation;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Security;
@@ -35,6 +37,17 @@ class OrganisationController extends AbstractCoreController
     )]
     #[OA\Post(
         summary: 'Update one',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: Organisation::class, groups: ['update'])
+                )
+            )
+        ),
         responses:
         [
             '200' => new OA\Response(

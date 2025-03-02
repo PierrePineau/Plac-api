@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: FileRepository::class)]
@@ -15,26 +16,33 @@ class File
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
     #[ORM\Column(unique: true)]
     private ?string $uuid = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $url = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $type = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(nullable: true)]
     private ?array $meta = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $ext = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(nullable: true)]
     private ?float $size = null;
 

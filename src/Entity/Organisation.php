@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: OrganisationRepository::class)]
@@ -15,11 +16,13 @@ class Organisation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
     #[ORM\Column(unique: true)]
     private ?string $uuid = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
@@ -41,12 +44,15 @@ class Organisation
     #[ORM\OneToMany(targetEntity: OrganisationFile::class, mappedBy: 'organisation')]
     private Collection $organisationFiles;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
@@ -74,6 +80,7 @@ class Organisation
     #[ORM\OneToMany(targetEntity: OrganisationStatus::class, mappedBy: 'organisation')]
     private Collection $organisationStatuses;
 
+    #[Groups(["default"])]
     #[ORM\Column]
     private ?bool $deleted = null;
 
@@ -89,6 +96,7 @@ class Organisation
     #[ORM\ManyToOne]
     private ?User $owner = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $freeTrialEndAt = null;
 

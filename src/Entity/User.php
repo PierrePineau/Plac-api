@@ -49,12 +49,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?bool $deleted = false;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updatedAt = null;
 
@@ -64,17 +67,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: UserOrganisation::class, mappedBy: 'user')]
     private Collection $userOrganisations;
 
+    #[Groups(["default"])]
     #[ORM\Column]
     private ?bool $enable = null;
 
+    #[Groups(["default"])]
     #[ORM\Column]
     private ?bool $emailVerified = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $firstname = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $lastname = null;
+
+    #[Groups(["default", "create", "update"])]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $phone = null;
 
     public function __construct()
     {
@@ -268,22 +279,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     // Pour les listes
     public function toArray(string $kind = 'default'): array
     {
+        return [
+            'id' => $this->getUuid(),
+            'email' => $this->getEmail(),
+            'phone' => $this->getPhone(),
+            'firstname' => $this->getFirstname(),
+            'lastname' => $this->getLastname(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+        ];
         // Quand on recherche des utilisateurs
-        if ($kind === 'search') {
-            return [
-                'id' => $this->getId(),
-                'uuid' => $this->getUuid(),
-                'email' => $this->getEmail(),
-                'createdAt' => $this->getCreatedAt(),
-                'updatedAt' => $this->getUpdatedAt(),
-            ];
-        }else {
-            return [
-                'id' => $this->getId(),
-                'uuid' => $this->getUuid(),
-                'email' => $this->getEmail(),
-            ];
-        }
+        // if ($kind === 'search') {
+        //     return [
+        //         // 'id' => $this->getId(),
+        //         'id' => $this->getUuid(),
+        //         'email' => $this->getEmail(),
+        //         'createdAt' => $this->getCreatedAt(),
+        //         'updatedAt' => $this->getUpdatedAt(),
+        //     ];
+        // }else {
+        //     return [
+        //         'id' => $this->getId(),
+        //         'uuid' => $this->getUuid(),
+        //         'email' => $this->getEmail(),
+        //     ];
+        // }
     }
 
     // Utilisé une fois l'authentification faite
@@ -336,5 +356,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getFullName(): ?string
     {
         return $this->firstname.' '.$this->lastname;
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): static
+    {
+        $this->phone = $phone;
+
+        return $this;
     }
 }

@@ -5,6 +5,7 @@ namespace App\Controller\App\Organisation\User;
 use App\Controller\Core\AbstractCoreController;
 use App\Entity\User;
 use App\Service\Organisation\OrganisationUserManager;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Security;
@@ -50,6 +51,17 @@ class OrganisationUserController extends AbstractCoreController
     )]
     #[OA\Post(
         summary: 'Create new member (Employee)',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: User::class, groups: ['create'])
+                )
+            )
+        ),
         responses:
         [
             '201' => new OA\Response(
@@ -82,6 +94,17 @@ class OrganisationUserController extends AbstractCoreController
     )]
     #[OA\Post(
         summary: 'Update one member (Employee)',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: User::class, groups: ['update'])
+                )
+            )
+        ),
         responses:
         [
             '200' => new OA\Response(

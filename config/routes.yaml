@@ -11,7 +11,5 @@ app.swagger_ui:
 
 api_app_login_check:
     path: /api/app/login_check
-api_customer_login_check:
-    path: /api/customer/login_check
 api_admin_login_check:
     path: /api/admin/login_check

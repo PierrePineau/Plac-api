@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\AccessRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AccessRepository::class)]
 class Access
@@ -12,17 +13,21 @@ class Access
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default", "delete"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     private ?string $uuid = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $type = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $entityIdentifier = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $entityId = null;
 

@@ -32,7 +32,7 @@ class JWTAuthenticationSuccessListener
 		// Une fois l'authentification réussie, on récupère l'utilisateur pour renvoyer ses informations
 		if ($user instanceof User) {
 			// $data = array_merge($data, $user->getInfos());
-			$data['user'] = $user->getInfos();
+			$data['user'] = $user->toArray('auth');
 
 			$organisation = $this->container->get(UserOrganisationManager::class)->getOneOrganisationsByUser([
 				'idUser' => $user->getId()
@@ -43,7 +43,7 @@ class JWTAuthenticationSuccessListener
 
 		if ($user instanceof Admin) {
 			// $data = array_merge($data, $user->getInfos());
-			$data['user'] = $user->getInfos();
+			$data['user'] = $user->toArray('auth');
 		}
 
 		$event->setData($data);

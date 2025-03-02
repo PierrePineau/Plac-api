@@ -3,7 +3,9 @@
 namespace App\Controller\App\Organisation\Note;
 
 use App\Controller\Core\AbstractCoreController;
+use App\Entity\Note;
 use App\Service\Organisation\OrganisationNoteManager;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Security;
@@ -49,6 +51,17 @@ class OrganisationNoteController extends AbstractCoreController
     )]
     #[OA\Post(
         summary: 'Create new',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: Note::class, groups: ['create'])
+                )
+            )
+        ),
         responses:
         [
             '201' => new OA\Response(
@@ -81,6 +94,17 @@ class OrganisationNoteController extends AbstractCoreController
     )]
     #[OA\Post(
         summary: 'Update one',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: Note::class, groups: ['update'])
+                )
+            )
+        ),
         responses:
         [
             '200' => new OA\Response(

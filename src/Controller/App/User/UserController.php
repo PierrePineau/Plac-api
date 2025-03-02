@@ -27,6 +27,17 @@ class UserController extends AbstractCoreController
 
     #[OA\Post(
         summary: 'Create new',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: User::class, groups: ['create'])
+                )
+            )
+        ),
         responses:
         [
             '201' => new OA\Response(
@@ -59,6 +70,17 @@ class UserController extends AbstractCoreController
     )]
     #[OA\Post(
         summary: 'Update one',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: User::class, groups: ['update'])
+                )
+            )
+        ),
         responses:
         [
             '200' => new OA\Response(

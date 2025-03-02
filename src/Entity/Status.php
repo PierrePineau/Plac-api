@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\StatusRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: StatusRepository::class)]
@@ -13,20 +14,26 @@ class Status
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255)]
     private ?string $code = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    #[Groups(["default"])]
     #[ORM\Column]
     private ?bool $deleted = false;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $color = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255)]
     private ?string $type = null;
 
@@ -36,9 +43,11 @@ class Status
     #[ORM\OneToMany(targetEntity: OrganisationStatus::class, mappedBy: 'status')]
     private Collection $organisationStatuses;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $action = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(nullable: true)]
     private ?int $position = null;
 
