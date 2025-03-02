@@ -22,6 +22,7 @@ class S3Manager implements FileServiceInterface
 
     public const FOLDER_NOT_FOUND = "Folder not found";
 
+    public const FOLDER_BASE = "organisations/";
     // OTHER
     public const FOLDER_FILES = "files/";
     // OTHER (Ce dossier correspond au fichier "Admin", que l'administateur peut utiliser pour stocker des fichiers NON VISIBLES par les utilisateurs)
@@ -93,30 +94,28 @@ class S3Manager implements FileServiceInterface
         if (substr($path, 0, 1) === "/") {
             $path = substr($path, 1);
         }
+        // On vérifie si le chemin commence par le préfix, si oui on le retire
         if (substr($path, 0, strlen($this->prefix)) === $this->prefix) {
             $path = substr($path, strlen($this->prefix));
         }
-
+        // On vérifie si l'organisation est définie
         if (!$organisation) {
             throw new NotFoundHttpException($this::FOLDER_FORBIDDEN);
         }
-
         $identifier = $organisation->getIdentifier();
-
         // On vérifie si le chemin commence par l'identifiant de l'organisation
         if (substr($path, 0, strlen($identifier)) === $identifier) {
             $path = substr($path, strlen($identifier));
         }
-
         // On vérifie que le chemin commence par l'un des dossiers autorisés
         if (!in_array($folder, $this->folders)) {
             throw new NotFoundHttpException($this::FOLDER_FORBIDDEN);
         }
-        // organisation_identifier/path
-        $path = $identifier."/".$path;
+        // organisations/organisation_identifier/folder/path
+        $path = self::FOLDER_BASE.$identifier.$folder."/".$path;
 
-        // prod/files/organisation_identifier/path
-        return $this->prefix.$folder."/".$path;
+        // prod/path
+        return $this->prefix.$path;
     }
 
     /**
