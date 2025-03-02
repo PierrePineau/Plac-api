@@ -76,7 +76,7 @@ class Project
     #[ORM\ManyToOne(inversedBy: 'projects', fetch: 'EAGER')]
     private ?Address $address = null;
 
-    #[Groups(["default", "create", "update"])]
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
@@ -357,7 +357,6 @@ class Project
                 $defaultData,
                 [
                     'deletedAt' => $this->getDeletedAt(),
-                    ''
                 ]
             );
         }else{
