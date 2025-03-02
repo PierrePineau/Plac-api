@@ -273,4 +273,19 @@ class File
 
         return $this;
     }
+    
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            'id' => $this->getUuid(),
+            'url' => $this->getUrl(),
+            'name' => $this->getName(),
+            'type' => $this->getType(),
+            'meta' => $this->getMeta(),
+            'ext' => $this->getExt(),
+            'size' => $this->getSize(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+        ];
+    }
 }
