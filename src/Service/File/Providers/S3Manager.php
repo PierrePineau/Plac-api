@@ -5,6 +5,7 @@ namespace App\Service\File\Providers;
 use App\Core\Interface\FileServiceInterface;
 use App\Entity\File;
 use App\Service\File\FileManager;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class S3Manager implements FileServiceInterface
@@ -57,6 +58,9 @@ class S3Manager implements FileServiceInterface
      */
     private function getMimeType($sourceFile): string
     {
+        if ($sourceFile instanceof UploadedFile) {
+            $sourceFile = $sourceFile->getPathname();
+        }
         $mimeType = mime_content_type($sourceFile);
 
         if (in_array($mimeType, FileManager::ALLOWED_MIME_TYPES)) {
