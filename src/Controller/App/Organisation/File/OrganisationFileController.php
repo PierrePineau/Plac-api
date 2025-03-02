@@ -76,6 +76,7 @@ class OrganisationFileController extends AbstractCoreController
     #[Route('', methods: ['GET', 'POST'])] 
     public function index($idOrganisation, Request $request): JsonResponse
     {
+        var_dump($request->headers->all());
         return parent::_index($request);
     }
 
