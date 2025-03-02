@@ -33,12 +33,13 @@ abstract class AbstractCoreController extends AbstractController
             }
         }
         $data = array_merge($data, $request->attributes->get('_route_params') ?? []);
+        $data = array_merge($data, $request->query->all());
         switch ($request->getMethod()) {
             case 'GET':
-                $data = array_merge($data, $request->query->all());
                 $response = $this->manager->search($data);
                 break;
             case 'POST':
+                $data = array_merge($data, $request->files->all());
                 $data = array_merge($data, $request->request->all());
                 $response = $this->manager->create($data);
                 break;
