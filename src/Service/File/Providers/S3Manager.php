@@ -80,6 +80,7 @@ class S3Manager implements FileServiceInterface
      */
     private function getAbsolutePath(array $options): string
     {
+        $folder = $options['folder'] ?? self::FOLDER_FILES;
         $organisation = $options['organisation'];
         $path = $options['path'];
         // On vérifie aussi que le chemin ne commence pas par le préfix ni par "../"
@@ -108,24 +109,14 @@ class S3Manager implements FileServiceInterface
         }
 
         // On vérifie que le chemin commence par l'un des dossiers autorisés
-        $found = false;
-
-        foreach ($this->folders as $folder) {
-            if (substr($path, 0, strlen($folder)) === $folder) {
-                $found = true;
-                break;
-            }
-        }
-
-        if (!$found) {
+        if (!in_array($folder, $this->folders)) {
             throw new NotFoundHttpException($this::FOLDER_FORBIDDEN);
         }
-
         // organisation_identifier/path
         $path = $identifier."/".$path;
 
-        // prod/organisation_identifier/path
-        return $this->prefix."/".$path;
+        // prod/files/organisation_identifier/path
+        return $this->prefix.$folder."/".$path;
     }
 
     /**

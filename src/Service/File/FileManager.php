@@ -9,6 +9,11 @@ use Symfony\Bundle\SecurityBundle\Security;
 
 class FileManager extends AbstractCoreService
 {
+    // OTHER
+    public const FOLDER_FILES = "files/";
+    // OTHER (Ce dossier correspond au fichier "Admin", que l'administateur peut utiliser pour stocker des fichiers NON VISIBLES par les utilisateurs)
+    public const FOLDER_ADMIN_FILES = "admin/files/";
+    
     public const ALLOWED_MIME_TYPES = [
         'image/jpeg',
         'image/png',
@@ -153,7 +158,8 @@ class FileManager extends AbstractCoreService
         $provider->upload([
             'organisation' => $data['organisation'],
             'file' => $data['file'],
-            'path' => $file->getPath(),
+            'folder' => self::FOLDER_FILES,
+            'path' => $file->getPath()
         ]);
 
         return $element;
@@ -186,6 +192,7 @@ class FileManager extends AbstractCoreService
         $provider = $this->container->get(self::GATEWAYS['OCEAN_S3_BUCKET']);
         $provider->delete([
             'organisation' => $data['organisation'],
+            'folder' => self::FOLDER_FILES,
             'path' => $element->getPath(),
         ]);
 
