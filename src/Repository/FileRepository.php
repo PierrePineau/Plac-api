@@ -27,6 +27,10 @@ class FileRepository extends AbstractCoreRepository
         $idOrganisation = $this->getIdOrganisation($search);
         $idProject = $search['idProject'] ?? null;
         $idsProjects = $search['idsProjects'] ?? [];
+        $types = $search['types'] ?? [];
+        if (isset($search['type']) && !empty($search['type'])) {
+            $types[] = $search['type'];
+        }
         if ($idProject) {
             $idsProjects[] = $idProject;
         }
@@ -48,6 +52,12 @@ class FileRepository extends AbstractCoreRepository
                 ->leftJoin("pf.project", "p")
                 ->andWhere("p.uuid IN (:idsProjects)")
                 ->setParameter('idsProjects', $idsProjects);
+        }
+
+        if (!empty($types)) {
+            $query = $query
+                ->andWhere("{$this->alias}.type IN (:types)")
+                ->setParameter('types', $types);
         }
 
         if (!$countMode) {
