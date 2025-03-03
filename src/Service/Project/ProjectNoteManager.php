@@ -8,6 +8,9 @@ use Symfony\Bundle\SecurityBundle\Security;
 
 class ProjectNoteManager extends AbstractCoreService
 {
+    public const BY_NOTE = 'note';
+    public const BY_PROJECT = 'project';
+
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
@@ -20,27 +23,84 @@ class ProjectNoteManager extends AbstractCoreService
 
     public function _add(array $data)
     {
-        $project = $data['project'];
-        $notes = $data['notes'];
-        
-        foreach ($notes as $note) {
-            $projectNote = new ProjectNote();
-            $projectNote->setProject($project);
-            $projectNote->setNote($note);
+        if ($data['by'] === self::BY_NOTE) {
+            $projects = $data['projects'];
+            $note = $data['note'];
 
-            $this->em->persist($projectNote);
-            $this->isValid($projectNote);
+            $ids = array_map(function($project) {
+                return $project->getId();
+            }, $projects);
+
+            // On récupère ceux qui existente déjà
+            $projectNotes = $this->findBy([
+                'project' => $ids,
+                'note' => $note->getId(),
+            ]);
+            
+            foreach ($projects as $project) {
+                // Vérifier si la relation existe déjà
+                $existingProjectNote = array_filter($projectNotes, function($projectNote) use ($project, $note) {
+                    return $projectNote->getProject()->getId() === $project->getId() && $projectNote->getNote()->getId() === $note->getId();
+                });
+
+                if (empty($existingProjectNote)) {
+                    $projectNote = new ProjectNote();
+                    $projectNote->setProject($project);
+                    $projectNote->setNote($note);
+
+                    $this->em->persist($projectNote);
+                    $this->isValid($projectNote);
+                }
+            }
+        } else {
+            $project = $data['project'];
+            $notes = $data['notes'];
+
+            $ids = array_map(function($project) {
+                return $project->getId();
+            }, $notes);
+
+            // On récupère ceux qui existente déjà
+            $projectNotes = $this->findBy([
+                'note' => $ids,
+                'project' => $project->getId(),
+            ]);
+            
+            foreach ($notes as $note) {
+                // Vérifier si la relation existe déjà
+                $existingProjectNote = array_filter($projectNotes, function($projectNote) use ($project, $note) {
+                    return $projectNote->getProject()->getId() === $project->getId() && $projectNote->getNote()->getId() === $note->getId();
+                });
+                
+                if (empty($existingProjectNote)) {
+                    $projectNote = new ProjectNote();
+                    $projectNote->setProject($project);
+                    $projectNote->setNote($note);
+
+                    $this->em->persist($projectNote);
+                    $this->isValid($projectNote);
+                }
+            }
         }
     }
 
     public function _remove(array $data)
     {
-        $project = $data['project'];
-        $projectNotes = $this->findBy([
-            'project' => $project->getId(),
-            'note' => $data['ids'],
-        ]);
-        foreach ($data['projectNotes'] as $projectNotes) {
+        if ($data['by'] === self::BY_NOTE) {
+            $project = $data['project'];
+            $projectNotes = $this->findBy([
+                'project' => $project->getId(),
+                'note' => $data['ids'],
+            ]);
+        } else {
+            $note = $data['note'];
+            $projectNotes = $this->findBy([
+                'note' => $note->getId(),
+                'project' => $data['ids'],
+            ]);
+        }
+        
+        foreach ($projectNotes as $projectNotes) {
             $this->em->remove($projectNotes);
         }
     }

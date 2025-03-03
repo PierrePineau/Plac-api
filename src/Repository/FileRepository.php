@@ -12,9 +12,11 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class FileRepository extends AbstractCoreRepository
 {
+    private $accessRelation;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, File::class);
+        $this->accessRelation = 'organisationFiles';
     }
 
 //    /**

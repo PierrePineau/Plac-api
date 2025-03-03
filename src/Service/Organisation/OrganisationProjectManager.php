@@ -78,37 +78,37 @@ class OrganisationProjectManager extends AbstractCoreService
         return $element;
     }
 
-    public function setStatus(array $data)
-    {
-        try {
-            $data = $this->guardMiddleware($data);
-            $orgProject = $this->_get($data['idProject'], [
-                'idOrganisation' => $data['organisation']->getId(),
-            ]);
+    // public function setStatus(array $data)
+    // {
+    //     try {
+    //         $data = $this->guardMiddleware($data);
+    //         $orgProject = $this->_get($data['idProject'], [
+    //             'idOrganisation' => $data['organisation']->getId(),
+    //         ]);
 
-            $orgStatusManager = $this->container->get(OrganisationStatusManager::class);
-            $orgStatus = $orgStatusManager->_get($data['idStatus'], [
-                'idOrganisation' => $data['organisation']->getId(),
-            ]);
+    //         $orgStatusManager = $this->container->get(OrganisationStatusManager::class);
+    //         $orgStatus = $orgStatusManager->_get($data['idStatus'], [
+    //             'idOrganisation' => $data['organisation']->getId(),
+    //         ]);
 
-            $project = $orgProject->getProject();
-            $project->setStatus($orgStatus->getStatus());
+    //         $project = $orgProject->getProject();
+    //         $project->setStatus($orgStatus->getStatus());
 
-            $this->em->persist($project);
-            $this->isValid($project);
+    //         $this->em->persist($project);
+    //         $this->isValid($project);
 
-            $this->em->flush();
+    //         $this->em->flush();
 
-            return $this->messenger->newResponse(
-                [
-                    'success' => true,
-                    'message' => $this->ELEMENT_UPDATED,
-                    'code' => 200,
-                    'data' => $project->toArray()
-                ]
-            );
-        } catch (\Throwable $th) {
-            return $this->messenger->errorResponse($th);
-        }
-    }
+    //         return $this->messenger->newResponse(
+    //             [
+    //                 'success' => true,
+    //                 'message' => $this->ELEMENT_UPDATED,
+    //                 'code' => 200,
+    //                 'data' => $project->toArray()
+    //             ]
+    //         );
+    //     } catch (\Throwable $th) {
+    //         return $this->messenger->errorResponse($th);
+    //     }
+    // }
 }

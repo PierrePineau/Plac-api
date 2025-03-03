@@ -30,4 +30,22 @@ class StatusRepository extends AbstractCoreRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function findOneByOrganisationByTypeById(array $option): ?Status
+    {
+        $organisation = $option['organisation'];
+        $id = $option['id'];
+        $type = $option['type'];
+        return $this->createQueryBuilder('s')
+            ->leftJoin('s.organisationStatuses', 'os')
+            ->andWhere('os.organisation = :organisation')
+            ->setParameter('organisation', $organisation->getId())
+            ->andWhere('s.uuid = :id')
+            ->setParameter('id', $id)
+            ->andWhere('s.type = :type')
+            ->setParameter('type', $type)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
