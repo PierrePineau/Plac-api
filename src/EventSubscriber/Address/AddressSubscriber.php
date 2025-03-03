@@ -4,6 +4,7 @@ namespace App\EventSubscriber\Address;
 use App\Event\Organisation\OrganisationCreateEvent;
 use App\Event\Project\ProjectCreateEvent;
 use App\Event\Project\ProjectUpdateEvent;
+use App\Service\Address\AddressManager;
 use App\Service\Organisation\OrganisationStatusManager;
 use App\Service\Status\StatusManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -32,19 +33,16 @@ class AddressSubscriber implements EventSubscriberInterface
             // On associe le status par défaut au projet
             $project = $event->getProject();
             $data = $event->getData();
-            $idStatus = $data['idStatus'];
-            // if ($project && $idStatus) {
-            //     $statusManager = $this->container->get(StatusManager::class);
-            //     $status = $statusManager->getOneStatusById([
-            //         'id' => $idStatus,
-            //         'type' => StatusManager::TYPE_PROJECT,
-            //         'organisation' => $data['organisation'],
-            //     ]);
+            $dataAddress = $data['address'] ?? null;
+            if ($project && $dataAddress) {
+                $AddressManager = $this->container->get(AddressManager::class);
+                $idAddress = $dataAddress['id'] ?? null;
+                $address = $AddressManager->_update($idAddress, $dataAddress);
 
-            //     if ($status) {
-            //         $project->setStatus($status);
-            //     }
-            // }
+                if ($address) {
+                    $project->setAddress($address);
+                }
+            }
             return $event;
         } catch (\Throwable $th) {
             //throw $th;
