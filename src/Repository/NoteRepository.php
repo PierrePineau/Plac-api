@@ -12,10 +12,12 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class NoteRepository extends AbstractCoreRepository
 {
+    private $accessRelation;
     use OrganisationRepositoryTrait;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Note::class);
+        $this->accessRelation = 'organisationNotes';
     }
 
     public function search(array $search = [], bool $countMode = false)
