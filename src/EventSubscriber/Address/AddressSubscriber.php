@@ -1,5 +1,5 @@
 <?php
-namespace App\EventSubscriber\Status;
+namespace App\EventSubscriber\Address;
 
 use App\Event\Organisation\OrganisationCreateEvent;
 use App\Event\Project\ProjectCreateEvent;
@@ -33,18 +33,18 @@ class AddressSubscriber implements EventSubscriberInterface
             $project = $event->getProject();
             $data = $event->getData();
             $idStatus = $data['idStatus'];
-            if ($project && $idStatus) {
-                $statusManager = $this->container->get(StatusManager::class);
-                $status = $statusManager->getOneStatusById([
-                    'id' => $idStatus,
-                    'type' => StatusManager::TYPE_PROJECT,
-                    'organisation' => $data['organisation'],
-                ]);
+            // if ($project && $idStatus) {
+            //     $statusManager = $this->container->get(StatusManager::class);
+            //     $status = $statusManager->getOneStatusById([
+            //         'id' => $idStatus,
+            //         'type' => StatusManager::TYPE_PROJECT,
+            //         'organisation' => $data['organisation'],
+            //     ]);
 
-                if ($status) {
-                    $project->setStatus($status);
-                }
-            }
+            //     if ($status) {
+            //         $project->setStatus($status);
+            //     }
+            // }
             return $event;
         } catch (\Throwable $th) {
             //throw $th;
