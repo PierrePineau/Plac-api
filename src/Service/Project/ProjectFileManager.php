@@ -9,6 +9,8 @@ use Symfony\Bundle\SecurityBundle\Security;
 
 class ProjectFileManager extends AbstractCoreService
 {
+    public const BY_FILE = 'file';
+    public const BY_PROJECT = 'project';
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
@@ -27,9 +29,9 @@ class ProjectFileManager extends AbstractCoreService
 
     public function _add(array $data)
     {
-        $by = $data['by'] ?? 'project';
+        $by = $data['by'] ?? self::BY_FILE; // par default on ajoute les fichiers aux projets
 
-        if ($by === 'project') {
+        if ($by === self::BY_PROJECT) {
             $project = $data['project'];
             $projectFiles = $this->findBy([
                 'project' => $project->getId(),
@@ -49,7 +51,7 @@ class ProjectFileManager extends AbstractCoreService
                     $this->em->persist($projectFile);
                 }
             }
-        }elseif ($by === 'file') {
+        }elseif ($by === self::BY_FILE) {
             $file = $data['file'];
             $projectFiles = $this->findBy([
                 'file' => $file->getId(),

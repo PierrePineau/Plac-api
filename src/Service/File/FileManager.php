@@ -5,6 +5,8 @@ namespace App\Service\File;
 use App\Core\Service\AbstractCoreService;
 use App\Entity\File;
 use App\Service\File\Providers\S3Manager;
+use App\Service\Project\ProjectFileManager;
+use App\Service\Project\ProjectManager;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class FileManager extends AbstractCoreService
@@ -152,6 +154,18 @@ class FileManager extends AbstractCoreService
         $file = $element;
         $fileSize = filesize($data['file']);
         $file->setSize($fileSize);
+
+        if ($data['idProject'] || $data['idsProject']) {
+            $ids = $data['idsProject'] ?? [$data['idProject']];
+            $ProjectFileManager = $this->container->get(ProjectFileManager::class);
+            $projectManager = $this->container->get(ProjectManager::class);
+            
+            $ProjectFileManager->_add([
+                'by' => ProjectFileManager::BY_FILE,
+                'projects' => $projectManager->findByIds($ids), // uuids
+                'file' => $element,
+            ]);
+        }
         
         // On upload le fichier via le provider
         $provider = $this->container->get(self::GATEWAYS['OCEAN_S3_BUCKET']);
