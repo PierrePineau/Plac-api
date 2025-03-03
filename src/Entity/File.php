@@ -72,7 +72,6 @@ class File
         $this->uuid = Uuid::v7()->toRfc4122();
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
-        $this->url = uniqid();
         $this->organisationFiles = new ArrayCollection();
         $this->projectFiles = new ArrayCollection();
     }

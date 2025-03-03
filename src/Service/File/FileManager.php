@@ -148,6 +148,7 @@ class FileManager extends AbstractCoreService
             $data
         );
 
+        $element->setUrl(uniqid() . '.' . $extension);
         $this->em->persist($element);
         $this->isValid($element);
         
