@@ -155,8 +155,7 @@ class FileManager extends AbstractCoreService
         $file = $element;
         $fileSize = filesize($data['file']);
         $file->setSize($fileSize);
-
-        if ($data['idProject'] || $data['idsProject']) {
+        if (isset($data['idProject']) || isset($data['idsProject'])) {
             $ids = $data['idsProject'] ?? [$data['idProject']];
             $ProjectFileManager = $this->container->get(ProjectFileManager::class);
             $projectManager = $this->container->get(ProjectManager::class);
