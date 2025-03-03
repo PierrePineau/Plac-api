@@ -58,7 +58,11 @@ class AddressManager extends AbstractCoreService
 
     public function _update($id, array $data)
     {
-        $element = $this->_get($id);
+        if ($id === null) {
+            $element = new Address();
+        } else {
+            $element = $this->_get($id);
+        }
 
         $this->_saveData($element, $data);
 

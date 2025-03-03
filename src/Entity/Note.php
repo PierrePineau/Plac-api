@@ -199,4 +199,15 @@ class Note
 
         return $this;
     }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            'id' => $this->getUuid(),
+            'name' => $this->getName(),
+            'content' => $this->getContent(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+        ];
+    }
 }

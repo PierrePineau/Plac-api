@@ -116,17 +116,6 @@ class Module
         return $this;
     }
 
-    public function toArray(string $kind = 'default'): array
-    {
-        return [
-            'id' => $this->getId(),
-            'reference' => $this->getReference(),
-            'name' => $this->getName(),
-            'position' => $this->getPosition(),
-            'enabled' => $this->isEnabled(),
-        ];
-    }
-
     public function getPosition(): ?int
     {
         return $this->position;
@@ -137,5 +126,16 @@ class Module
         $this->position = $position;
 
         return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            'id' => $this->getId(),
+            'reference' => $this->getReference(),
+            'name' => $this->getName(),
+            'position' => $this->getPosition(),
+            'enabled' => $this->isEnabled(),
+        ];
     }
 }

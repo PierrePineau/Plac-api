@@ -230,19 +230,6 @@ class Client
         return $this;
     }
 
-    public function toArray(string $kind = 'default'): array
-    {
-        return [
-            // 'id' => $this->getId(),
-            'id' => $this->getUuid(),
-            'email' => $this->getEmail(),
-            'name' => $this->getName(),
-            'firstname' => $this->getFirstname(),
-            'lastname' => $this->getLastname(),
-            'phone' => $this->getPhone(),
-        ];
-    }
-
     /**
      * @return Collection<int, ProjectClient>
      */
@@ -295,5 +282,18 @@ class Client
         $this->address = $address;
 
         return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'id' => $this->getUuid(),
+            'email' => $this->getEmail(),
+            'name' => $this->getName(),
+            'firstname' => $this->getFirstname(),
+            'lastname' => $this->getLastname(),
+            'phone' => $this->getPhone(),
+        ];
     }
 }

@@ -10,7 +10,7 @@ final class ProjectUpdateEvent extends AbstractCoreEvent
     private ?Project $project = null;
     
     public function __construct(array $data = [])
-    {   
+    {
         parent::__construct($data);
         $this->project = $data['project'] ?? null;
     }

@@ -217,21 +217,6 @@ class Address
         return $this;
     }
 
-    public function toArray(string $kind = 'default'): array
-    {
-        return [
-            'id' => $this->getUuid(),
-            'country' => $this->getCountry(),
-            'state' => $this->getState(),   
-            'city' => $this->getCity(),
-            'postcode' => $this->getPostcode(),
-            'street' => $this->getStreet(),
-            'compl' => $this->getCompl(),
-            'createdAt' => $this->getCreatedAt(),
-            'updatedAt' => $this->getUpdatedAt(),
-        ];
-    }
-
     /**
      * @return Collection<int, Client>
      */
@@ -260,5 +245,20 @@ class Address
         }
 
         return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            'id' => $this->getUuid(),
+            'country' => $this->getCountry(),
+            'state' => $this->getState(),   
+            'city' => $this->getCity(),
+            'postcode' => $this->getPostcode(),
+            'street' => $this->getStreet(),
+            'compl' => $this->getCompl(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+        ];
     }
 }

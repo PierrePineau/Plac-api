@@ -88,4 +88,14 @@ class Access
 
         return $this;
     }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            'id' => $this->getUuid(),
+            // 'type' => $this->getType(),
+            // 'entityIdentifier' => $this->getEntityIdentifier(),
+            // 'entityId' => $this->getEntityId(),
+        ];
+    }
 }
