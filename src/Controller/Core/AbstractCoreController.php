@@ -37,6 +37,7 @@ abstract class AbstractCoreController extends AbstractController
         switch ($request->getMethod()) {
             case 'GET':
                 $response = $this->manager->search($data);
+                $response['filters'] = $request->query->all();
                 break;
             case 'POST':
                 $data = array_merge($data, $request->files->all());

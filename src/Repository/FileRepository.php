@@ -30,7 +30,9 @@ class FileRepository extends AbstractCoreRepository
         $types = $search['types'] ?? [];
         if (isset($search['type']) && $search['type'] != '') {
             $types[] = $search['type'];
+            $types = array_unique($types);
         }
+        
         if ($idProject) {
             $idsProjects[] = $idProject;
         }

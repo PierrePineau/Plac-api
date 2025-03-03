@@ -184,6 +184,14 @@ class FileManager extends AbstractCoreService
     {
         $element = $this->_get($id);
 
+        if (isset($data['name'])) {
+            // On retire l'exension du nom du fichier
+            $ext = $element->getExt();
+            $name = explode($ext, $element->getName());
+            $name = $name[0];
+            $data['name'] = $name;
+        }
+
         $this->setData(
             $element,
             [
