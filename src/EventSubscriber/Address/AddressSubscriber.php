@@ -36,7 +36,7 @@ class AddressSubscriber implements EventSubscriberInterface
             $dataAddress = $data['address'] ?? null;
             if ($project && $dataAddress) {
                 $AddressManager = $this->container->get(AddressManager::class);
-                $idAddress = $dataAddress['id'] ?? null;
+                $idAddress = $project->getAddress() ? $project->getAddress()->getId() : null;
                 $address = $AddressManager->_update($idAddress, $dataAddress);
 
                 if ($address) {

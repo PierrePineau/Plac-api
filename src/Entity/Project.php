@@ -73,6 +73,7 @@ class Project
     #[ORM\ManyToOne(inversedBy: 'projects', fetch: 'EAGER')]
     private ?Status $status = null;
 
+    #[Groups(["default", "update"])]
     #[ORM\ManyToOne(inversedBy: 'projects', fetch: 'EAGER')]
     private ?Address $address = null;
 
