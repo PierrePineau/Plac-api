@@ -4,6 +4,7 @@ namespace App\Service\File\Providers;
 
 use App\Core\Interface\FileServiceInterface;
 use App\Entity\File;
+use App\Entity\Organisation;
 use App\Service\File\FileManager;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -102,7 +103,7 @@ class S3Manager implements FileServiceInterface
         if (!$organisation) {
             throw new NotFoundHttpException($this::FOLDER_FORBIDDEN);
         }
-        $identifier = $organisation->getIdentifier();
+        $identifier = $organisation instanceof Organisation ? $organisation->getIdentifier() : $organisation;
         // On vérifie si le chemin commence par l'identifiant de l'organisation
         if (substr($path, 0, strlen($identifier)) === $identifier) {
             $path = substr($path, strlen($identifier));

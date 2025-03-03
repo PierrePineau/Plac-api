@@ -5,6 +5,7 @@ namespace App\Service\File;
 use App\Core\Service\AbstractCoreService;
 use App\Entity\File;
 use App\Service\File\Providers\S3Manager;
+use App\Service\Organisation\OrganisationManager;
 use App\Service\Project\ProjectFileManager;
 use App\Service\Project\ProjectManager;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -214,5 +215,40 @@ class FileManager extends AbstractCoreService
         $this->em->flush();
 
         return true;
+    }
+
+    public function get($id, array $filters = []): ?array
+    {
+        // 0194f783-58bc-7f20-a76a-6a826fe51bd1/fichiers/
+        // 67c5dfb9b9b0e.jpg
+        try {
+            $element = $this->findOneBy(['url' => $id]);
+            $idOrganisation = $filters['idOrganisation'] ?? null;
+            // $organisation = $this->container->get(OrganisationManager::class)->find($idOrganisation);
+            if (empty($element)) {
+                throw new \Exception($this->ELEMENT_NOT_FOUND);
+            }
+            $provider = $this->container->get(self::GATEWAYS['OCEAN_S3_BUCKET']);
+
+            $file = $provider->get([
+                'organisation' => $idOrganisation,
+                'folder' => self::FOLDER_FILES,
+                'path' => $element->getPath(),
+            ]);
+    
+            return $this->messenger->newResponse(
+                [
+                    'success' => true,
+                    'message' => $this->ELEMENT_FOUND,
+                    'code' => 200,
+                    'data' => [
+                        'file' => $element->toArray(),
+                        'content' => $file ?? null,
+                    ]
+                ]
+            );
+        } catch (\Throwable $th) {
+            return $this->messenger->errorResponse($th);
+        }
     }
 }
