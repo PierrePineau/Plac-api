@@ -112,8 +112,7 @@ class S3Manager implements FileServiceInterface
             throw new NotFoundHttpException($this::FOLDER_FORBIDDEN);
         }
         // organisations/organisation_identifier/folder/path
-        $path = self::FOLDER_BASE.$identifier.$folder."/".$path;
-
+        $path = self::FOLDER_BASE.$identifier."/".$folder.$path;
         // prod/path
         return $this->prefix.$path;
     }
