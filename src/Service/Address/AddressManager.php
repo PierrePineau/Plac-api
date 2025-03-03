@@ -20,20 +20,27 @@ class AddressManager extends AbstractCoreService
 
     private function _saveData(Address $address, array $data): Address
     {
+        $data['country'] = $data['country'] ?? 'FR';
         $this->setData(
             $address,
             [
                 'country' => [
+                    'nullable' => true,
                 ],
                 'state' => [
+                    'nullable' => true,
                 ],
                 'city' => [
+                    'nullable' => true,
                 ],
                 'postcode' => [
+                    'nullable' => true,
                 ],
                 'street' => [
+                    'nullable' => true,
                 ],
                 'compl' => [
+                    'nullable' => true,
                 ],
             ],
             $data
