@@ -41,12 +41,12 @@ class Access
         return $this->id;
     }
 
-    public function getUuid(): ?Uuid
+    public function getUuid(): ?string
     {
         return $this->uuid;
     }
 
-    public function setUuid(Uuid $uuid): static
+    public function setUuid(string $uuid): static
     {
         $this->uuid = $uuid;
 
