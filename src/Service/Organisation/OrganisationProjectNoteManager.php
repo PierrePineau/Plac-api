@@ -58,7 +58,6 @@ class OrganisationProjectNoteManager extends AbstractCoreService
         $notes = $noteManager->_search([
             'organisation' => $data['organisation'],
             'ids' => $data['ids'],
-            'excludeIdsProject' => [$project->getId()],
         ]);
 
         $projectNoteManager = $this->getElementManager();

@@ -42,11 +42,12 @@ class NoteRepository extends AbstractCoreRepository
                 ->setParameter('ids', $search['ids']);
         }
 
-        if (isset($search['excludeIdsProject']) && count($search['excludeIdsProject']) > 0) {
+        if (!empty($idsProjects)) {
             $query = $query
                 ->leftJoin("{$this->alias}.projectNotes", "pn")
-                ->andWhere("pn.project NOT IN (:excludeIdsProject)")
-                ->setParameter('excludeIdsProject', $search['excludeIdsProject']);
+                ->leftJoin("pn.project", "p")
+                ->andWhere("p.uuid IN (:idsProjects)")
+                ->setParameter('idsProjects', $idsProjects);
         }
 
         if (!$countMode) {
