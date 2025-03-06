@@ -48,18 +48,6 @@ class OAuthController extends AbstractController
                 Response::HTTP_NOT_FOUND
             );
         }
-        
-        $data = [];
-        if ($request->headers->get('Content-Type') === 'application/json') {
-            try {
-                $json = $request->getContent();
-                $data = json_decode($json, true) ?? [];
-            } catch (\Throwable $th) {
-                //throw $th;
-                $data = [];
-            }
-        }
-
         // $returnUrl = null;
         // if (isset($data['return_url']) && is_string($data['return_url'])) {
         //     $returnUrl = $data['return_url'] ?? null;
@@ -69,16 +57,14 @@ class OAuthController extends AbstractController
         
         $content = $clientRegistry->getClient($service)->redirect(self::SCOPES[$service], [
         ]);
-
-        
-        if (!is_array($content)) {
-            $content = [$content];
-        }
         $resp = $messenger->newResponse([
             'success' => true,
             'message' => 'oauth.redirect',
             'code' => Response::HTTP_OK,
-            'data' => $content
+            'data' => [
+                'service' => $service,
+                'targetUrl' => $content->getTargetUrl(),
+            ]
         ]);
         return $this->json(
             $resp,
