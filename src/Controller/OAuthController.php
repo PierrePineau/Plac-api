@@ -30,10 +30,10 @@ class OAuthController extends AbstractController
         return $this->json([]);
     }
 
-    #[OA\Post(
+    #[OA\Get(
         summary: 'Connect with one oauth service',
     )]
-    #[Route('/connect/{service}', name:"connect", methods: ['POST'])]
+    #[Route('/connect/{service}', name:"connect", methods: ['GET'])]
     public function oauthConnect(string $service, Request $request, ClientRegistry $clientRegistry, Messenger $messenger): JsonResponse
     {
         if (!array_key_exists($service, self::SCOPES)) {
