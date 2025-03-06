@@ -207,6 +207,9 @@ class UserManager extends AbstractCoreService
             $provider = $data['provider'];
             $oauthUser = $data['oauthUser'];
 
+            $key = $provider.'Id';
+            $setter = 'set'.ucfirst($provider).'Id';
+
             $user = $this->em->getRepository(User::class)->findOneBy([
                 'email' => $oauthUser->getEmail(),
             ]);
@@ -222,10 +225,9 @@ class UserManager extends AbstractCoreService
 
                 // On associe le provider à l'utilisateur
                 // On check si la méthode setProviderId existe sur l'objet User
-                $key = 'set'.ucfirst($provider).'Id';
-                if (method_exists($user, $key)) {
+                if (method_exists($user, $setter)) {
                     // setGoogleId par exemple
-                    $user->$key($oauthUser->getId());
+                    $user->$setter($oauthUser->getId());
                 }
                 $this->em->persist($user);
 
