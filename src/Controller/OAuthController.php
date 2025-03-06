@@ -115,12 +115,11 @@ class OAuthController extends AbstractController
                 Response::HTTP_OK
             );
         }else{
-            $returnUrl = $_ENV['OAUTH_RETURN_URL'];
-            $returnUrl = $returnUrl .'?oauth=' . $service;
             $token = $resp['data']['token'];
+            $returnUrl = $_ENV['OAUTH_RETURN_URL'];
+            $returnUrl = $returnUrl .'?oauth=' . $service . '&token=' . $token;
 
             $response = new RedirectResponse($returnUrl, 302);
-            $response->headers->setCookie(new Cookie('oauth_token', $token, time() + 3600, '/', null, false, true));
             
             return $response;
         }
