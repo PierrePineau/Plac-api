@@ -5,6 +5,7 @@ knpu_oauth2_client:
             type: google
             client_id: '%env(GOOGLE_OAUTH_CLIENT_ID)%'
             client_secret: '%env(GOOGLE_OAUTH_CLIENT_SECRET)%'
+            use_state: true
             redirect_route: api_oauth_login_check
             redirect_params:
                 service: google
