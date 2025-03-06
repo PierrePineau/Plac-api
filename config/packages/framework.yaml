@@ -4,7 +4,10 @@ framework:
     #csrf_protection: true
 
     # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    session:
+        cookie_lifetime: 3600
+        cookie_samesite: lax
+        name: APPSESSID
 
     #esi: true
     #fragments: true

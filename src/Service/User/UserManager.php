@@ -7,9 +7,13 @@ use App\Core\Service\AbstractCoreService;
 use App\Entity\User;
 use App\Event\Client\UserCreateEvent;
 use App\Security\Middleware\UserMiddleware;
+use KnpU\OAuth2ClientBundle\Security\User\OAuthUser;
+use League\OAuth2\Client\Provider\GoogleUser;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Uid\Uuid;
 
 class UserManager extends AbstractCoreService
 {
@@ -17,9 +21,12 @@ class UserManager extends AbstractCoreService
     public const ROLE_ADMIN = 'ROLE_ADMIN'; // Les utilisateurs avec ce role peuvent modifier les autres utilisateurs
     public const ROLE_EMPLOYE = 'ROLE_EMPLOYE'; // Les utilisateurs au sein d'une organisation
     private $passwordHash;
-    public function __construct($container, $entityManager, Security $security, UserPasswordHasherInterface $passwordHash)
+    private $jwtManager;
+
+    public function __construct($container, $entityManager, Security $security, UserPasswordHasherInterface $passwordHash, JWTTokenManagerInterface $jwtManager)
     {
         $this->passwordHash = $passwordHash;
+        $this->jwtManager = $jwtManager;
         parent::__construct($container, $entityManager, [
             'security' => $security,
             'identifier' => 'uuid',
@@ -56,6 +63,34 @@ class UserManager extends AbstractCoreService
         }
 
         return $element;
+    }
+
+    public function create(array $data): ?array
+    {
+        try {
+            $data = $this->guardMiddleware($data);
+            $user = $this->_create($data);
+
+            $this->em->flush();
+
+            $returnData['user'] = $user->toArray('create');
+            $authenticateUser = $this->getUser();
+
+            // Si l'utilisateur connecté est un admin, on lui retourne le token
+            if (!$authenticateUser->isAuthenticate()) {
+                $token = $this->jwtManager->create($user);
+                $returnData['token'] = $token;
+            }
+
+            return $this->messenger->newResponse([
+                'success' => true,
+                'message' => $this->ELEMENT_CREATED,
+                'code' => 201,
+                'data' => $returnData,
+            ]);
+        } catch (\Throwable $th) {
+            return $this->messenger->errorResponse($th);
+        }
     }
     
     // Fonction appelée lors de la création d'un utilisateur (création de compte et d'une organisation)
@@ -107,13 +142,13 @@ class UserManager extends AbstractCoreService
         $this->setData(
             $user,
             [
-                'firstname' => [
+                'email' => [
                     'required' => true,
                     'nullable' => false,
                 ],
+                'firstname' => [
+                ],
                 'lastname' => [
-                    'required' => true,
-                    'nullable' => false,
                 ],
             ],
             $data
@@ -163,5 +198,62 @@ class UserManager extends AbstractCoreService
         $this->em->persist($user);
         $this->em->flush();
         return [];
+    }
+
+    // Fonction appelée lors de la création / connection via oauth
+    public function oauth(array $data): ?array
+    {
+        try {
+            $provider = $data['provider'];
+            $oauthUser = $data['oauthUser'];
+
+            $user = $this->em->getRepository(User::class)->findOneBy([
+                'email' => $oauthUser->getEmail(),
+            ]);
+            
+            if (!$user) {
+                $user = $this->_createUser([
+                    'email' => $oauthUser->getEmail(),
+                    'firstname' => $oauthUser->getFirstName(),
+                    'lastname' => $oauthUser->getLastName(),
+                    'password' => uniqid() . Uuid::v7()->toRfc4122(), // On lui génère un mot de passe aléatoire
+                ]);
+                $user->setRoles([self::ROLE_USER, self::ROLE_ADMIN]);
+
+                // On associe le provider à l'utilisateur
+                // On check si la méthode setProviderId existe sur l'objet User
+                $key = 'set'.ucfirst($provider).'Id';
+                if (method_exists($user, $key)) {
+                    // setGoogleId par exemple
+                    $user->$key($oauthUser->getId());
+                }
+                $this->em->persist($user);
+
+                $newEvent = new UserCreateEvent([
+                    'user' => $user,
+                    'authenticateUser' => $this->getUser(),
+                ]);
+                // Send Event
+                $this->dispatchEvent($newEvent);
+            }
+
+            $returnData['user'] = $user->toArray('create');
+            $authenticateUser = $this->getUser();
+
+            // Si l'utilisateur connecté est un admin, on lui retourne le token
+            if (!$authenticateUser->isAuthenticate()) {
+                $token = $this->jwtManager->create($user);
+                $returnData['token'] = $token;
+            }
+
+            return $this->messenger->newResponse([
+                'success' => true,
+                'message' => $this->ELEMENT_CREATED,
+                'code' => 201,
+                'data' => $returnData,
+            ]);
+        } catch (\Throwable $th) {
+            return $this->messenger->errorResponse($th);
+        }
     }
 }

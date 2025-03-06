@@ -212,6 +212,14 @@ class FileManager extends AbstractCoreService
     {
         $element = $this->_get($id);
 
+        // On check si le fichier à des associations
+
+        // Organisations
+        $element->getOrganisationFiles()->clear();
+        // Projects
+        $element->getProjectFiles()->clear();
+        $this->em->persist($element);
+
         $provider = $this->container->get(self::GATEWAYS['OCEAN_S3_BUCKET']);
         $provider->delete([
             'organisation' => $data['organisation'],

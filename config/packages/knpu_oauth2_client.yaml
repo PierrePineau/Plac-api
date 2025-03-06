@@ -8,3 +8,4 @@ knpu_oauth2_client:
             redirect_route: api_oauth_login_check
             redirect_params:
                 service: google
+                
