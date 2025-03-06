@@ -115,7 +115,7 @@ class OAuthController extends AbstractController
             );
         }else{
             $returnUrl = $_ENV['OAUTH_RETURN_URL'];
-            $returnUrl += '?oauth=' . $service;
+            $returnUrl = $returnUrl .'?oauth=' . $service;
             return new RedirectResponse($returnUrl, 302, [
                 'data' => json_encode($resp),
             ]);
