@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -116,9 +117,12 @@ class OAuthController extends AbstractController
         }else{
             $returnUrl = $_ENV['OAUTH_RETURN_URL'];
             $returnUrl = $returnUrl .'?oauth=' . $service;
-            return new RedirectResponse($returnUrl, 302, [
-                'data' => json_encode($resp),
-            ]);
+            $token = $resp['data']['token'];
+
+            $response = new RedirectResponse($returnUrl, 302);
+            $response->headers->setCookie(new Cookie('oauth_token', $token, time() + 3600, '/', null, false, true));
+            
+            return $response;
         }
     }
 }

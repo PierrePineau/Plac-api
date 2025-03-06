@@ -250,8 +250,42 @@ class UserManager extends AbstractCoreService
 
             return $this->messenger->newResponse([
                 'success' => true,
-                'message' => $this->ELEMENT_CREATED,
-                'code' => 201,
+                'message' => $this->ELEMENT.'.oauth',
+                'code' => 200,
+                'data' => $returnData,
+            ]);
+        } catch (\Throwable $th) {
+            return $this->messenger->errorResponse($th);
+        }
+    }
+
+    public function me(array $data): ?array
+    {
+        try {
+            // On récupère l'utilisateur connecté
+            $authenticateUser = $this->getUser();
+
+            if (!$authenticateUser->isAuthenticate()) {
+                throw new DeniedException();
+            }
+
+            $user = $this->findOneBy([
+                'id' => $authenticateUser->getId()
+            ]);
+
+            $returnData = [];
+            $returnData['user'] = $user->toArray('auth');
+
+			$organisation = $this->container->get(UserOrganisationManager::class)->getOneOrganisationsByUser([
+				'idUser' => $user->getId()
+			]);
+
+			$data['organisation'] = $organisation ? $organisation->getInfos() : null;
+            
+            return $this->messenger->newResponse([
+                'success' => true,
+                'message' => $this->ELEMENT_FOUND,
+                'code' => 200,
                 'data' => $returnData,
             ]);
         } catch (\Throwable $th) {
