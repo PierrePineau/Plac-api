@@ -1,6 +1,7 @@
 <?php
 namespace App\EventSubscriber\Mail;
 
+use App\Core\Utils\Messenger;
 use App\Event\Client\UserCreateEvent;
 use App\Model\Mail;
 use App\Service\Mail\MailManager;
@@ -9,9 +10,11 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class MailSubscriber implements EventSubscriberInterface
 {
     private $container;
+    private $messenger;
     public function __construct($container)
     {
         $this->container = $container;
+        $this->messenger = $this->container->get(Messenger::class);
     }
 
     public static function getSubscribedEvents(): array
@@ -30,9 +33,9 @@ class MailSubscriber implements EventSubscriberInterface
             // On envoie un email pour que l'utilisateur vérifie son compte
             $user = $event->getUser();
             $data = $event->getData();
-            $authenticateUser = $data['authenticateUser'];
+            $authenticateUser = $data['authenticateUser'] ?? null;
             // On check que ce n'est pas un admin qui a créé le compte
-            if ($authenticateUser->isAdmin()) {
+            if ($authenticateUser && $authenticateUser->isAdmin()) {
                 // On set l'email comme vérifié
                 // $user->setEmailVerified(true);
                 return $event;
@@ -45,7 +48,7 @@ class MailSubscriber implements EventSubscriberInterface
                     'name' => $user->getFullName(),
                     'email' => $user->getEmail()
                 ]);
-                $mail->setSubject(MailManager::SUBJECT_USER_ACTIVATION);
+                $mail->setSubject($this->messenger->getMessage(MailManager::SUBJECT_USER_ACTIVATION));
                 $resp = $mailManager->send($mail, [
                     'template' => MailManager::TEMPLATE_USER_ACTIVATION,
                     'data' => [
