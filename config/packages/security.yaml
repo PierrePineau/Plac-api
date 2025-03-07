@@ -27,7 +27,7 @@ security:
     firewalls:
         admin:
             pattern: ^/api/admin
-            stateless: false 
+            stateless: true 
             switch_user: true
             jwt: 
               authenticator: admin.user_authenticator
@@ -44,7 +44,7 @@ security:
                 max_attempts: 5
         app:
             pattern: ^/api/app
-            stateless: false
+            stateless: true
             jwt: 
               authenticator: app.user_authenticator
             switch_user: true

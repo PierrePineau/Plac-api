@@ -277,10 +277,10 @@ class UserManager extends AbstractCoreService
             $returnData['user'] = $user->toArray('auth');
 
 			$organisation = $this->container->get(UserOrganisationManager::class)->getOneOrganisationsByUser([
-				'idUser' => $user->getId()
+				'idUser' => $user->getId(),
 			]);
 
-			$data['organisation'] = $organisation ? $organisation->getInfos() : null;
+			$returnData['organisation'] = $organisation ? $organisation->getInfos() : null;
             
             return $this->messenger->newResponse([
                 'success' => true,
