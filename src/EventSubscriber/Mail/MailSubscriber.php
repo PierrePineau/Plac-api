@@ -53,7 +53,7 @@ class MailSubscriber implements EventSubscriberInterface
                     'template' => MailManager::TEMPLATE_USER_ACTIVATION,
                     'data' => [
                         'user' => $user,
-                        'url' => 'https://gestion-plac.fr/verify',
+                        'url' => 'https://app.gestion-plac.fr/verify',
                         'subject' => $mail->getSubject() // Pour le render twig
                     ]
                 ]);

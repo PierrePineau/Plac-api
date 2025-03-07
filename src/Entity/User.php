@@ -286,6 +286,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'id' => $this->getUuid(),
             'email' => $this->getEmail(),
             'phone' => $this->getPhone(),
+            'fullname' => $this->getFullName(),
             'firstname' => $this->getFirstname(),
             'lastname' => $this->getLastname(),
             'createdAt' => $this->getCreatedAt(),
