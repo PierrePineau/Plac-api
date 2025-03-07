@@ -73,6 +73,7 @@ class UserManager extends AbstractCoreService
 
             $this->em->flush();
 
+            $returnData = [];
             $returnData['user'] = $user->toArray('create');
             $authenticateUser = $this->getUser();
 

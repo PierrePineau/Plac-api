@@ -63,7 +63,10 @@ class UserOrganisationManager extends AbstractCoreService
         // $user = $this->getCustomer([
         //     'idUser' => $data['idUser'],
         // ]);
-        $user = $data['user'];
+        $user = $data['user'] ?? null;
+        if (!$user) {
+            throw new ErrorException($this->ELEMENT_NOT_FOUND);
+        }
 
         // On vérifie que l'utilisateur n'a pas déjà une organisation
         $userOrganisation = $this->findOneBy([
