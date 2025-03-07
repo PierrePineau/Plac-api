@@ -216,14 +216,13 @@ class UserManager extends AbstractCoreService
             ]);
             
             if (!$user) {
-                $user = $this->_createUser([
+                $user = $this->_create([
                     'email' => $oauthUser->getEmail(),
                     'firstname' => $oauthUser->getFirstName(),
                     'lastname' => $oauthUser->getLastName(),
                     'password' => uniqid() . Uuid::v7()->toRfc4122(), // On lui génère un mot de passe aléatoire
                 ]);
-                $user->setRoles([self::ROLE_USER, self::ROLE_ADMIN]);
-
+                // $user->setRoles([self::ROLE_USER, self::ROLE_ADMIN]);
                 // On associe le provider à l'utilisateur
                 // On check si la méthode setProviderId existe sur l'objet User
                 if (method_exists($user, $setter)) {
@@ -231,13 +230,7 @@ class UserManager extends AbstractCoreService
                     $user->$setter($oauthUser->getId());
                 }
                 $this->em->persist($user);
-
-                $newEvent = new UserCreateEvent([
-                    'user' => $user,
-                    'authenticateUser' => $this->getUser(),
-                ]);
-                // Send Event
-                $this->dispatchEvent($newEvent);
+                $this->em->flush();
             }
 
             $returnData['user'] = $user->toArray('create');
