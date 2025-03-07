@@ -278,6 +278,9 @@ class UserManager extends AbstractCoreService
 
 			$organisation = $this->container->get(UserOrganisationManager::class)->getOneOrganisationsByUser([
 				'idUser' => $user->getId(),
+                'user' => $user,
+                'name' => $user->getFullName() . ' Organisation',
+                'createIfNotExist' => true,
 			]);
 
 			$returnData['organisation'] = $organisation ? $organisation->getInfos() : null;

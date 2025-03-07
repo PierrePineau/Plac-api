@@ -45,6 +45,16 @@ class UserOrganisationManager extends AbstractCoreService
             'idUser' => $data['idUser'],
         ]);
 
+        if (!$userOrganisation && isset($data['createIfNotExist']) && $data['createIfNotExist']) {
+            $this->_create($data);
+
+            $this->em->flush();
+
+            $userOrganisation = $this->repo->getOneUserOrganisationsByUser([
+                'idUser' => $data['idUser'],
+            ]);
+        }
+
         return $userOrganisation ? $userOrganisation->getOrganisation() : null;
     }
 
