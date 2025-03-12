@@ -359,8 +359,11 @@ class Project
             'status' => $this->getStatus()?->toArray(),
             'address' => $this->getAddress()?->toArray(),
             'deleted' => $this->isDeleted(),
+            'thumbnail' => $this->getProjectFiles()->filter(function($projectFile) {
+                return $projectFile->getFile()->getType() === 'MEDIA';
+            })->first()?->toArray(),
         ];
-        
+
         if (in_array($kind, ['get','create', 'update', 'add'])) {
             $data = array_merge(
                 $defaultData,
