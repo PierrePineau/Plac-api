@@ -359,10 +359,16 @@ class Project
             'status' => $this->getStatus()?->toArray(),
             'address' => $this->getAddress()?->toArray(),
             'deleted' => $this->isDeleted(),
-            'thumbnail' => $this->getProjectFiles()->filter(function($projectFile) {
-                return $projectFile->getFile()->getType() === 'MEDIA';
-            })->first()?->getFile()->toArray(),
+            'thumbnail' => null,
         ];
+        // on récupp la thumbnail
+        $thumbnail = $this->getProjectFiles()->filter(function($projectFile) {
+            return $projectFile->getFile()->getType() === 'MEDIA';
+        })->first();
+
+        if ($thumbnail) {
+            $defaultData['thumbnail'] = $thumbnail->getFile()->toArray();
+        }
 
         if (in_array($kind, ['get','create', 'update', 'add'])) {
             $data = array_merge(
