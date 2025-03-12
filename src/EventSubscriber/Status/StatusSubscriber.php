@@ -63,7 +63,7 @@ class StatusSubscriber implements EventSubscriberInterface
         return $event;
     }
 
-    public function onProjectCreate(ProjectUpdateEvent $event): ProjectUpdateEvent
+    public function onProjectCreate(ProjectCreateEvent $event): ProjectCreateEvent
     {
         try {
             // On associe le status par défaut au projet
