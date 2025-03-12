@@ -27,6 +27,17 @@ class UserController extends AbstractCoreController
 
     #[OA\Post(
         summary: 'Create new',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: User::class, groups: ['create'])
+                )
+            )
+        ),
         responses:
         [
             '201' => new OA\Response(
@@ -45,6 +56,26 @@ class UserController extends AbstractCoreController
     }
 
     #[OA\Get(
+        summary: 'Get current user',
+        responses:
+        [
+            '200' => new OA\Response(
+                response: 200,
+                description: '',
+                content: new OA\JsonContent(
+                    ref: '#/components/schemas/response'
+                )
+            )
+        ]
+    )]
+    #[Route('/me', methods: ['GET'])]
+    public function me(Request $request, UserManager $manager): JsonResponse
+    {
+        $response = $manager->me($request->query->all());
+        return $this->json($response, $response['success'] ? JsonResponse::HTTP_OK : JsonResponse::HTTP_BAD_REQUEST);
+    }
+
+    #[OA\Get(
         summary: 'Get one',
         responses:
         [
@@ -59,6 +90,17 @@ class UserController extends AbstractCoreController
     )]
     #[OA\Post(
         summary: 'Update one',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: User::class, groups: ['update'])
+                )
+            )
+        ),
         responses:
         [
             '200' => new OA\Response(

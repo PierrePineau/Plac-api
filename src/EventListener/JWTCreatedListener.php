@@ -17,10 +17,9 @@ class JWTCreatedListener
 	/**
 	 * @param RequestStack $requestStack
 	 */
-	public function __construct(RequestStack $requestStack, $entityManager)
+	public function __construct(RequestStack $requestStack)
 	{
 		$this->requestStack = $requestStack;
-        // $this->repoSite = $entityManager->getRepository(Site::class);
 	}
 
 	/**

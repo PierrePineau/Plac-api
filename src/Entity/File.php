@@ -7,6 +7,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: FileRepository::class)]
 class File
@@ -14,23 +16,33 @@ class File
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
+    #[ORM\Column(unique: true)]
+    private ?string $uuid = null;
+
+    #[Groups(["default"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $url = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $type = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(nullable: true)]
     private ?array $meta = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $ext = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(nullable: true)]
     private ?float $size = null;
 
@@ -57,6 +69,9 @@ class File
 
     public function __construct()
     {
+        $this->uuid = Uuid::v7()->toRfc4122();
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
         $this->organisationFiles = new ArrayCollection();
         $this->projectFiles = new ArrayCollection();
     }
@@ -66,12 +81,36 @@ class File
         return $this->id;
     }
 
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(string $uuid): static
+    {
+        $this->uuid = $uuid;
+
+        return $this;
+    }
+
     public function getUrl(): ?string
     {
         return $this->url;
     }
 
     public function setUrl(?string $url): static
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    public function getPath(): ?string
+    {
+        return $this->url;
+    }
+
+    public function setPath(?string $url): static
     {
         $this->url = $url;
 
@@ -232,5 +271,20 @@ class File
         }
 
         return $this;
+    }
+    
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            'id' => $this->getUuid(),
+            'url' => $this->getUrl(),
+            'name' => $this->getName(),
+            'type' => $this->getType(),
+            'meta' => $this->getMeta(),
+            'ext' => $this->getExt(),
+            'size' => $this->getSize(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+        ];
     }
 }

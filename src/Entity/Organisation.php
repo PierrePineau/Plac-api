@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: OrganisationRepository::class)]
@@ -15,11 +16,13 @@ class Organisation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
     #[ORM\Column(unique: true)]
     private ?string $uuid = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
@@ -28,9 +31,6 @@ class Organisation
      */
     #[ORM\OneToMany(targetEntity: UserOrganisation::class, mappedBy: 'organisation')]
     private Collection $userOrganisations;
-
-    #[ORM\OneToOne(mappedBy: 'organisation', cascade: ['persist', 'remove'])]
-    private ?OrganisationSubscription $organisationSubscription = null;
 
     /**
      * @var Collection<int, OrganisationModule>
@@ -44,12 +44,15 @@ class Organisation
     #[ORM\OneToMany(targetEntity: OrganisationFile::class, mappedBy: 'organisation')]
     private Collection $organisationFiles;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
@@ -72,19 +75,30 @@ class Organisation
     private Collection $organisationNotes;
 
     /**
-     * @var Collection<int, EmployeOrganisation>
-     */
-    #[ORM\OneToMany(targetEntity: EmployeOrganisation::class, mappedBy: 'organisation')]
-    private Collection $employeOrganisations;
-
-    /**
      * @var Collection<int, OrganisationStatus>
      */
     #[ORM\OneToMany(targetEntity: OrganisationStatus::class, mappedBy: 'organisation')]
     private Collection $organisationStatuses;
 
+    #[Groups(["default"])]
     #[ORM\Column]
     private ?bool $deleted = null;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?Subscription $currentSubscription = null;
+
+    /**
+     * @var Collection<int, Subscription>
+     */
+    #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'organisation')]
+    private Collection $subscriptions;
+
+    #[ORM\ManyToOne]
+    private ?User $owner = null;
+
+    #[Groups(["default"])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $freeTrialEndAt = null;
 
     public function __construct()
     {
@@ -97,9 +111,9 @@ class Organisation
         $this->organisationClients = new ArrayCollection();
         $this->organisationProjects = new ArrayCollection();
         $this->organisationNotes = new ArrayCollection();
-        $this->employeOrganisations = new ArrayCollection();
         $this->organisationStatuses = new ArrayCollection();
         $this->deleted = false;
+        $this->subscriptions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -162,23 +176,6 @@ class Organisation
                 $userOrganisation->setOrganisation(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getOrganisationSubscription(): ?OrganisationSubscription
-    {
-        return $this->organisationSubscription;
-    }
-
-    public function setOrganisationSubscription(OrganisationSubscription $organisationSubscription): static
-    {
-        // set the owning side of the relation if necessary
-        if ($organisationSubscription->getOrganisation() !== $this) {
-            $organisationSubscription->setOrganisation($this);
-        }
-
-        $this->organisationSubscription = $organisationSubscription;
 
         return $this;
     }
@@ -370,36 +367,6 @@ class Organisation
     }
 
     /**
-     * @return Collection<int, EmployeOrganisation>
-     */
-    public function getEmployeOrganisations(): Collection
-    {
-        return $this->employeOrganisations;
-    }
-
-    public function addEmployeOrganisation(EmployeOrganisation $employeOrganisation): static
-    {
-        if (!$this->employeOrganisations->contains($employeOrganisation)) {
-            $this->employeOrganisations->add($employeOrganisation);
-            $employeOrganisation->setOrganisation($this);
-        }
-
-        return $this;
-    }
-
-    public function removeEmployeOrganisation(EmployeOrganisation $employeOrganisation): static
-    {
-        if ($this->employeOrganisations->removeElement($employeOrganisation)) {
-            // set the owning side to null (unless already changed)
-            if ($employeOrganisation->getOrganisation() === $this) {
-                $employeOrganisation->setOrganisation(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, OrganisationStatus>
      */
     public function getOrganisationStatuses(): Collection
@@ -429,19 +396,6 @@ class Organisation
         return $this;
     }
 
-    public function toArray(string $kind = 'default'): array
-    {
-        return [
-            // 'id' => $this->getId(),
-            'uuid' => $this->getUuid(),
-            'name' => $this->getName(),
-            'deleted' => $this->isDeleted(),
-            'createdAt' => $this->getCreatedAt(),
-            'updatedAt' => $this->getUpdatedAt(),
-            'deletedAt' => $this->getDeletedAt(),
-        ];
-    }
-
     public function isDeleted(): ?bool
     {
         return $this->deleted;
@@ -450,6 +404,99 @@ class Organisation
     public function setDeleted(bool $deleted): static
     {
         $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    public function getCurrentSubscription(): ?Subscription
+    {
+        return $this->currentSubscription;
+    }
+
+    public function setCurrentSubscription(?Subscription $currentSubscription): static
+    {
+        $this->currentSubscription = $currentSubscription;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Subscription>
+     */
+    public function getSubscriptions(): Collection
+    {
+        return $this->subscriptions;
+    }
+
+    public function addSubscription(Subscription $subscription): static
+    {
+        if (!$this->subscriptions->contains($subscription)) {
+            $this->subscriptions->add($subscription);
+            $subscription->setOrganisation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubscription(Subscription $subscription): static
+    {
+        if ($this->subscriptions->removeElement($subscription)) {
+            // set the owning side to null (unless already changed)
+            if ($subscription->getOrganisation() === $this) {
+                $subscription->setOrganisation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): static
+    {
+        $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'uuid' => $this->getUuid(),
+            'name' => $this->getName(),
+            'freeTrialEndAt' => $this->getFreeTrialEndAt(),
+            'deleted' => $this->isDeleted(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+            'deletedAt' => $this->getDeletedAt(),
+        ];
+    }
+
+    // Utilisé au moment de la connection
+    public function getInfos(): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'id' => $this->getUuid(),
+            'name' => $this->getName(),
+            'freeTrialEndAt' => $this->getFreeTrialEndAt(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+        ];
+    }
+
+    public function getFreeTrialEndAt(): ?\DateTimeInterface
+    {
+        return $this->freeTrialEndAt;
+    }
+
+    public function setFreeTrialEndAt(?\DateTimeInterface $freeTrialEndAt): static
+    {
+        $this->freeTrialEndAt = $freeTrialEndAt;
 
         return $this;
     }

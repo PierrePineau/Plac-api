@@ -4,12 +4,13 @@ namespace App\Core\Traits;
 
 use App\Entity\Organisation;
 use App\Service\Organisation\OrganisationManager;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 trait OrganisationTrait {
 
-    public function __construct() {
-        $this->setGuardAction('organisation', 'getOrganisation');
-    }
+    // public function __construct() {
+    //     $this->setGuardAction('organisation', 'getOrganisation');
+    // }
 
     public function getOrganisation(array $data): Organisation
     {
@@ -19,35 +20,39 @@ trait OrganisationTrait {
 
     public function _getOrganisationElement($id, array $filters = []): mixed
     {
-        $orgElement = $this->findOneByAccess([
+        $manager = $this->getElementManager();
+        $element = $manager->findOneByAccess([
             'id' => $id,
             'organisation' => $filters['organisation'],
         ]);
-        return $orgElement;
+        if (!$element) {
+            throw new NotFoundHttpException($this->ELEMENT_NOT_FOUND);
+        }
+        return $element;
     }
 
     public function _updateOrganisationElement($id, array $data)
     {
-        $orgElement = $this->_get($id, [
-            'idOrganisation' => $data['organisation']->getId(),
+        $element = $this->_get($id, [
+            'organisation' => $data['organisation'],
         ]);
 
         $manager = $this->getElementManager();
-        $element = $manager->_update($orgElement->getElement(), $data);
+        $element = $manager->_update($element, $data);
 
-        $this->em->persist($orgElement);
-        $this->isValid($orgElement);
+        $this->em->persist($element);
+        $this->isValid($element);
 
         return $element;
     }
 
     public function _deleteOrganisationElement($id, array $filters = [])
     {
-        $orgElement = $this->_get($id, [
-            'idOrganisation' => $filters['organisation']->getId(),
+        $element = $this->_get($id, [
+            'organisation' => $filters['organisation'],
         ]);
 
         $manager = $this->getElementManager();
-        return $manager->_delete($orgElement->getElement());
+        return $manager->_delete($element);
     }
 }

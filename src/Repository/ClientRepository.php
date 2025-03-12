@@ -9,16 +9,23 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class ClientRepository extends AbstractCoreRepository
 {
+    private $accessRelation;
     use OrganisationRepositoryTrait;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Client::class);
+        $this->accessRelation = 'organisationClients';
     }
 
     public function search(array $search = [], bool $countMode = false)
     {
         $settings = $this->configureSearch($search);
         $idOrganisation = $this->getIdOrganisation($search);
+        $idsProject = $search['idsProject'] ?? [];
+
+        if (isset($search['idProject']) && $search['idProject'] != '') {
+            $idsProject[] = $search['idProject'];
+        }
 
         $query = $this->createNewQueryBuilder()
             ->leftJoin("{$this->alias}.organisationClients", "rel")
@@ -29,6 +36,12 @@ class ClientRepository extends AbstractCoreRepository
             $query = $query
                 ->andWhere("{$this->alias}.firstName LIKE :search OR {$this->alias}.lastName LIKE :search OR {$this->alias}.email LIKE :search OR {$this->alias}.phone LIKE :search")
                 ->setParameter('search', "%{$search['search']}%");
+        }
+
+        if (isset($search['ids']) && count($search['ids']) > 0) {
+            $query = $query
+                ->andWhere("{$this->alias}.uuid IN (:ids)")
+                ->setParameter('ids', $search['ids']);
         }
 
         if (!$countMode) {

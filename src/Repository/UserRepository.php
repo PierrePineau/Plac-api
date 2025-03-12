@@ -35,7 +35,7 @@ class UserRepository extends AbstractCoreRepository implements PasswordUpgraderI
                 ->setParameter('scopeIdentifer', $identifier);
         }else {
             $query = $this->createQueryBuilder('u')
-                ->andWhere('u.email = :identifier OR u.uuid = :identifier');
+                ->andWhere('(u.email = :identifier OR u.uuid = :identifier) AND u.deleted = 0 AND u.email IS NOT NULL');
         }
         return $query
             ->setParameter('identifier', $identifier)
@@ -55,5 +55,68 @@ class UserRepository extends AbstractCoreRepository implements PasswordUpgraderI
         $user->setPassword($newHashedPassword);
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
+    }
+
+    private function searchAdmin(array $search = [], bool $countMode = false)
+    {
+        $settings = $this->configureSearch($search);
+        // Ajouoter un element ocnfigurable pour le tri sur le abstract repository
+        $query = $this->createNewQueryBuilder();
+
+        // if (isset($search['search']) && $search['search'] != '') {
+            
+        // }
+
+        if (!$countMode) {
+            $query = $query
+                ->setMaxResults($settings['limit'])
+                ->setFirstResult($settings['offset']);
+
+            return $query->getQuery()
+                ->getResult();
+        }else{
+            $query = $query->select("COUNT({$this->alias}.id)");
+            return $query->getQuery()
+                ->getSingleScalarResult();
+        }
+    }
+
+    public function search(array $search = [], bool $countMode = false)
+    {
+        if (isset($search['isSuperAdmin']) && $search['isSuperAdmin']) {
+            return $this->searchAdmin($search, $countMode);
+        }else{
+            return $this->searchByOrganisation($search, $countMode);
+        }
+    }
+
+    public function searchByOrganisation(array $search = [], bool $countMode = false)
+    {
+        $settings = $this->configureSearch($search);
+        $idOrganisation = $this->getIdOrganisation($search);
+
+        $query = $this->createNewQueryBuilder()
+            ->leftJoin("{$this->alias}.userOrganisations", "rel")
+            ->andWhere("rel.organisation = :idOrganisation")
+            ->setParameter('idOrganisation', $idOrganisation);
+
+        if (isset($search['search']) && $search['search'] != '') {
+            // $query = $query
+            //     ->andWhere("{$this->alias}.firstName LIKE :search OR {$this->alias}.lastName LIKE :search OR {$this->alias}.email LIKE :search OR {$this->alias}.phone LIKE :search")
+            //     ->setParameter('search', "%{$search['search']}%");
+        }
+
+        if (!$countMode) {
+            $query = $query
+                ->setMaxResults($settings['limit'])
+                ->setFirstResult($settings['offset']);
+
+            return $query->getQuery()
+                ->getResult();
+        }else{
+            $query = $query->select("COUNT({$this->alias}.id)");
+            return $query->getQuery()
+                ->getSingleScalarResult();
+        }
     }
 }

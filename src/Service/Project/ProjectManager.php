@@ -4,6 +4,8 @@ namespace App\Service\Project;
 
 use App\Entity\Project;
 use App\Core\Service\AbstractCoreService;
+use App\Event\Project\ProjectCreateEvent;
+use App\Event\Project\ProjectUpdateEvent;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class ProjectManager extends AbstractCoreService
@@ -14,16 +16,20 @@ class ProjectManager extends AbstractCoreService
             'identifier' => 'uuid',
             'code' => 'Project',
             'entity' => Project::class,
+            'security' => $security,
         ]);
     }
 
     public function _create(array $data)
     {
+        $data['name'] = $data['name'] ?? 'Nouveau projet';
         $element = new Project();
         $this->setData(
             $element,
             [
                 'name' => [
+                    'required' => true,
+                    'nullable' => false,
                 ],
                 'reference' => [
                     'nullable' => false,
@@ -37,6 +43,15 @@ class ProjectManager extends AbstractCoreService
 
         $this->em->persist($element);
         $this->isValid($element);
+
+        // Envoie un event pour la création du projet
+        $newEvent = new ProjectCreateEvent([
+            'organisation' => $data['organisation'],
+            'project' => $element,
+            'em' => $this->em,
+        ]);
+        $this->dispatchEvent($newEvent);
+        $this->em->persist($element);
 
         return $element;
     }
@@ -49,7 +64,7 @@ class ProjectManager extends AbstractCoreService
             $element,
             [
                 'name' => [
-                    'nullable' => true,
+                    'nullable' => false,
                 ],
                 'reference' => [
                     'nullable' => false,
@@ -63,6 +78,14 @@ class ProjectManager extends AbstractCoreService
 
         $this->em->persist($element);
         $this->isValid($element);
+
+        $data['project'] = $element;
+        // Envoie un event pour la création du projet
+        $newEvent = new ProjectUpdateEvent($data);
+
+        $this->dispatchEvent($newEvent);
+        $element->setUpdatedAt(new \DateTime());
+        $this->em->persist($element);
 
         return $element;
     }

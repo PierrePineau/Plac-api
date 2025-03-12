@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ModuleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ModuleRepository::class)]
@@ -13,14 +14,18 @@ class Module
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255, unique: true)]
     private ?string $reference = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column]
     private ?bool $enabled = false;
 
@@ -30,6 +35,7 @@ class Module
     #[ORM\OneToMany(targetEntity: OrganisationModule::class, mappedBy: 'module')]
     private Collection $organisationModules;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column]
     private ?int $position = null;
 
@@ -110,17 +116,6 @@ class Module
         return $this;
     }
 
-    public function toArray(string $kind = 'default'): array
-    {
-        return [
-            'id' => $this->getId(),
-            'reference' => $this->getReference(),
-            'name' => $this->getName(),
-            'position' => $this->getPosition(),
-            'enabled' => $this->isEnabled(),
-        ];
-    }
-
     public function getPosition(): ?int
     {
         return $this->position;
@@ -131,5 +126,16 @@ class Module
         $this->position = $position;
 
         return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            'id' => $this->getId(),
+            'reference' => $this->getReference(),
+            'name' => $this->getName(),
+            'position' => $this->getPosition(),
+            'enabled' => $this->isEnabled(),
+        ];
     }
 }

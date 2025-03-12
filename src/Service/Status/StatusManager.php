@@ -34,6 +34,7 @@ class StatusManager extends AbstractCoreService
                 'code' => 'A_FAIRE',
                 'name' => 'À effectuer', // Bleu
                 'color' => '#295BFF',
+                'type' => self::TYPE_PROJECT,
                 'action' => self::ACTION_DEFAULT,
                 'position' => self::POSITIONS[self::ACTION_DEFAULT],
             ],
@@ -41,12 +42,14 @@ class StatusManager extends AbstractCoreService
                 'code' => 'EN_COURS',
                 'name' => 'En cours', // Orange
                 'color' => '#F5811A',
+                'type' => self::TYPE_PROJECT,
                 'position' => 0,
             ],
             [
                 'code' => 'TERMINE',
                 'name' => 'Terminé', // Vert
                 'color' => '#22C55E',
+                'type' => self::TYPE_PROJECT,
                 'action' => self::ACTION_FINISHED,
                 'position' => self::POSITIONS[self::ACTION_FINISHED],
             ],
@@ -54,6 +57,7 @@ class StatusManager extends AbstractCoreService
                 'code' => 'ARCHIVE',
                 'name' => 'Archivé', // Gris
                 'color' => '#B0B0B0',
+                'type' => self::TYPE_PROJECT,
                 'action' => self::ACTION_ARCHIVED,
                 'position' => self::POSITIONS[self::ACTION_ARCHIVED],
             ],
@@ -63,6 +67,7 @@ class StatusManager extends AbstractCoreService
                 'code' => 'A_FAIRE',
                 'name' => 'À effectuer', // Bleu
                 'color' => '#295BFF',
+                'type' => self::TYPE_TASK,
                 'action' => self::ACTION_DEFAULT,
                 'position' => self::POSITIONS[self::ACTION_DEFAULT],
             ],
@@ -71,11 +76,13 @@ class StatusManager extends AbstractCoreService
                 'name' => 'En cours', // Orange
                 'color' => '#F5811A',
                 'position' => 0,
+                'type' => self::TYPE_TASK,
             ],
             [
                 'code' => 'TERMINE',
                 'name' => 'Terminé', // Vert
                 'color' => '#22C55E',
+                'type' => self::TYPE_TASK,
                 'action' => self::ACTION_FINISHED,
                 'position' => self::POSITIONS[self::ACTION_FINISHED],
             ],
@@ -83,6 +90,7 @@ class StatusManager extends AbstractCoreService
                 'code' => 'ARCHIVE',
                 'name' => 'Archivé', // Gris
                 'color' => '#B0B0B0',
+                'type' => self::TYPE_TASK,
                 'action' => self::ACTION_ARCHIVED,
                 'position' => self::POSITIONS[self::ACTION_ARCHIVED],
             ],
@@ -92,6 +100,7 @@ class StatusManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'identifier' => 'uuid',
             'code' => 'Status',
             'entity' => Status::class,
@@ -102,8 +111,6 @@ class StatusManager extends AbstractCoreService
     {
         $newStatus = [];
         $type = $data['type'];
-        $needFlush = $data['flush'] ?? false;
-
         if (!in_array($type, self::TYPES)) {
             throw new ErrorException($this->ELEMENT_INVALID. '.type', 400);
         }
@@ -112,10 +119,6 @@ class StatusManager extends AbstractCoreService
 
         foreach ($defaultStatus as $dataStatus) {
             $newStatus[] = $this->_create($dataStatus);
-        }
-
-        if ($needFlush) {
-            $this->em->flush();
         }
 
         return $newStatus;
@@ -147,6 +150,7 @@ class StatusManager extends AbstractCoreService
                     'type' => 'float',
                 ],
                 'type' => [
+                    'required' => true,
                     'nullable' => false,
                 ],
             ],
@@ -183,5 +187,19 @@ class StatusManager extends AbstractCoreService
         $this->isValid($element);
 
         return $element;
+    }
+
+    public function getOneStatus(array $options)
+    {
+        $options['type'] = $options['type'] ?? self::TYPE_PROJECT;
+        $options['action'] = $options['action'] ?? self::ACTION_DEFAULT;
+        return $this->repo->findOneByOrganisationByActionByType($options);
+    }
+
+    public function getOneStatusById(array $options)
+    {
+        $options['type'] = $options['type'] ?? self::TYPE_PROJECT;
+        // $options['action'] = $options['action'] ?? self::ACTION_DEFAULT;
+        return $this->repo->findOneByOrganisationByTypeById($options);
     }
 }

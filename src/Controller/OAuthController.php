@@ -3,15 +3,15 @@
 namespace App\Controller;
 
 use App\Core\Utils\Messenger;
+use App\Service\User\UserManager;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use Nelmio\ApiDocBundle\Annotation\Model;
-use Nelmio\ApiDocBundle\Annotation\Security;
 use OpenApi\Attributes as OA;
-use OpenApi\Attributes\JsonContent;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 #[Route('/api/oauth', name: 'api_oauth_')]
@@ -25,17 +25,17 @@ class OAuthController extends AbstractController
     #[OA\Post(
         summary: 'Login with oauth',
     )]
-    #[Route('/login',name:"login", methods: ['GET','POST'])]
+    #[Route('/login',name:"login", methods: ['GET','POST'])] 
     public function oauthLogin(): JsonResponse
     {
         return $this->json([]);
     }
 
-    #[OA\Post(
+    #[OA\Get(
         summary: 'Connect with one oauth service',
     )]
-    #[Route('/connect/{service}',name:"connect", methods: ['GET'])]
-    public function oauthConnect(string $service, ClientRegistry $clientRegistry, Messenger $messenger): JsonResponse
+    #[Route('/connect/{service}', name:"connect", methods: ['GET'])]
+    public function oauthConnect(string $service, Request $request, ClientRegistry $clientRegistry, Messenger $messenger): JsonResponse
     {
         if (!array_key_exists($service, self::SCOPES)) {
             // throw $this->createNotFoundException();
@@ -49,15 +49,23 @@ class OAuthController extends AbstractController
                 Response::HTTP_NOT_FOUND
             );
         }
-        $content = $clientRegistry->getClient($service)->redirect(self::SCOPES[$service], []);
-        if (!is_array($content)) {
-            $content = [$content];
-        }
+        // $returnUrl = null;
+        // if (isset($data['return_url']) && is_string($data['return_url'])) {
+        //     $returnUrl = $data['return_url'] ?? null;
+        // } else {
+        //     $returnUrl = $request->query->get('return_url') ?? null;
+        // }
+        
+        $content = $clientRegistry->getClient($service)->redirect(self::SCOPES[$service], [
+        ]);
         $resp = $messenger->newResponse([
             'success' => true,
             'message' => 'oauth.redirect',
             'code' => Response::HTTP_OK,
-            'data' => $content
+            'data' => [
+                'service' => $service,
+                'targetUrl' => $content->getTargetUrl(),
+            ]
         ]);
         return $this->json(
             $resp,
@@ -65,11 +73,11 @@ class OAuthController extends AbstractController
         );
     }
 
-    #[OA\Post(
+    #[OA\Get(
         summary: 'Login check for oauth',
     )]
-    #[Route('/check/{service}', name:"login_check", methods: ['POST'])]
-    public function oauthCheck(string $service, ClientRegistry $clientRegistry, Messenger $messenger): JsonResponse
+    #[Route('/check/{service}', name:"login_check", methods: ['GET'])]
+    public function oauthCheck(string $service, Request $request, ClientRegistry $clientRegistry, Messenger $messenger, UserManager $userManager): Response
     {
         if (!array_key_exists($service, self::SCOPES)) {
             // throw $this->createNotFoundException();
@@ -84,7 +92,36 @@ class OAuthController extends AbstractController
             );
         }
 
-        // L'autentification est géré par le firewall avec un JWT
-        return $this->json([]);
+        $client = $clientRegistry->getClient($service);
+        $accessToken = $client->getAccessToken();
+        $user = $client->fetchUserFromToken($accessToken);
+        // $user = $client->fetchUser();
+
+        $resp = $userManager->oauth([
+            'provider' => $service,
+            'oauthUser' => $user,
+        ]);
+
+        $isDemo = $request->query->get('demo') ?? false;
+        if (in_array($isDemo, ['true', true])) {
+            // On fait une redirection vers la page demandée avec les données de l'utilisateur
+            return $this->json(
+                [
+                    'success' => true,
+                    'message' => 'oauth.success',
+                    'code' => Response::HTTP_OK,
+                    'data' => $resp,
+                ],
+                Response::HTTP_OK
+            );
+        }else{
+            $token = $resp['data']['token'];
+            $returnUrl = $_ENV['OAUTH_RETURN_URL'];
+            $returnUrl = $returnUrl .'?oauth=' . $service . '&token=' . $token;
+
+            $response = new RedirectResponse($returnUrl, 302);
+            
+            return $response;
+        }
     }
 }

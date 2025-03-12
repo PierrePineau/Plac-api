@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
@@ -15,32 +16,40 @@ class Client
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
     #[ORM\Column(unique: true)]
     private ?string $uuid = null;
 
+    #[Groups(["default", "create"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $firstname = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $lastname = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $phone = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\Column]
     private ?bool $archived = false;
 
+    #[Groups(["default"])]
     #[ORM\Column]
     private ?bool $deleted = false;
 
@@ -55,6 +64,12 @@ class Client
      */
     #[ORM\OneToMany(targetEntity: ProjectClient::class, mappedBy: 'client')]
     private Collection $projectClients;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
+
+    #[ORM\ManyToOne(inversedBy: 'clients')]
+    private ?Address $address = null;
 
     public function __construct()
     {
@@ -215,19 +230,6 @@ class Client
         return $this;
     }
 
-    public function toArray(string $kind = 'default'): array
-    {
-        return [
-            // 'id' => $this->getId(),
-            'id' => $this->getUuid(),
-            'email' => $this->getEmail(),
-            'name' => $this->getName(),
-            'firstname' => $this->getFirstname(),
-            'lastname' => $this->getLastname(),
-            'phone' => $this->getPhone(),
-        ];
-    }
-
     /**
      * @return Collection<int, ProjectClient>
      */
@@ -256,5 +258,42 @@ class Client
         }
 
         return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    public function getAddress(): ?Address
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?Address $address): static
+    {
+        $this->address = $address;
+
+        return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            // 'id' => $this->getId(),
+            'id' => $this->getUuid(),
+            'email' => $this->getEmail(),
+            'name' => $this->getName(),
+            'firstname' => $this->getFirstname(),
+            'lastname' => $this->getLastname(),
+            'phone' => $this->getPhone(),
+        ];
     }
 }

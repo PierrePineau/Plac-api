@@ -118,6 +118,14 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     // CANNOT LISTING ADMIN USERS -> RETURN EMPTY ARRAY
     public function toArray(string $kind = 'default'): array
     {
-        return [];
+        if ($kind === 'auth') {
+            return [
+                // 'id' => $this->getId(),
+                'email' => $this->getEmail(),
+                'roles' => $this->getRoles(),
+            ];
+        } else {
+            return [];
+        }
     }
 }

@@ -14,22 +14,30 @@ class OrganisationProjectManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'code' => 'Organisation.Project',
             'entity' => OrganisationProject::class,
-            'security' => $security,
             'elementManagerClass' => ProjectManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
 
     public function generateDefault(array $data = [])
     {
         $organisation = $data['organisation'];
+        $needFlush = $data['flush'] ?? false;
 
         $this->_create([
             'organisation' => $organisation,
             'name' => 'Nouveau projet',
             'description' => 'La description de votre projet',
         ]);
+
+        if ($needFlush) {
+            $this->em->flush();
+        }
     }
 
     public function _search(array $filters = []): array
@@ -70,37 +78,37 @@ class OrganisationProjectManager extends AbstractCoreService
         return $element;
     }
 
-    public function setStatus(array $data)
-    {
-        try {
-            $data = $this->guardMiddleware($data);
-            $orgProject = $this->_get($data['idProject'], [
-                'idOrganisation' => $data['organisation']->getId(),
-            ]);
+    // public function setStatus(array $data)
+    // {
+    //     try {
+    //         $data = $this->guardMiddleware($data);
+    //         $orgProject = $this->_get($data['idProject'], [
+    //             'idOrganisation' => $data['organisation']->getId(),
+    //         ]);
 
-            $orgStatusManager = $this->container->get(OrganisationStatusManager::class);
-            $orgStatus = $orgStatusManager->_get($data['idStatus'], [
-                'idOrganisation' => $data['organisation']->getId(),
-            ]);
+    //         $orgStatusManager = $this->container->get(OrganisationStatusManager::class);
+    //         $orgStatus = $orgStatusManager->_get($data['idStatus'], [
+    //             'idOrganisation' => $data['organisation']->getId(),
+    //         ]);
 
-            $project = $orgProject->getProject();
-            $project->setStatus($orgStatus->getStatus());
+    //         $project = $orgProject->getProject();
+    //         $project->setStatus($orgStatus->getStatus());
 
-            $this->em->persist($project);
-            $this->isValid($project);
+    //         $this->em->persist($project);
+    //         $this->isValid($project);
 
-            $this->em->flush();
+    //         $this->em->flush();
 
-            return $this->messenger->newResponse(
-                [
-                    'success' => true,
-                    'message' => $this->ELEMENT_UPDATED,
-                    'code' => 200,
-                    'data' => $project->toArray()
-                ]
-            );
-        } catch (\Throwable $th) {
-            return $this->messenger->errorResponse($th);
-        }
-    }
+    //         return $this->messenger->newResponse(
+    //             [
+    //                 'success' => true,
+    //                 'message' => $this->ELEMENT_UPDATED,
+    //                 'code' => 200,
+    //                 'data' => $project->toArray()
+    //             ]
+    //         );
+    //     } catch (\Throwable $th) {
+    //         return $this->messenger->errorResponse($th);
+    //     }
+    // }
 }

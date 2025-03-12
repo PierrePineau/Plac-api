@@ -4,20 +4,23 @@ namespace App\Service\Organisation;
 
 use App\Core\Service\AbstractCoreService;
 use App\Core\Traits\OrganisationTrait;
-use App\Entity\EmployeOrganisation;
-use App\Service\Employe\EmployeManager;
+use App\Entity\OrganisationFile;
+use App\Service\File\FileManager;
 use Symfony\Bundle\SecurityBundle\Security;
 
-class OrganisationEmployeManager extends AbstractCoreService
+class OrganisationFileManager extends AbstractCoreService
 {
     use OrganisationTrait;
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
-            'code' => 'Organisation.Employe',
-            'entity' => EmployeOrganisation::class,
             'security' => $security,
-            'elementManagerClass' => EmployeManager::class,
+            'code' => 'Organisation.File',
+            'entity' => OrganisationFile::class,
+            'elementManagerClass' => FileManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
 
@@ -49,12 +52,12 @@ class OrganisationEmployeManager extends AbstractCoreService
         $manager = $this->getElementManager();
         $element = $manager->_create($data);
 
-        $employeOrg = new EmployeOrganisation();
-        $employeOrg->setEmploye($element);
-        $employeOrg->setOrganisation($organisation);
+        $orgElement = new OrganisationFile();
+        $orgElement->setFile($element);
+        $orgElement->setOrganisation($organisation);
 
-        $this->em->persist($employeOrg);
-        $this->isValid($employeOrg);
+        $this->em->persist($orgElement);
+        $this->isValid($orgElement);
 
         return $element;
     }

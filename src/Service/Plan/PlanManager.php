@@ -12,8 +12,10 @@ use Symfony\Bundle\SecurityBundle\Security;
 class PlanManager extends AbstractCoreService
 {
     const PLAN_STANDARD = 'STANDARD';
+    const PLAN_STANDARD_ANNUAL = 'STANDARD_ANNUAL';
     const PLAN_PRO = 'PRO';
-    const PLAN_PREMIUM = 'PREMIUM';
+    const PLAN_PRO_ANNUAL = 'PRO_ANNUAL';
+    const PLAN_CUSTOM = 'CUSTOM';
 
     const DEFAULT_MODULES_STANDARD = [
         ModuleManager::MODULE_PROJECT,
@@ -33,7 +35,7 @@ class PlanManager extends AbstractCoreService
         ModuleManager::MODULE_EMPLOYE_ACCESS,
     ];
 
-    const DEFAULT_MODULES_PREMIUM = [
+    const DEFAULT_MODULES_CUSTOM = [
         ModuleManager::MODULE_PROJECT,
         ModuleManager::MODULE_CLIENT,
         ModuleManager::MODULE_NOTE,
@@ -48,39 +50,56 @@ class PlanManager extends AbstractCoreService
             'name' => 'Standard',
             'reference' => self::PLAN_STANDARD,
             'modules' => self::DEFAULT_MODULES_STANDARD,
+            'renewalFrequency' => 'monthly',
             'maxDevices' => 2,
-            'monthlyPrice' => 40,
-            'annualPrice' => 440, // - 10 %
+            'price' => 40,
             'position' => 1,
+        ],
+        self::PLAN_STANDARD_ANNUAL => [
+            'name' => 'Standard',
+            'reference' => 'STANDARD_ANNUAL',
+            'modules' => self::DEFAULT_MODULES_STANDARD,
+            'renewalFrequency' => 'yearly',
+            'maxDevices' => 2,
+            'price' => 440, // - 10 %
+            'position' => 2,
         ],
         self::PLAN_PRO => [
             'name' => 'Pro',
             'reference' => self::PLAN_PRO,
             'modules' => self::DEFAULT_MODULES_PRO,
+            'renewalFrequency' => 'monthly',
             'maxDevices' => 10,
-            'monthlyPrice' => 65,
-            'annualPrice' => 715, // - 10 %
-            'position' => 2,
-        ],
-        self::PLAN_PREMIUM => [
-            'name' => 'Premium',
-            'reference' => self::PLAN_PREMIUM,
-            'modules' => self::DEFAULT_MODULES_PREMIUM,
-            'maxDevices' => 20,
-            'monthlyPrice' => null,
-            'annualPrice' => null,
-            'isCustom' => true,
+            'price' => 65,
             'position' => 3,
+        ],
+        self::PLAN_PRO_ANNUAL => [
+            'name' => 'Pro',
+            'reference' => 'PRO_ANNUAL',
+            'modules' => self::DEFAULT_MODULES_PRO,
+            'renewalFrequency' => 'yearly',
+            'maxDevices' => 10,
+            'price' => 715, // - 10 %
+            'position' => 4,
+        ],
+        self::PLAN_CUSTOM => [
+            'name' => 'Sur mesure',
+            'reference' => self::PLAN_CUSTOM,
+            'modules' => self::DEFAULT_MODULES_CUSTOM,
+            'renewalFrequency' => null,
+            'price' => null,
+            'isCustom' => true,
+            'position' => 10,
         ],
     ];
 
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'identifier' => 'id',
             'code' => 'Plan',
             'entity' => Plan::class,
-            'security' => $security,
         ]);
     }
 
@@ -137,6 +156,8 @@ class PlanManager extends AbstractCoreService
                 'position' => [
                     'type' => 'integer',
                 ],
+                'renewalFrequency' => [
+                ],
             ],
             $data
         );
@@ -146,11 +167,9 @@ class PlanManager extends AbstractCoreService
         }
 
         if (!$element->isCustom()) {
-            $element->setMonthlyPrice($data['monthlyPrice']);
-            $element->setAnnualPrice($data['annualPrice']);
+            $element->setPrice($data['price']);
         }else{
-            $element->setMonthlyPrice(null);
-            $element->setAnnualPrice(null);
+            $element->setPrice(null);
         }
 
         $this->em->persist($element);
@@ -182,7 +201,9 @@ class PlanManager extends AbstractCoreService
                 ],
                 'enabled' => [
                     'type' => 'boolean',
-                ]
+                ],
+                'renewalFrequency' => [
+                ],
             ],
             $data
         );
@@ -192,11 +213,9 @@ class PlanManager extends AbstractCoreService
         }
         
         if (!$element->isCustom()) {
-            $element->setMonthlyPrice($data['monthlyPrice']);
-            $element->setAnnualPrice($data['annualPrice']);
+            $element->setPrice($data['price']);
         }else{
-            $element->setMonthlyPrice(null);
-            $element->setAnnualPrice(null);
+            $element->setPrice(null);
         }
         
         $element->getModules()->clear();

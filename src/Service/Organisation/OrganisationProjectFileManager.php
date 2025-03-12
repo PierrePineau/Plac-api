@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Service\Organisation;
+
+use App\Core\Service\AbstractCoreService;
+use App\Core\Traits\OrganisationTrait;
+use App\Entity\OrganisationFile;
+use App\Service\Project\ProjectFileManager;
+use Symfony\Bundle\SecurityBundle\Security;
+
+class OrganisationProjectFileManager extends AbstractCoreService
+{
+    use OrganisationTrait;
+    public function __construct($container, $entityManager, Security $security)
+    {
+        parent::__construct($container, $entityManager, [
+            'security' => $security,
+            'code' => 'Organisation.Project.File',
+            'entity' => OrganisationFile::class,
+            'elementManagerClass' => ProjectFileManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
+        ]);
+    }
+
+    public function _search(array $filters = []): array
+    {
+        $manager = $this->getElementManager();
+        $filters['by'] = 'project';
+        return $manager->_search($filters);
+    }
+
+    public function _create(array $data)
+    {
+        return $this->_add($data);
+    }
+
+    public function _add(array $data)
+    {
+        $organisationProjectManager = $this->container->get(OrganisationProjectManager::class);
+        $orgProject = $organisationProjectManager->_get($data['idProject'], $data);
+        $project = $orgProject->getProject();
+
+        $ids = $data['ids'] ?? [];
+        if (isset($data['id'])) {
+            $ids[] = $data['id'];
+        }
+
+        // On récupère par ids qui ne sont pas déjà liées au projet
+        $organisationFileManager = $this->container->get(OrganisationFileManager::class);
+        $clients = $organisationFileManager->_search([
+            'organisation' => $data['organisation'],
+            'ids' => $data['ids'],
+            'limit' => 100,
+        ]);
+
+        $elementManager = $this->getElementManager();
+        $elementManager->_add([
+            'by' => 'project',
+            'project' => $project,
+            'clients' => $clients,
+        ]);
+
+        $this->em->flush();
+    }
+
+    public function _delete($id, array $data = [])
+    {
+        $data['ids'] = [$id];
+        $this->_remove($data);
+    }
+
+    public function _remove(array $data)
+    {
+        $organisationProjectManager = $this->container->get(OrganisationProjectManager::class);
+        $orgProject = $organisationProjectManager->_get($data['idProject'], $data);
+        // $project = $orgProject->getProject();
+
+        // Les ids correspondent aux ids des relations à supprimer
+        $ids = $data['ids'] ?? [];
+        if (isset($data['id'])) {
+            $ids[] = $data['id'];
+        }
+
+        $organisationFileManager = $this->container->get(OrganisationFileManager::class);
+        $clients = $organisationFileManager->_search([
+            'organisation' => $data['organisation'],
+            'ids' => $data['ids'],
+            'limit' => 100,
+        ]);
+
+        $elementManager = $this->getElementManager();
+        $elementManager->_remove([
+            'by' => 'project',
+            'ids' => $orgProject->getProject(),
+            'clients' => $clients,
+        ]);
+    }
+}

@@ -6,6 +6,7 @@ use App\Repository\PlanRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PlanRepository::class)]
 class Plan
@@ -13,14 +14,18 @@ class Plan
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255, unique: true)]
     private ?string $reference = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = '';
 
@@ -30,29 +35,46 @@ class Plan
     #[ORM\ManyToMany(targetEntity: Module::class)]
     private Collection $modules;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column]
     private ?bool $custom = false;
 
-    #[ORM\Column(nullable: true)]
-    private ?float $monthlyPrice = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?float $annualPrice = null;
-
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(nullable: true)]
     private ?float $maxDevices = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column]
     private ?int $position = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column]
     private ?bool $enabled = false;
+
+    /**
+     * @var Collection<int, Subscription>
+     */
+    #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'plan')]
+    private Collection $subscriptions;
+
+    #[Groups(["default", "create", "update"])]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $stripeId = null;
+
+    #[Groups(["default", "create", "update"])]
+    #[ORM\Column(nullable: true)]
+    private ?float $price = null;
+
+    #[Groups(["default", "create", "update"])]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $renewalFrequency = null;
 
     public function __construct()
     {
         $this->modules = new ArrayCollection();
         $this->custom = false;
         $this->enabled = false;
+        $this->subscriptions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -120,18 +142,6 @@ class Plan
         return $this;
     }
 
-    public function toArray(string $kind = 'default'): array
-    {
-        return [
-            'id' => $this->getId(),
-            'reference' => $this->getReference(),
-            'name' => $this->getName(),
-            'description' => $this->getDescription(),
-            // 'modules' => $this->getModules()->map(fn (Module $module) => $module->toArray())->toArray(),
-            'enabled' => $this->isEnabled(),
-        ];
-    }
-
     public function isCustom(): ?bool
     {
         return $this->custom;
@@ -140,30 +150,6 @@ class Plan
     public function setCustom(bool $custom): static
     {
         $this->custom = $custom;
-
-        return $this;
-    }
-
-    public function getMonthlyPrice(): ?float
-    {
-        return $this->monthlyPrice;
-    }
-
-    public function setMonthlyPrice(?float $monthlyPrice): static
-    {
-        $this->monthlyPrice = $monthlyPrice;
-
-        return $this;
-    }
-
-    public function getAnnualPrice(): ?float
-    {
-        return $this->annualPrice;
-    }
-
-    public function setAnnualPrice(?float $annualPrice): static
-    {
-        $this->annualPrice = $annualPrice;
 
         return $this;
     }
@@ -200,6 +186,86 @@ class Plan
     public function setEnabled(bool $enabled): static
     {
         $this->enabled = $enabled;
+
+        return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            'id' => $this->getId(),
+            'reference' => $this->getReference(),
+            'name' => $this->getName(),
+            'description' => $this->getDescription(),
+            'maxDevices' => $this->getMaxDevices(),
+            'position' => $this->getPosition(),
+            'modules' => $this->getModules()->map(fn (Module $module) => $module->toArray())->toArray(),
+            'enabled' => $this->isEnabled(),
+        ];
+    }
+
+    /**
+     * @return Collection<int, Subscription>
+     */
+    public function getSubscriptions(): Collection
+    {
+        return $this->subscriptions;
+    }
+
+    public function addSubscription(Subscription $subscription): static
+    {
+        if (!$this->subscriptions->contains($subscription)) {
+            $this->subscriptions->add($subscription);
+            $subscription->setPlan($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubscription(Subscription $subscription): static
+    {
+        if ($this->subscriptions->removeElement($subscription)) {
+            // set the owning side to null (unless already changed)
+            if ($subscription->getPlan() === $this) {
+                $subscription->setPlan(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getStripeId(): ?string
+    {
+        return $this->stripeId;
+    }
+
+    public function setStripeId(?string $stripeId): static
+    {
+        $this->stripeId = $stripeId;
+
+        return $this;
+    }
+
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+
+    public function setPrice(?float $price): static
+    {
+        $this->price = $price;
+
+        return $this;
+    }
+
+    public function getRenewalFrequency(): ?string
+    {
+        return $this->renewalFrequency;
+    }
+
+    public function setRenewalFrequency(?string $renewalFrequency): static
+    {
+        $this->renewalFrequency = $renewalFrequency;
 
         return $this;
     }

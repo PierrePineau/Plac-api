@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ProjectClientRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ProjectClientRepository::class)]
@@ -13,13 +14,21 @@ class ProjectClient
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'projectClients')]
+    #[ORM\ManyToOne(inversedBy: 'projectClients', fetch: 'EAGER')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Project $project = null;
 
-    #[ORM\ManyToOne(inversedBy: 'projectClients')]
+    #[ORM\ManyToOne(inversedBy: 'projectClients', fetch: 'EAGER')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Client $client = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+    }
 
     public function getId(): ?int
     {
@@ -48,5 +57,28 @@ class ProjectClient
         $this->client = $client;
 
         return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function toArray(): array
+    {
+        return $this->getClient()->toArray('relation');
+        // return [
+        //     'id' => $this->id,
+        //     'project' => $this->project->toArray(),
+        //     'client' => $this->client->toArray(),
+        //     'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
+        // ];
     }
 }
