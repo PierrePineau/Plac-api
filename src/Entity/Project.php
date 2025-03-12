@@ -361,7 +361,7 @@ class Project
             'deleted' => $this->isDeleted(),
             'thumbnail' => $this->getProjectFiles()->filter(function($projectFile) {
                 return $projectFile->getFile()->getType() === 'MEDIA';
-            })->first()?->toArray(),
+            })->first()?->getFile()->toArray(),
         ];
 
         if (in_array($kind, ['get','create', 'update', 'add'])) {
