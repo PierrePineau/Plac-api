@@ -2,7 +2,7 @@
 namespace App\EventSubscriber\Mail;
 
 use App\Core\Utils\Messenger;
-use App\Event\Client\UserCreateEvent;
+use App\Event\User\UserCreateEvent;
 use App\Model\Mail;
 use App\Service\Mail\MailManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

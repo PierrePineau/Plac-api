@@ -3,10 +3,8 @@
 namespace App\Command\Test;
 
 use App\Core\Utils\Messenger;
-use App\Event\Client\UserCreateEvent;
 use App\Event\Organisation\OrganisationCreateEvent;
 use App\Service\Organisation\OrganisationManager;
-use App\Service\User\UserManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

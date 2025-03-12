@@ -1,7 +1,7 @@
 <?php
 namespace App\EventSubscriber\Organisation;
 
-use App\Event\Client\UserCreateEvent;
+use App\Event\User\UserCreateEvent;
 use App\Event\Organisation\OrganisationCreateEvent;
 use App\Event\Organisation\OrganisationGetEvent;
 use App\Service\Organisation\OrganisationManager;

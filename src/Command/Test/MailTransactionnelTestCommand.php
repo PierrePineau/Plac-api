@@ -3,7 +3,7 @@
 namespace App\Command\Test;
 
 use App\Core\Utils\Messenger;
-use App\Event\Client\UserCreateEvent;
+use App\Event\User\UserCreateEvent;
 use App\Service\User\UserManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;

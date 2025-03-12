@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Event\Client;
+namespace App\Event\User;
 
 use App\Core\Event\AbstractCoreEvent;
 use App\Entity\User;
