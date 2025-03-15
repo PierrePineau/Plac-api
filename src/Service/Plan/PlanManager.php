@@ -96,10 +96,10 @@ class PlanManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'identifier' => 'id',
             'code' => 'Plan',
             'entity' => Plan::class,
-            'security' => $security,
         ]);
     }
 

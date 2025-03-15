@@ -3,6 +3,7 @@
 namespace App\Service\Project;
 
 use App\Core\Service\AbstractCoreService;
+use App\Core\Traits\OrganisationTrait;
 use App\Entity\ProjectClient;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -20,26 +21,54 @@ class ProjectClientManager extends AbstractCoreService
 
     public function _add(array $data)
     {
-        $project = $data['project'];
-        $clients = $data['clients'];
-        
-        foreach ($clients as $client) {
-            $projectClient = new ProjectClient();
-            $projectClient->setProject($project);
-            $projectClient->setClient($client);
+        $by = $data['by'] ?? 'project';
 
-            $this->em->persist($projectClient);
-            $this->isValid($projectClient);
+        if ($by === 'project') {
+            $project = $data['project'];
+            $projectClients = $this->findBy([
+                'project' => $project->getId(),
+            ]);
+            $existingClients = [];
+            foreach ($projectClients as $projectClient) {
+                $existingClients[] = $projectClient->getClient()->getId();
+            }
+
+            $clients = $data['clients'];
+            
+            foreach ($clients as $client) {
+                if (!in_array($client->getId(), $existingClients)) {
+                    $projectClient = new ProjectClient();
+                    $projectClient->setProject($project);
+                    $projectClient->setClient($client);
+                    $this->em->persist($projectClient);
+                }
+            }
+        }elseif ($by === 'client') {
+            $client = $data['client'];
+            $projectClients = $this->findBy([
+                'client' => $client->getId(),
+            ]);
+            $existingProjects = [];
+            foreach ($projectClients as $projectClient) {
+                $existingProjects[] = $projectClient->getProject()->getId();
+            }
+
+            $projects = $data['projects'];
+            
+            foreach ($projects as $project) {
+                if (!in_array($project->getId(), $existingProjects)) {
+                    $projectClient = new ProjectClient();
+                    $projectClient->setProject($project);
+                    $projectClient->setClient($client);
+                    $this->em->persist($projectClient);
+                }
+            }
         }
+        
     }
 
     public function _remove(array $data)
     {
-        $project = $data['project'];
-        // $projectClients = $this->findBy([
-        //     'project' => $project->getId(),
-        //     'client' => $data['ids'],
-        // ]);
         $projectClients = $this->findBy([
             'id' => $$data['ids'],
         ]);

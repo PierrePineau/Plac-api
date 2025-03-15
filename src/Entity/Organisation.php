@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: OrganisationRepository::class)]
@@ -15,11 +16,13 @@ class Organisation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
     #[ORM\Column(unique: true)]
     private ?string $uuid = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
@@ -41,12 +44,15 @@ class Organisation
     #[ORM\OneToMany(targetEntity: OrganisationFile::class, mappedBy: 'organisation')]
     private Collection $organisationFiles;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
@@ -69,21 +75,16 @@ class Organisation
     private Collection $organisationNotes;
 
     /**
-     * @var Collection<int, EmployeOrganisation>
-     */
-    #[ORM\OneToMany(targetEntity: EmployeOrganisation::class, mappedBy: 'organisation')]
-    private Collection $employeOrganisations;
-
-    /**
      * @var Collection<int, OrganisationStatus>
      */
     #[ORM\OneToMany(targetEntity: OrganisationStatus::class, mappedBy: 'organisation')]
     private Collection $organisationStatuses;
 
+    #[Groups(["default"])]
     #[ORM\Column]
     private ?bool $deleted = null;
 
-    #[ORM\OneToOne(inversedBy: 'organisation', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     private ?Subscription $currentSubscription = null;
 
     /**
@@ -94,6 +95,10 @@ class Organisation
 
     #[ORM\ManyToOne]
     private ?User $owner = null;
+
+    #[Groups(["default"])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $freeTrialEndAt = null;
 
     public function __construct()
     {
@@ -106,7 +111,6 @@ class Organisation
         $this->organisationClients = new ArrayCollection();
         $this->organisationProjects = new ArrayCollection();
         $this->organisationNotes = new ArrayCollection();
-        $this->employeOrganisations = new ArrayCollection();
         $this->organisationStatuses = new ArrayCollection();
         $this->deleted = false;
         $this->subscriptions = new ArrayCollection();
@@ -363,36 +367,6 @@ class Organisation
     }
 
     /**
-     * @return Collection<int, EmployeOrganisation>
-     */
-    public function getEmployeOrganisations(): Collection
-    {
-        return $this->employeOrganisations;
-    }
-
-    public function addEmployeOrganisation(EmployeOrganisation $employeOrganisation): static
-    {
-        if (!$this->employeOrganisations->contains($employeOrganisation)) {
-            $this->employeOrganisations->add($employeOrganisation);
-            $employeOrganisation->setOrganisation($this);
-        }
-
-        return $this;
-    }
-
-    public function removeEmployeOrganisation(EmployeOrganisation $employeOrganisation): static
-    {
-        if ($this->employeOrganisations->removeElement($employeOrganisation)) {
-            // set the owning side to null (unless already changed)
-            if ($employeOrganisation->getOrganisation() === $this) {
-                $employeOrganisation->setOrganisation(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, OrganisationStatus>
      */
     public function getOrganisationStatuses(): Collection
@@ -494,6 +468,7 @@ class Organisation
             // 'id' => $this->getId(),
             'uuid' => $this->getUuid(),
             'name' => $this->getName(),
+            'freeTrialEndAt' => $this->getFreeTrialEndAt(),
             'deleted' => $this->isDeleted(),
             'createdAt' => $this->getCreatedAt(),
             'updatedAt' => $this->getUpdatedAt(),
@@ -506,10 +481,23 @@ class Organisation
     {
         return [
             // 'id' => $this->getId(),
-            'uuid' => $this->getUuid(),
+            'id' => $this->getUuid(),
             'name' => $this->getName(),
+            'freeTrialEndAt' => $this->getFreeTrialEndAt(),
             'createdAt' => $this->getCreatedAt(),
             'updatedAt' => $this->getUpdatedAt(),
         ];
+    }
+
+    public function getFreeTrialEndAt(): ?\DateTimeInterface
+    {
+        return $this->freeTrialEndAt;
+    }
+
+    public function setFreeTrialEndAt(?\DateTimeInterface $freeTrialEndAt): static
+    {
+        $this->freeTrialEndAt = $freeTrialEndAt;
+
+        return $this;
     }
 }

@@ -14,10 +14,13 @@ class OrganisationNoteManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'code' => 'Organisation.Note',
             'entity' => OrganisationNote::class,
-            'security' => $security,
             'elementManagerClass' => NoteManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
 

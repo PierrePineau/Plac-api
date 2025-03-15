@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\SubscriptionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: SubscriptionRepository::class)]
@@ -13,29 +14,37 @@ class Subscription
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
     #[ORM\Column(unique: true)]
     private ?string $uuid = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column]
     private ?float $price = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $renewalFrequency = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column]
     private ?bool $autoRenew = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column]
     private ?bool $active = null;
     
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
     
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $startAt = null;
     
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $endAt = null;
 
@@ -46,9 +55,11 @@ class Subscription
     #[ORM\JoinColumn(nullable: false)]
     private ?Plan $plan = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripeId = null;
 

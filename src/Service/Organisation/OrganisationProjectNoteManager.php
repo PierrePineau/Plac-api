@@ -16,10 +16,13 @@ class OrganisationProjectNoteManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'code' => 'Organisation.Project',
             'entity' => OrganisationProject::class,
-            'security' => $security,
             'elementManagerClass' => ProjectNoteManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
 
@@ -55,7 +58,6 @@ class OrganisationProjectNoteManager extends AbstractCoreService
         $notes = $noteManager->_search([
             'organisation' => $data['organisation'],
             'ids' => $data['ids'],
-            'excludeIdsProject' => [$project->getId()],
         ]);
 
         $projectNoteManager = $this->getElementManager();

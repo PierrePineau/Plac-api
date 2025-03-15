@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\StatusRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: StatusRepository::class)]
@@ -13,20 +14,26 @@ class Status
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255)]
     private ?string $code = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    #[Groups(["default"])]
     #[ORM\Column]
     private ?bool $deleted = false;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $color = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255)]
     private ?string $type = null;
 
@@ -36,16 +43,25 @@ class Status
     #[ORM\OneToMany(targetEntity: OrganisationStatus::class, mappedBy: 'status')]
     private Collection $organisationStatuses;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $action = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(nullable: true)]
     private ?int $position = null;
+
+    /**
+     * @var Collection<int, Project>
+     */
+    #[ORM\OneToMany(targetEntity: Project::class, mappedBy: 'status')]
+    private Collection $projects;
 
     public function __construct()
     {
         $this->deleted = false;
         $this->organisationStatuses = new ArrayCollection();
+        $this->projects = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -165,5 +181,48 @@ class Status
         $this->position = $position;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Project>
+     */
+    public function getProjects(): Collection
+    {
+        return $this->projects;
+    }
+
+    public function addProject(Project $project): static
+    {
+        if (!$this->projects->contains($project)) {
+            $this->projects->add($project);
+            $project->setStatus($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProject(Project $project): static
+    {
+        if ($this->projects->removeElement($project)) {
+            // set the owning side to null (unless already changed)
+            if ($project->getStatus() === $this) {
+                $project->setStatus(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        return [
+            'id' => $this->getId(),
+            'code' => $this->getCode(),
+            'name' => $this->getName(),
+            'color' => $this->getColor(),
+            'type' => $this->getType(),
+            'action' => $this->getAction(),
+            'position' => $this->getPosition(),
+        ];
     }
 }

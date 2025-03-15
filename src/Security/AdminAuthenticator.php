@@ -58,7 +58,7 @@ class AdminAuthenticator extends JWTAuthenticator
         EventDispatcherInterface $eventDispatcher,
         TokenExtractorInterface $tokenExtractor,
         UserProviderInterface $adminProvider,
-        TranslatorInterface $translator = null,
+        TranslatorInterface $translator,
         $container,
         UserPasswordHasherInterface $passwordHash,
         LoggerInterface $logger,
@@ -179,7 +179,7 @@ class AdminAuthenticator extends JWTAuthenticator
                     throw new CustomUserMessageAuthenticationException(json_encode([$th->getMessage(), $th->getLine()]), [], Response::HTTP_UNAUTHORIZED);
                 }
                 throw new CustomUserMessageAuthenticationException($this::INVALID_CREDENTIALS, [], Response::HTTP_UNAUTHORIZED);
-                return null;
+                // return null;
             }
         }
     }

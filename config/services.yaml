@@ -100,6 +100,11 @@ services:
             $adminProvider: '@App\Security\Provider\AdminProvider'
         parent: lexik_jwt_authentication.security.jwt_authenticator
 
+    App\Security\Middleware\:
+            resource: '../src/Security/Middleware/'
+            public: true
+            arguments:
+                $container: '@service_container'
     # customer.custom_authenticator:
     #     class: App\Security\Customer\CustomerAuthenticator
     #     public: true
@@ -113,18 +118,20 @@ services:
     #     parent: lexik_jwt_authentication.security.jwt_authenticator
 
 # EVENTS
-    # App\EventListener\JWTCreatedListener:
-    #     public: true
-    #     arguments:
-    #         $requestStack: '@request_stack'
-    #         $entityManager: '@doctrine.orm.default_entity_manager'
-    #     tags:
-    #         - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
+    App\EventListener\JWTCreatedListener:
+        public: true
+        arguments:
+            $requestStack: '@request_stack'
+            # $entityManager: '@doctrine.orm.default_entity_manager'
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
 
-    # App\EventListener\JWTAuthenticationSuccessListener:
-    #     public: true
-    #     tags:
-    #         - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: onAuthenticationSuccessResponse }
+    App\EventListener\JWTAuthenticationSuccessListener:
+        public: true
+        arguments:
+            $container: '@service_container'
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: onAuthenticationSuccessResponse }
 
 # SUBSCRIBERS
     App\EventSubscriber\:

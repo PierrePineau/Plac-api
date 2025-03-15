@@ -3,6 +3,10 @@
 namespace App\Service\File\Providers;
 
 use App\Core\Interface\FileServiceInterface;
+use App\Entity\File;
+use App\Entity\Organisation;
+use App\Service\File\FileManager;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class S3Manager implements FileServiceInterface
@@ -11,22 +15,6 @@ class S3Manager implements FileServiceInterface
     private $bucket;
     private $s3;
     private $prefix;
-    private $allowedMimeTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'image/webp',
-        'image/svg+xml',
-        'image/x-icon',
-        'image/vnd.microsoft.icon',
-        'image/vnd.wap.wbmp',
-        'image/bmp',
-        'image/tiff',
-        'application/pdf',
-        'text/csv',
-        'text/plain',
-        'application/zip',
-    ];
 
     public const ELEMENT_NOT_FOUND = "File not found";
     public const ELEMENT_FORBIDDEN = "Forbidden path";
@@ -35,6 +23,7 @@ class S3Manager implements FileServiceInterface
 
     public const FOLDER_NOT_FOUND = "Folder not found";
 
+    public const FOLDER_BASE = "organisations/";
     // OTHER
     public const FOLDER_FILES = "files/";
     // OTHER (Ce dossier correspond au fichier "Admin", que l'administateur peut utiliser pour stocker des fichiers NON VISIBLES par les utilisateurs)
@@ -71,9 +60,12 @@ class S3Manager implements FileServiceInterface
      */
     private function getMimeType($sourceFile): string
     {
+        if ($sourceFile instanceof UploadedFile) {
+            $sourceFile = $sourceFile->getPathname();
+        }
         $mimeType = mime_content_type($sourceFile);
 
-        if (in_array($mimeType, $this->allowedMimeTypes)) {
+        if (in_array($mimeType, FileManager::ALLOWED_MIME_TYPES)) {
             return $mimeType;
         } else {
             throw new NotFoundHttpException($this::ELEMENT_TYPE_FORBIDDEN);
@@ -90,6 +82,7 @@ class S3Manager implements FileServiceInterface
      */
     private function getAbsolutePath(array $options): string
     {
+        $folder = $options['folder'] ?? self::FOLDER_FILES;
         $organisation = $options['organisation'];
         $path = $options['path'];
         // On vérifie aussi que le chemin ne commence pas par le préfix ni par "../"
@@ -102,39 +95,27 @@ class S3Manager implements FileServiceInterface
         if (substr($path, 0, 1) === "/") {
             $path = substr($path, 1);
         }
+        // On vérifie si le chemin commence par le préfix, si oui on le retire
         if (substr($path, 0, strlen($this->prefix)) === $this->prefix) {
             $path = substr($path, strlen($this->prefix));
         }
-
+        // On vérifie si l'organisation est définie
         if (!$organisation) {
             throw new NotFoundHttpException($this::FOLDER_FORBIDDEN);
         }
-
-        $identifier = $organisation->getIdentifier();
-
+        $identifier = $organisation instanceof Organisation ? $organisation->getIdentifier() : $organisation;
         // On vérifie si le chemin commence par l'identifiant de l'organisation
         if (substr($path, 0, strlen($identifier)) === $identifier) {
             $path = substr($path, strlen($identifier));
         }
-
-        // organisation_identifier/path
-        $path = $identifier."/".$path;
-
         // On vérifie que le chemin commence par l'un des dossiers autorisés
-        $found = false;
-
-        foreach ($this->folders as $folder) {
-            if (substr($path, 0, strlen($folder)) === $folder) {
-                $found = true;
-                break;
-            }
-        }
-
-        if (!$found) {
+        if (!in_array($folder, $this->folders)) {
             throw new NotFoundHttpException($this::FOLDER_FORBIDDEN);
         }
-
-        return $this->prefix.$path."/".$path;
+        // organisations/organisation_identifier/folder/path
+        $path = self::FOLDER_BASE.$identifier."/".$folder.$path;
+        // prod/path
+        return $this->prefix.$path;
     }
 
     /**
@@ -163,19 +144,21 @@ class S3Manager implements FileServiceInterface
 	public function upload(array $options): void
 	{
         $organisation = $options['organisation'];
-        $sourceFile = $options['sourceFile'];
-        $destPath = $options['destPath'];
-		if ($sourceFile && $destPath) {
-            $destPath = $this->getAbsolutePath([
+        // $file = $options['element'] instanceof File ? $options['element'] : null;
+        $sourceFile = $options['file'];
+        $path = $options['path'];
+		if ($sourceFile && $path) {
+            $mimeType = $this->getMimeType($sourceFile);
+            
+            $filePath = $this->getAbsolutePath([
                 'organisation' => $organisation,
-                'path' => $destPath
+                'path' => $path
             ]);
 
-            $mimeType = $this->getMimeType($sourceFile);
 			try {
 				$this->s3->putObject([
 					'Bucket' => $this->bucket,
-					'Key' => $destPath,
+					'Key' => $filePath,
 					'SourceFile' => $sourceFile,
 					'ContentType' => $mimeType
 				]);

@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
@@ -15,14 +16,17 @@ class Project
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'uuid')]
-    private ?Uuid $uuid = null;
+    #[ORM\Column(unique: true)]
+    private ?string $uuid = null;
 
-    #[ORM\Column(length: 255)]
+    #[Groups(["default", "create", "update"])]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $reference = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
 
@@ -44,15 +48,19 @@ class Project
     #[ORM\OneToMany(targetEntity: OrganisationProject::class, mappedBy: 'project')]
     private Collection $organisationProjects;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[Groups(["default"])]
     #[ORM\Column]
     private ?bool $deleted = false;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
@@ -61,6 +69,25 @@ class Project
      */
     #[ORM\OneToMany(targetEntity: ProjectClient::class, mappedBy: 'project')]
     private Collection $projectClients;
+
+    #[ORM\ManyToOne(inversedBy: 'projects', fetch: 'EAGER')]
+    private ?Status $status = null;
+
+    #[Groups(["default", "update"])]
+    #[ORM\ManyToOne(inversedBy: 'projects', fetch: 'EAGER')]
+    private ?Address $address = null;
+
+    #[Groups(["default"])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
+
+    #[Groups(["default", "update"])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $startAt = null;
+
+    #[Groups(["default", "update"])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $endAt = null;
 
     public function __construct()
     {
@@ -113,15 +140,6 @@ class Project
         $this->name = $name;
 
         return $this;
-    }
-
-    public function toArray(string $kind = 'default'): array
-    {
-        return [
-            'id' => $this->getId(),
-            'uuid' => $this->getUuid(),
-            'name' => $this->getName(),
-        ];
     }
 
     /**
@@ -288,6 +306,108 @@ class Project
                 $projectClient->setProject(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getStatus(): ?Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?Status $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getAddress(): ?Address
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?Address $address): static
+    {
+        $this->address = $address;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    public function toArray(string $kind = 'default'): array
+    {
+        $defaultData = [
+            // 'id' => $this->getId(),
+            'id' => $this->getUuid(),
+            'reference' => $this->getReference(),
+            'name' => $this->getName(),
+            'description' => $this->getDescription(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+            'status' => $this->getStatus()?->toArray(),
+            'address' => $this->getAddress()?->toArray(),
+            'deleted' => $this->isDeleted(),
+            'thumbnail' => null,
+        ];
+        // on récupp la thumbnail
+        $thumbnail = $this->getProjectFiles()->filter(function($projectFile) {
+            return $projectFile->getFile()->getType() === 'MEDIA';
+        })->first();
+
+        if ($thumbnail) {
+            $defaultData['thumbnail'] = $thumbnail->getFile()->toArray();
+        }
+
+        if (in_array($kind, ['get','create', 'update', 'add'])) {
+            $data = array_merge(
+                $defaultData,
+                [
+                    'deletedAt' => $this->getDeletedAt(),
+                ]
+            );
+        }else{
+            $data = array_merge(
+                $defaultData,
+                [
+                ]
+            );
+        }
+
+        return $data;
+    }
+
+    public function getStartAt(): ?\DateTimeInterface
+    {
+        return $this->startAt;
+    }
+
+    public function setStartAt(?\DateTimeInterface $startAt): static
+    {
+        $this->startAt = $startAt;
+
+        return $this;
+    }
+
+    public function getEndAt(): ?\DateTimeInterface
+    {
+        return $this->endAt;
+    }
+
+    public function setEndAt(?\DateTimeInterface $endAt): static
+    {
+        $this->endAt = $endAt;
 
         return $this;
     }

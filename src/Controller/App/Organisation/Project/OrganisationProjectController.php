@@ -5,6 +5,7 @@ namespace App\Controller\App\Organisation\Project;
 use App\Controller\Core\AbstractCoreController;
 use App\Entity\Project;
 use App\Service\Organisation\OrganisationProjectManager;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Security;
@@ -50,6 +51,17 @@ class OrganisationProjectController extends AbstractCoreController
     )]
     #[OA\Post(
         summary: 'Create new',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: Project::class, groups: ['create'])
+                )
+            )
+        ),
         responses:
         [
             '201' => new OA\Response(
@@ -78,10 +90,21 @@ class OrganisationProjectController extends AbstractCoreController
                     ref: '#/components/schemas/response'
                 )
             )
-        ],
+        ]
     )]
     #[OA\Post(
         summary: 'Update one',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: Project::class, groups: ['update'])
+                )
+            )
+        ),
         responses:
         [
             '200' => new OA\Response(
@@ -91,7 +114,7 @@ class OrganisationProjectController extends AbstractCoreController
                     ref: '#/components/schemas/response'
                 )
             )
-        ],
+        ]
     )]
     #[OA\Delete(
         summary: 'Delete',
@@ -104,11 +127,11 @@ class OrganisationProjectController extends AbstractCoreController
                     ref: '#/components/schemas/response'
                 )
             )
-        ],
+        ]
     )]
     #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['uuid' => '[a-z0-9-]+'])]
-    public function get($idOrganisation, $id, Request $request): JsonResponse
+    public function get($uuid, Request $request): JsonResponse
     {
-        return parent::_get($id, $request);
+        return parent::_get($uuid, $request);
     }
 }

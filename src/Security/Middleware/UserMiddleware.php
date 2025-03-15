@@ -4,7 +4,9 @@ namespace App\Security\Middleware;
 
 use App\Entity\Admin;
 use App\Entity\User;
+use App\Entity\UserOrganisation;
 use App\Model\AuthenticateUser;
+use App\Service\User\UserOrganisationManager;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -23,6 +25,7 @@ class UserMiddleware extends Voter
     ];
 
     public function __construct(
+        private $container,
         private AccessDecisionManagerInterface $accessDecisionManager,
     ) {
     }
@@ -39,23 +42,18 @@ class UserMiddleware extends Voter
             return false;
         }
 
+        $authenticateUser = $subject['authenticateUser'] ?? null;
+        if (!$authenticateUser instanceof AuthenticateUser || !$authenticateUser->isAuthenticate()) {
+            return false;
+        }
+
         return true;
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        $userConnected = $subject['userConnected'] ?? $token->getUser();
-
-        if ($this->accessDecisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
-            return true;
-        }
-
-        if (!$userConnected instanceof AuthenticateUser || !$userConnected->isAuthenticate()) {
-            // the user must be logged in; if not, deny access
-            return false;
-        }
-
-        if ($userConnected->isSuperAdmin()) {
+        $authenticateUser = $subject['authenticateUser'] ?? $token->getUser();
+        if ($authenticateUser->isSuperAdmin()) {
             return true;
         }
 
@@ -64,27 +62,37 @@ class UserMiddleware extends Voter
         $user = $subject['user'];
 
         return match($attribute) {
-            self::ACCESS => $this->canAccess($user, $userConnected),
-            self::UPDATE => $this->canUpdate($user, $userConnected),
-            self::DELETE => $this->canDelete($user, $userConnected),
+            self::ACCESS => $this->canAccess($user, $authenticateUser, $subject),
+            // self::UPDATE => $this->canUpdate($user, $authenticateUser, $subject),
+            // self::DELETE => $this->canDelete($user, $authenticateUser, $subject),
             default => throw new \LogicException('This code should not be reached!')
         };
     }
 
-    private function canAccess(User $user, AuthenticateUser $userConnected): bool
+    private function canAccess(User $user, AuthenticateUser $authenticateUser, array $data = []): bool
     {
-        return $userConnected->getId() === $user->getId();
+        if ($authenticateUser->getId() === $user->getId()) {
+            return true;
+        }elseif ($authenticateUser->getId() !== $user->getId() && $authenticateUser->isAdmin()) {
+            // Si l'utilisateur connecté est un admin, exemple le gérant de l'organisation. il peut accéder à tous CES utilisateurs (dans son organisation)
+            // On check de vérif s'il est dans la même organisation
+            if (!isset($data['userOrganisation']) || !$data['userOrganisation'] instanceof UserOrganisation) {
+                return false;
+            }
+        }else {
+            return false;
+        }
     }
 
-    private function canUpdate(User $user, AuthenticateUser $userConnected): bool
-    {
-        // Spécification de la logique métier pour update ?  
-        return $userConnected->getId() === $user->getId();
-    }
+    // private function canUpdate(User $user, AuthenticateUser $authenticateUser): bool
+    // {
+    //     // Spécification de la logique métier pour update ?  
+    //     return $authenticateUser->getId() === $user->getId();
+    // }
 
-    private function canDelete(User $user, AuthenticateUser $userConnected): bool
-    {
-        // Spécification de la logique métier pour delete ?  
-        return $userConnected->getId() === $user->getId();
-    }
+    // private function canDelete(User $user, AuthenticateUser $authenticateUser): bool
+    // {
+    //     // Spécification de la logique métier pour delete ?  
+    //     return $authenticateUser->getId() === $user->getId();
+    // }
 }

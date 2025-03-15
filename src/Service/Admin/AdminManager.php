@@ -14,9 +14,9 @@ class AdminManager extends AbstractCoreService
     {
         $this->passwordHash = $passwordHash;
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'code' => 'admin',
             'entity' => Admin::class,
-            'security' => $security,
         ]);
     }
 

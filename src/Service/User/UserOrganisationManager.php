@@ -16,10 +16,10 @@ class UserOrganisationManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'identifier' => 'uuid',
             'code' => 'User.Organisation',
             'entity' => UserOrganisation::class,
-            'security' => $security,
         ]);
     }
 
@@ -38,20 +38,35 @@ class UserOrganisationManager extends AbstractCoreService
         return $org;
     }
 
-    public function getOneOrganisationsByUser(array $data): Organisation
+    public function getOneOrganisationsByUser(array $data): ?Organisation
     {
         // On récupère les organisation non deleted
         $userOrganisation = $this->repo->getOneUserOrganisationsByUser([
             'idUser' => $data['idUser'],
         ]);
+
+        if (!$userOrganisation && isset($data['createIfNotExist']) && $data['createIfNotExist']) {
+            $this->_create($data);
+
+            $this->em->flush();
+
+            $userOrganisation = $this->repo->getOneUserOrganisationsByUser([
+                'idUser' => $data['idUser'],
+            ]);
+        }
+
         return $userOrganisation ? $userOrganisation->getOrganisation() : null;
     }
 
     public function _create(array $data)
     {
-        $user = $this->getCustomer([
-            'idUser' => $data['idUser'],
-        ]);
+        // $user = $this->getCustomer([
+        //     'idUser' => $data['idUser'],
+        // ]);
+        $user = $data['user'] ?? null;
+        if (!$user) {
+            throw new ErrorException($this->ELEMENT_NOT_FOUND);
+        }
 
         // On vérifie que l'utilisateur n'a pas déjà une organisation
         $userOrganisation = $this->findOneBy([

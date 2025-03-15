@@ -9,10 +9,12 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class ProjectRepository extends AbstractCoreRepository
 {
+    private $accessRelation;
     use OrganisationRepositoryTrait;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Project::class);
+        $this->accessRelation = 'organisationProjects';
     }
 
     public function search(array $search = [], bool $countMode = false)
@@ -26,13 +28,20 @@ class ProjectRepository extends AbstractCoreRepository
             ->setParameter('idOrganisation', $idOrganisation);
 
         if (isset($search['search']) && $search['search'] != '') {
-            // $query = $query
-            //     ->andWhere("{$this->alias}.firstName LIKE :search OR {$this->alias}.lastName LIKE :search OR {$this->alias}.email LIKE :search OR {$this->alias}.phone LIKE :search")
-            //     ->setParameter('search', "%{$search['search']}%");
+            $query = $query
+                ->andWhere("{$this->alias}.name LIKE :search OR {$this->alias}.description LIKE :search OR {$this->alias}.reference LIKE :search")
+                ->setParameter('search', "%{$search['search']}%");
+        }
+
+        if (isset($search['status']) && !empty($search['status'])) {
+            $query = $query
+                ->andWhere("{$this->alias}.status IN (:status)")
+                ->setParameter('status', $search['status']);
         }
 
         if (!$countMode) {
             $query = $query
+                ->addOrderBy("{$this->alias}.createdAt", "DESC")
                 ->setMaxResults($settings['limit'])
                 ->setFirstResult($settings['offset']);
 

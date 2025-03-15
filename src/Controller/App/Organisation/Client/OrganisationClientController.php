@@ -3,7 +3,9 @@
 namespace App\Controller\App\Organisation\Client;
 
 use App\Controller\Core\AbstractCoreController;
+use App\Entity\Client;
 use App\Service\Organisation\OrganisationClientManager;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Security;
@@ -49,6 +51,17 @@ class OrganisationClientController extends AbstractCoreController
     )]
     #[OA\Post(
         summary: 'Create new',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: Client::class, groups: ['create'])
+                )
+            )
+        ),
         responses:
         [
             '201' => new OA\Response(
@@ -81,6 +94,17 @@ class OrganisationClientController extends AbstractCoreController
     )]
     #[OA\Post(
         summary: 'Update one',
+        requestBody: new OA\RequestBody(
+            description: '',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    type: 'object',
+                    ref: new Model(type: Client::class, groups: ['update'])
+                )
+            )
+        ),
         responses:
         [
             '200' => new OA\Response(
@@ -105,9 +129,9 @@ class OrganisationClientController extends AbstractCoreController
             )
         ]
     )]
-    #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['id' => '[a-z0-9-]+'])]
-    public function get($id, Request $request): JsonResponse
+    #[Route('/{uuid}', methods: ['GET', 'POST', 'DELETE'], requirements: ['uuid' => '[a-z0-9-]+'])]
+    public function get($uuid, Request $request): JsonResponse
     {
-        return parent::_get($id, $request);
+        return parent::_get($uuid, $request);
     }
 }

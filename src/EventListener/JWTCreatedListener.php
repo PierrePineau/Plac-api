@@ -1,37 +1,34 @@
 <?php
-namespace App\EventSubscriber\Auth;
 
-use App\Entity\Admin;
-use App\Entity\User;
-use App\Service\User\UserOrganisationManager;
+namespace App\EventListener;
+
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
-use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
-class AuthJWTSubscriber implements EventSubscriberInterface
+class JWTCreatedListener
 {
-    private $container;
-    public function __construct($container)
-    {
-        $this->container = $container;
-    }
+	/**
+	 * @var RequestStack
+	 */
+	private $requestStack;
 
-    public static function getSubscribedEvents(): array
-    {
-        // return the subscribed events, their methods and priorities
-        return [
-            JWTCreatedEvent::class => [
-                ['onJWTCreatedEvent', 1],
-            ],
-            AuthenticationSuccessEvent::class => [
-                ['onAuthenticationSuccessEvent', 1],
-            ],
-        ];
-    }
+    // private $repoSite;
 
-    public function onJWTCreatedEvent(JWTCreatedEvent $event): JWTCreatedEvent
-    {
+	/**
+	 * @param RequestStack $requestStack
+	 */
+	public function __construct(RequestStack $requestStack)
+	{
+		$this->requestStack = $requestStack;
+	}
+
+	/**
+	 * @param JWTCreatedEvent $event
+	 *
+	 * @return void
+	 */
+	public function onJWTCreated(JWTCreatedEvent $event)
+	{
         $user = $event->getUser();
 		$payload = $event->getData();
 		// $domain = null;
@@ -75,34 +72,5 @@ class AuthJWTSubscriber implements EventSubscriberInterface
         //     $payload['id'] = $user->getId();
         // }
 		$event->setData($payload);
-
-        return $event;
-    }
-
-    public function onAuthenticationSuccessEvent(AuthenticationSuccessEvent $event): AuthenticationSuccessEvent
-    {
-        $data = $event->getData();
-		$user = $event->getUser();
-
-		if (!$user instanceof UserInterface) {
-			return $event;
-		}
-
-		// Une fois l'authentification réussie, on récupère l'utilisateur pour renvoyer ses informations
-		if ($user instanceof User) {
-			$data = array_merge($data, $user->getInfos());
-
-			$organisation = $this->container->get(UserOrganisationManager::class)->getOneOrganisationsByUser([
-				'idUser' => $user->getId()
-			]);
-
-			$data['organisation'] = $organisation ? $organisation->getInfos() : null;
-		}
-
-		if ($user instanceof Admin) {
-			$data = array_merge($data, $user->getInfos());
-		}
-
-		$event->setData($data);
 	}
 }

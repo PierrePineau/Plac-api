@@ -6,6 +6,7 @@ use App\Repository\PlanRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PlanRepository::class)]
 class Plan
@@ -13,14 +14,18 @@ class Plan
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["default"])]
     private ?int $id = null;
 
+    #[Groups(["default"])]
     #[ORM\Column(length: 255, unique: true)]
     private ?string $reference = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = '';
 
@@ -30,15 +35,19 @@ class Plan
     #[ORM\ManyToMany(targetEntity: Module::class)]
     private Collection $modules;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column]
     private ?bool $custom = false;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(nullable: true)]
     private ?float $maxDevices = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column]
     private ?int $position = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column]
     private ?bool $enabled = false;
 
@@ -48,12 +57,15 @@ class Plan
     #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'plan')]
     private Collection $subscriptions;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripeId = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(nullable: true)]
     private ?float $price = null;
 
+    #[Groups(["default", "create", "update"])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $renewalFrequency = null;
 

@@ -11,14 +11,16 @@ use Symfony\Bundle\SecurityBundle\Security;
 class OrganisationClientManager extends AbstractCoreService
 {
     use OrganisationTrait;
-
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'code' => 'Organisation.Client',
             'entity' => OrganisationClient::class,
-            'security' => $security,
             'elementManagerClass' => ClientManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
     

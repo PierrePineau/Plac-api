@@ -14,17 +14,28 @@ class OrganisationStatusManager extends AbstractCoreService
     public function __construct($container, $entityManager, Security $security)
     {
         parent::__construct($container, $entityManager, [
+            'security' => $security,
             'code' => 'Organisation.Status',
             'entity' => OrganisationStatus::class,
-            'security' => $security,
             'elementManagerClass' => StatusManager::class,
+            'guardActions' => [
+                'organisation' => 'getOrganisation',
+            ],
         ]);
     }
 
     public function generateDefault(array $data = [])
     {
         $statusManager = $this->getElementManager();
+        $needFlush = $data['flush'] ?? false;
+        $organisation = $data['organisation'];
 
+        $organisationStatuses = $organisation->getOrganisationStatuses();
+        
+        if (count($organisationStatuses) > (count(StatusManager::DEFAULT_STATUS[StatusManager::TYPE_PROJECT]) + count(StatusManager::DEFAULT_STATUS[StatusManager::TYPE_TASK]))) {
+            return $organisation;
+        }
+        
         // Les status par défaut pour chaque type
         $projectStatuses = $statusManager->generateDefault([
             'type' => StatusManager::TYPE_PROJECT,
@@ -55,7 +66,16 @@ class OrganisationStatusManager extends AbstractCoreService
             $this->isValid($orgElement);
         }
 
-        return $organisation;
+        if ($needFlush) {
+            $this->em->flush();
+        }
+    }
+
+    // On récupère un status d'une organisation par action et type
+    public function getOneStatus(array $options)
+    {
+        $manager = $this->getElementManager();
+        return $manager->getOneStatus($options);
     }
 
     public function _search(array $filters = []): array

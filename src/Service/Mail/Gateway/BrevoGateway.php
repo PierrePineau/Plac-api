@@ -42,8 +42,6 @@ class BrevoGateway implements MailGatewayInterface
             'htmlContent' => $mail->getHtml()
         ];
 
-        dump($mail->getDestinataires());
-
         // Les destinataires en copie cachée
         if (!empty($mail->getBcc())) {
             $emailData['bcc'] = $mail->getBcc();

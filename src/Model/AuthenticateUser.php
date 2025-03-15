@@ -64,9 +64,14 @@ class AuthenticateUser implements UserInterface
         return !empty($this->id);
     }
 
+    public function isEmploye(): bool
+    {
+        // Un employé est un utilisateur qui possède le rôle ROLE_EMPLOYE
+        return in_array('ROLE_EMPLOYE', $this->roles);
+    }
+
     public function isOnlyUser(): bool
     {
-        // Pour qu'il soit customer il ne doit posséder que le role ROLE_USER
         return in_array('ROLE_USER', $this->roles) && count($this->roles) === 1;
     }
 
@@ -77,7 +82,7 @@ class AuthenticateUser implements UserInterface
 
     public function isSuperAdmin(): bool
     {
-        return in_array('ROLE_SUPER_ADMIN', $this->roles);
+        return in_array('ROLE_SUPER_ADMIN', $this->roles) && $this->type === 'admin';
     }
 
 }

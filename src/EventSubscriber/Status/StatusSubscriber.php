@@ -2,8 +2,11 @@
 namespace App\EventSubscriber\Status;
 
 use App\Event\Organisation\OrganisationCreateEvent;
+use App\Event\Project\ProjectCreateEvent;
+use App\Event\Project\ProjectUpdateEvent;
 use App\Service\Organisation\OrganisationProjectManager;
 use App\Service\Organisation\OrganisationStatusManager;
+use App\Service\Status\StatusManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class StatusSubscriber implements EventSubscriberInterface
@@ -21,6 +24,12 @@ class StatusSubscriber implements EventSubscriberInterface
             OrganisationCreateEvent::class => [
                 ['onOrganisationCreate', 10],
             ],
+            ProjectCreateEvent::class => [
+                ['onProjectCreate', 10],
+            ],
+            ProjectUpdateEvent::class => [
+                ['onProjectUpdate', 10],
+            ],
         ];
     }
 
@@ -34,7 +43,10 @@ class StatusSubscriber implements EventSubscriberInterface
 
                 $status = $orgStatusManager->generateDefault([
                     'organisation' => $organisation,
+                    'flush' => true,
                 ]);
+
+                $event->addSubscriber('StatusSubscriber', 'OK');
             }
 
             return $event;
@@ -42,8 +54,68 @@ class StatusSubscriber implements EventSubscriberInterface
         } catch (\Throwable $th) {
             //throw $th;
             $event->setError($th->getMessage());
+            $event->addSubscriber('StatusSubscriber', 'K O');
             $event->stopPropagation();
 
+            return $event;
+        }
+        
+        return $event;
+    }
+
+    public function onProjectCreate(ProjectCreateEvent $event): ProjectCreateEvent
+    {
+        try {
+            // On associe le status par défaut au projet
+            $project = $event->getProject();
+            $data = $event->getData();
+            if ($project) {
+                $statusManager = $this->container->get(StatusManager::class);
+                $status = $statusManager->getOneStatus([
+                    'organisation' => $data['organisation'],
+                    'type' => StatusManager::TYPE_PROJECT,
+                    'action' => StatusManager::ACTION_DEFAULT,
+                ]);
+
+                if ($status) {
+                    $project->setStatus($status);
+                }
+            }
+            return $event;
+        } catch (\Throwable $th) {
+            //throw $th;
+            $event->setError($th->getMessage());
+            $event->stopPropagation();
+            return $event;
+        }
+        
+        return $event;
+    }
+
+    public function onProjectUpdate(ProjectCreateEvent $event): ProjectCreateEvent
+    {
+        try {
+            // On associe le status par défaut au projet
+            $project = $event->getProject();
+            $data = $event->getData();
+            $idStatus = $data['idStatus'];
+            if ($project && $idStatus) {
+                $statusManager = $this->container->get(StatusManager::class);
+                $status = $statusManager->getOneStatusById([
+                    'id' => $idStatus,
+                    'type' => StatusManager::TYPE_PROJECT,
+                    'organisation' => $data['organisation'],
+                ]);
+
+                if ($status) {
+                    $project->setStatus($status);
+                }
+            }
+            return $event;
+        } catch (\Throwable $th) {
+            //throw $th;
+            $event->setError($th->getMessage());
+            $event->stopPropagation();
             return $event;
         }
         

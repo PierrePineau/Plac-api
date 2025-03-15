@@ -22,13 +22,25 @@ abstract class AbstractCoreController extends AbstractController
 
     public function _index(Request $request): JsonResponse
     {
-        $data = $request->attributes->all();
+        $data = [];
+        if ($request->headers->get('Content-Type') === 'application/json') {
+            try {
+                $json = $request->getContent();
+                $data = json_decode($json, true) ?? [];
+            } catch (\Throwable $th) {
+                //throw $th;
+                $data = [];
+            }
+        }
+        $data = array_merge($data, $request->query->all());
+        $data = array_merge($data, $request->attributes->get('_route_params') ?? []);
         switch ($request->getMethod()) {
             case 'GET':
-                $data = array_merge($data, $request->query->all());
                 $response = $this->manager->search($data);
+                $response['filters'] = $request->query->all();
                 break;
             case 'POST':
+                $data = array_merge($data, $request->files->all());
                 $data = array_merge($data, $request->request->all());
                 $response = $this->manager->create($data);
                 break;
@@ -45,7 +57,17 @@ abstract class AbstractCoreController extends AbstractController
 
     public function _get($id, Request $request): JsonResponse
     {
-        $data = $request->attributes->all();
+        $data = [];
+        if ($request->headers->get('Content-Type') === 'application/json') {
+            try {
+                $json = $request->getContent();
+                $data = json_decode($json, true) ?? [];
+            } catch (\Throwable $th) {
+                //throw $th;
+                $data = [];
+            }
+        }
+        $data = array_merge($data, $request->attributes->get('_route_params') ?? []);
         switch ($request->getMethod()) {
             case 'GET':
                 $data = array_merge($data, $request->query->all());

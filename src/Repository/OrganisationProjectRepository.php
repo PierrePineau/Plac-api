@@ -14,6 +14,6 @@ class OrganisationProjectRepository extends AbstractCoreRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, OrganisationProject::class);
-        $this->accessRelation = 'organisationProjects';
+        $this->accessRelation = 'project';
     }
 }

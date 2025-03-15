@@ -12,6 +12,7 @@ final class OrganisationCreateEvent extends AbstractCoreEvent
     public function __construct(array $data = [])
     {   
         parent::__construct($data);
+        $this->organisation = $data['organisation'] ?? null;
     }
 
     public function getOrganisation(): ?Organisation
