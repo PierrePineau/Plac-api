@@ -28,7 +28,7 @@ class OrganisationSubscriber implements EventSubscriberInterface
                 ['onOrganisationCreate', 15],
             ],
             UserCreateEvent::class => [
-                ['onUserCreate', 10],
+                ['onUserCreate', 5],
             ],
         ];
     }
@@ -93,16 +93,17 @@ class OrganisationSubscriber implements EventSubscriberInterface
             // On créer une organisation pour l'utilisateur
             $user = $event->getUser();
             // On check si l'utilisateur a une organisation
-            $organisation = $user->getUserOrganisations()->first();
-            if (!$organisation) {
-                $organisationManager = $this->container->get(UserOrganisationManager::class);
-                $resp = $organisationManager->create([
+            // $organisation = 
+            // getOneOrganisationsByUser
+            // $organisation = $user->getUserOrganisations()->first();
+            if ($user) {
+                // >Créer ou récupérer l'organisation de l'utilisateur
+                $organisation = $this->container->get(UserOrganisationManager::class)->getOneOrganisationsByUser([
+                    'idUser' => $user->getId(),
+                    'user' => $user,
                     'name' => $user->getFullName() . ' Organisation',
+                    'createIfNotExist' => true,
                 ]);
-
-                if ($resp['success']) {
-                    $organisation = $resp['data'];
-                }
             }
 
             return $event;
