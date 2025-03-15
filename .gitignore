@@ -11,10 +11,5 @@ migrations/*.php
 ###< symfony/framework-bundle ###
 
 ###> lexik/jwt-authentication-bundle ###
-# /config/jwt/*.pem
-/config/jwt/public.pem
-/config/jwt/private.pem
+/config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
-
-# PLAC GESTION
-/config/packages/databases/*.yaml
