@@ -322,12 +322,13 @@ abstract class AbstractCoreService
 
     public function _search(array $filters = []): array
     {
-        $count = $this->repo->search($filters, true);
         $results = [];
         $resultsArray = [];
         $userAuth = $this->getUser();
         $filters['authenticateUser'] = $userAuth;
         $filters['isSuperAdmin'] = $userAuth->isSuperAdmin();
+        
+        $count = $this->repo->search($filters, true);
         if ($count) {
             $results = $this->repo->search($filters);
             foreach ($results as $element) {
