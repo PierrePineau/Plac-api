@@ -100,7 +100,7 @@ abstract class AbstractCoreService
         if (!$this->user || !$this->user instanceof AuthenticateUser) {
             $this->user = new AuthenticateUser($this->security->getUser());
         }
-        return $this->user;        
+        return $this->user;
     }
 
     public function generateDefault(array $data = [])
@@ -326,7 +326,7 @@ abstract class AbstractCoreService
         $results = [];
         $resultsArray = [];
         $userAuth = $this->getUser();
-        $filters['authenticateUser'] = $this->getUser();
+        $filters['authenticateUser'] = $userAuth;
         $filters['isSuperAdmin'] = $userAuth->isSuperAdmin();
         if ($count) {
             $results = $this->repo->search($filters);
@@ -347,6 +347,19 @@ abstract class AbstractCoreService
     public function search(array $filters = []): ?array
     {
         try {
+            $userAuth = $this->getUser();
+            return $this->messenger->newResponse(
+                [
+                    'success' => true,
+                    'message' => $this->ELEMENT_FOUND,
+                    'code' => 200,
+                    'data' => [
+                        'isSuperAdmin' => $userAuth->isSuperAdmin(),
+                        'type' => $userAuth->getType()
+                    ]
+                ]
+            );
+
             $filters = $this->guardMiddleware($filters);
             $search = $this->_search($filters);
 
