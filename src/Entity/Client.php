@@ -294,6 +294,8 @@ class Client
             'firstname' => $this->getFirstname(),
             'lastname' => $this->getLastname(),
             'phone' => $this->getPhone(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
         ];
     }
 }

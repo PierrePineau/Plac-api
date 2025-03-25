@@ -84,5 +84,4 @@ class AuthenticateUser implements UserInterface
     {
         return in_array('ROLE_SUPER_ADMIN', $this->roles) && $this->type === 'admin';
     }
-
 }

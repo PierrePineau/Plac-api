@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use App\Core\Repository\AbstractCoreRepository;
+use App\Core\Traits\OrganisationRepositoryTrait;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -17,11 +18,14 @@ class UserRepository extends AbstractCoreRepository implements PasswordUpgraderI
     private const SCOPES = [
         'google' => 'google_id',
     ];
+    private $accessRelation;
+    use OrganisationRepositoryTrait;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class, [
             'alias' => 'u',
         ]);
+        $this->accessRelation = 'userOrganisations';
     }
 
     public function loadUserByIdentifierAndPayload(string $identifier, array $payload = []): ?User
