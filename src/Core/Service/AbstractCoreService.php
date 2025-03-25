@@ -347,19 +347,6 @@ abstract class AbstractCoreService
     public function search(array $filters = []): ?array
     {
         try {
-            $userAuth = $this->getUser();
-            return $this->messenger->newResponse(
-                [
-                    'success' => true,
-                    'message' => $this->ELEMENT_FOUND,
-                    'code' => 200,
-                    'data' => [
-                        'isSuperAdmin' => $userAuth->isSuperAdmin(),
-                        'type' => $userAuth->getType()
-                    ]
-                ]
-            );
-
             $filters = $this->guardMiddleware($filters);
             $search = $this->_search($filters);
 
